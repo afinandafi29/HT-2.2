@@ -30,11 +30,7 @@ import Apps from './pages/Apps';
 import Learning from './pages/Learning';
 import LearningLanguages from './pages/LearningLanguages';
 import BasicLearning from './pages/BasicLearning';
-<<<<<<< HEAD
-import IPadHome from './pages/iPadHome';
-=======
 import iPadHome from './pages/iPadHome';
->>>>>>> 7257dc869ef60e2fe2df31eb77999c361539cb5b
 import EnglishQuiz from './pages/EnglishQuiz';
 import SpanishQuiz from './pages/SpanishQuiz';
 import FrenchQuiz from './pages/FrenchQuiz';
@@ -156,11 +152,7 @@ function App() {
           <Route path="/basic-learning" element={<BasicLearning />} />
 
           {/* iPad Home Route */}
-<<<<<<< HEAD
-          <Route path="/ipad" element={<IPadHome />} />
-=======
           <Route path="/ipad" element={<iPadHome />} />
->>>>>>> 7257dc869ef60e2fe2df31eb77999c361539cb5b
 
           {/* Quiz Routes */}
           <Route path="/english-quiz" element={<EnglishQuiz />} />
@@ -190,11 +182,11 @@ function App() {
           <Route path="/notes-app" element={<NotesApp />} />
           <Route path="/reminders-app" element={<RemindersApp />} />
           <Route path="/compass-app" element={<CompassApp />} />
-        </Route>
+        </Route >
 
         {/* 404 No Found route */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+        < Route path="*" element={< Navigate to="/" replace />} />
+      </Routes >
     </Router >
   );
 }
