@@ -13664,7 +13664,7 @@ function leaveFeedback() {
 }
 
 function redirectOnLeave() {
-    redirectActive ? openURL(redirectURL) : openURL('/newcall');
+    openURL('https://happyytalk.in/');
 }
 
 /**
