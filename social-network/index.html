@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Global Error Handler for Debugging -->
+  <script>
+    window.onerror = function (message, source, lineno, colno, error) {
+      const errorContainer = document.getElementById('global-error-display') || document.createElement('div');
+      errorContainer.id = 'global-error-display';
+      errorContainer.style.cssText = 'position:fixed;top:0;left:0;width:100%;background:rgba(255,0,0,0.9);color:white;padding:20px;z-index:99999;font-family:monospace;white-space:pre-wrap;';
+      errorContainer.innerText += `Global Error: ${message}\nAt: ${source}:${lineno}:${colno}\n\n`;
+      document.body.appendChild(errorContainer);
+      console.error('Global Error caught:', message, error);
+    };
+    window.onunhandledrejection = function (event) {
+      const errorContainer = document.getElementById('global-error-display') || document.createElement('div');
+      errorContainer.id = 'global-error-display';
+      errorContainer.style.cssText = 'position:fixed;top:0;left:0;width:100%;background:rgba(255,0,0,0.9);color:white;padding:20px;z-index:99999;font-family:monospace;white-space:pre-wrap;';
+      errorContainer.innerText += `Unhandled Rejection: ${event.reason}\n\n`;
+      document.body.appendChild(errorContainer);
+      console.error('Unhandled Rejection caught:', event.reason);
+    };
+  </script>
+
+  <!-- PWA Meta Tags -->
+
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="apple-touch-icon" href="/happytalk.png" />
+  <meta name="theme-color" content="#0f172a" />
+
+  <title>HAPPY TALK</title>
+  <meta name="description"
+    content="Happy Talk is a social networking platform where you can connect with friends, join discussion rooms in multiple languages, and speak freely." />
+  <meta name="keywords" content="social network, language learning, rooms, discussion, community, connect, happytalk" />
+  <meta name="author" content="Happy Talk" />
+
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" />
+
+  <!-- Google Fonts -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Orbitron:wght@400;700&family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet" />
+
+  <!-- Material Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons|Material+Icons+Outlined" rel="stylesheet" />
+
+  <!-- External scripts removed for debugging/stability -->
+</head>
+
+<body>
+  <div id="root"></div>
+
+  <script type="module" src="/src/main.jsx"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then((registration) => {
+            console.log('ServiceWorker registration successful with scope: ', registration.scope);
+          }, (err) => {
+            console.log('ServiceWorker registration failed: ', err);
+          });
+      });
+    }
+  </script>
+</body>
+
+</html>

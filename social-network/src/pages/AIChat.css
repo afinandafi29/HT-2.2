@@ -1,0 +1,132 @@
+
+.ai-chat-container {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 120px); /* Adjust based on your layout's header/footer */
+    background-color: #1a1a1a;
+    color: white;
+    border-radius: 12px;
+    overflow: hidden;
+    max-width: 800px;
+    margin: auto;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.ai-chat-header {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    background-color: #2a2a2a;
+    border-bottom: 1px solid #3a3a3a;
+}
+
+.ai-chat-header h2 {
+    margin-left: 0.5rem;
+}
+
+.ai-chat-messages {
+    flex-grow: 1;
+    padding: 1rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.message {
+    padding: 0.75rem 1rem;
+    border-radius: 18px;
+    max-width: 80%;
+    line-height: 1.5;
+}
+
+.message.user {
+    background: linear-gradient(to right, #5A67D8, #805AD5);
+    color: white;
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
+}
+
+.message.assistant {
+    background-color: #333;
+    color: #e0e0e0;
+    align-self: flex-start;
+    border-bottom-left-radius: 4px;
+}
+
+.ai-chat-input-area {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    border-top: 1px solid #3a3a3a;
+    background-color: #2a2a2a;
+}
+
+.ai-chat-input {
+    flex-grow: 1;
+    background-color: transparent;
+    border: none;
+    color: white;
+    font-size: 1rem;
+    padding: 0.5rem;
+    resize: none;
+    max-height: 100px;
+    overflow-y: auto;
+}
+
+.ai-chat-input:focus {
+    outline: none;
+}
+
+.ai-chat-send-button {
+    background: none;
+    border: none;
+    color: #805AD5;
+    cursor: pointer;
+    padding: 0.5rem;
+    margin-left: 0.5rem;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+}
+
+.ai-chat-send-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.ai-chat-send-button:disabled {
+    color: #555;
+    cursor: not-allowed;
+}
+
+/* Typing indicator */
+.typing-indicator {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    padding: 8px 0;
+}
+
+.typing-indicator span {
+    width: 8px;
+    height: 8px;
+    background-color: #805AD5;
+    border-radius: 50%;
+    animation: bounce 1.4s infinite ease-in-out both;
+}
+
+.typing-indicator span:nth-child(2) {
+    animation-delay: -0.32s;
+}
+
+.typing-indicator span:nth-child(3) {
+    animation-delay: -0.16s;
+}
+
+@keyframes bounce {
+    0%, 80%, 100% {
+        transform: scale(0);
+    }
+    40% {
+        transform: scale(1.0);
+    }
+}

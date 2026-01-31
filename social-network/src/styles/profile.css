@@ -1,0 +1,521 @@
+/* Modern Profile CSS with Responsive Design */
+
+:root {
+  --profile-transition: all 0.3s ease;
+  --profile-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  --profile-radius: 16px;
+}
+
+/* Profile Container */
+.profile-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+  width: 100%;
+  padding: 1rem;
+  padding-bottom: 5rem;
+  /* Space for bottom navbar on mobile */
+}
+
+/* Profile Card */
+.pCard_card {
+  position: relative;
+  width: 100%;
+  max-width: 450px;
+  min-height: 500px;
+  max-height: 100vh;
+  background-color: var(--card-background);
+  backdrop-filter: none;
+  border-radius: var(--profile-radius);
+  overflow: hidden;
+  box-shadow: var(--profile-shadow);
+  transition: var(--profile-transition);
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border-color);
+}
+
+.pCard_card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(30, 144, 255, 0.2);
+}
+
+/* Upper Section with Gradient Background */
+.pCard_up {
+  position: relative;
+  padding: 2.5rem 1.5rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+  color: white;
+  text-align: center;
+}
+
+/* Profile Image */
+.profile-image-container {
+  position: relative;
+  margin-bottom: 1.25rem;
+  z-index: 1;
+}
+
+.profile-image {
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  border: 4px solid rgba(255, 255, 255, 0.8);
+  object-fit: cover;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.profile-image:hover {
+  transform: scale(1.05);
+}
+
+.profile-image::after {
+  content: '';
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  right: -5px;
+  bottom: -5px;
+  border-radius: 50%;
+  background: linear-gradient(45deg, #3b82f6, transparent, #3b82f6);
+  z-index: -1;
+  animation: rotate 8s linear infinite;
+}
+
+@keyframes rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Profile Text */
+.pCard_text {
+  text-align: center;
+  margin-bottom: .5rem;
+  padding: 0 1rem;
+  width: 100%;
+}
+
+.pCard_text h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.2rem;
+  color: white;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.pCard_text p {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.9);
+  max-width: 100%;
+  overflow-wrap: break-word;
+  line-height: 1.5;
+}
+
+/* Action Buttons */
+/* Edit Button */
+.edit-button {
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  width: 40px;
+  height: 40px;
+  background-color: white;
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+  transition: all var(--transition-speed);
+  z-index: 10;
+  font-size: 10px;
+}
+
+.home-button {
+  position: absolute;
+  left: 20px;
+  top: 20px;
+  width: 40px;
+  height: 40px;
+  background-color: white;
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+  transition: all var(--transition-speed);
+  z-index: 10;
+  font-size: 10px;
+}
+
+.edit-button svg {
+  color: var(--primary);
+  font-size: 18px;
+}
+
+.home-button svg {
+  color: var(--primary);
+  font-size: 18px;
+}
+
+.edit-button:hover {
+  transform: scale(1.1);
+  background-color: #f8f8f8;
+}
+
+.home-button:hover {
+  transform: scale(1.1);
+  background-color: #f8f8f8;
+}
+
+
+.pCard_add {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  z-index: 10;
+  background: white;
+  color: #3b82f6;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  border: none;
+}
+
+.edit-button {
+  right: 1rem;
+  top: 1rem;
+}
+
+.home-button {
+  left: 1rem;
+  top: 1rem;
+}
+
+.pCard_add {
+  left: 1rem;
+  top: 1rem;
+}
+
+.edit-button:hover,
+.home-button:hover,
+.pCard_add:hover {
+  transform: scale(1.1) rotate(5deg);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.edit-button svg,
+.home-button svg,
+.pCard_add svg {
+  font-size: 1.2rem;
+  color: #3b82f6;
+}
+
+/* Stats Section */
+.pCard_down {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  padding: 1rem 0;
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.pCard_down div {
+  padding: 0.5rem;
+}
+
+.pCard_down div:nth-child(2) {
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.pCard_down p:first-child {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pCard_down p:last-child {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: white;
+}
+
+/* Social Media Section */
+.pCard_back {
+  padding-top: 0.75rem;
+  padding-bottom: 1.25rem;
+  text-align: center;
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.pCard_back p {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.social-icons {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.social-icon {
+  font-size: 1.5rem;
+  color: rgba(255, 255, 255, 0.8);
+  transition: all 0.3s ease;
+  padding: 0.5rem;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.social-icon:hover {
+  color: white;
+  transform: translateY(-3px) scale(1.1);
+  background-color: rgba(59, 130, 246, 0.5);
+}
+
+/* Edit Form Styles */
+.edit-form {
+  padding: 1.5rem;
+  height: 100%;
+  overflow-y: auto;
+  background-color: var(--body-bg);
+  color: var(--text-primary);
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+  outline: none;
+}
+
+.form-group textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.image-url-input {
+  margin-top: 0.75rem;
+  font-size: 0.875rem;
+}
+
+.edit-form h3 {
+  margin: 1.25rem 0 0.75rem;
+  font-size: 1rem;
+  color: white;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 0.5rem;
+}
+
+/* Form Buttons */
+.form-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1.5rem;
+  gap: 1rem;
+}
+
+.save-button,
+.cancel-button {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  flex: 1;
+}
+
+.save-button {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.save-button:hover:not(:disabled) {
+  background-color: #2563eb;
+  transform: translateY(-2px);
+}
+
+.cancel-button {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.cancel-button:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.save-button:disabled,
+.cancel-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Error Message */
+.error-message {
+  color: #ef4444;
+  font-size: 0.875rem;
+  margin-top: 0.75rem;
+  background-color: rgba(239, 68, 68, 0.1);
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  text-align: center;
+}
+
+/* Profile actions in pCard_back */
+.profile-actions {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+/* Modal for reporting */
+.report-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  backdrop-filter: none;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 640px) {
+  .pCard_card {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    min-height: auto;
+    border-radius: 0.75rem;
+  }
+
+  .profile-image {
+    width: 100px;
+    height: 100px;
+  }
+
+  .pCard_text h2 {
+    font-size: 1.25rem;
+  }
+
+  .pCard_text p {
+    font-size: 0.875rem;
+  }
+
+  .edit-button,
+  .home-button,
+  .pCard_add {
+    width: 36px;
+    height: 36px;
+  }
+
+  .edit-button svg,
+  .home-button svg,
+  .pCard_add svg {
+    font-size: 1rem;
+  }
+
+  .pCard_down {
+    padding: 1rem 0;
+  }
+
+  .pCard_down p:last-child {
+    font-size: 1.125rem;
+  }
+
+  .social-icon {
+    font-size: 1.25rem;
+  }
+
+  .form-buttons {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .save-button,
+  .cancel-button {
+    width: 100%;
+  }
+}
+
+/* Scrollbar Styling */
+.edit-form::-webkit-scrollbar {
+  width: 0.5rem;
+}
+
+.edit-form::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 0.5rem;
+}
+
+.edit-form::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 0.5rem;
+}
+
+.edit-form::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Animation when card loads */
+@keyframes cardEntrance {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.pCard_card {
+  animation: cardEntrance 0.5s ease-out;
+}

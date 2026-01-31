@@ -1,0 +1,162 @@
+@import "tailwindcss";
+
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  font-weight: 500;
+  color: #646cff;
+  text-decoration: inherit;
+}
+
+a:hover {
+  color: #535bf2;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+}
+
+button {
+  border-radius: 14px;
+  /* iOS-like rounded corners */
+  border: 1px solid rgba(59, 130, 246, 0.4);
+  /* Blue glass border */
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 600;
+  font-family: inherit;
+
+  /* Glass effect */
+  background: rgba(255, 255, 255, 0.03);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  color: rgba(255, 255, 255, 0.9);
+
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+button:hover {
+  border-color: #3b82f6;
+  /* Brighter blue on hover */
+  background: rgba(59, 130, 246, 0.1);
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+}
+
+button:active {
+  transform: scale(0.94);
+  /* Click press animation */
+  background: rgba(59, 130, 246, 0.2);
+}
+
+button:focus,
+button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.4);
+}
+
+/* Exception for icon-only/transparent buttons to remove container */
+button.bg-transparent,
+button[class*="text-blue-500"] {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+
+  a:hover {
+    color: #747bff;
+  }
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #1a1f2c;
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #3b455d;
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #4a5568;
+}
+
+/* Avatar Premium Rings */
+.avatar-premium-ring {
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  z-index: 5;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+/* Show on hover of the group associated with the avatar */
+.group\/avatar:hover .avatar-premium-ring {
+  opacity: 1;
+}
+
+.avatar-premium-ring.pink {
+  border: 2px solid #ec4899;
+  box-shadow: 0 0 10px #ec4899, inset 0 0 10px #ec4899;
+}
+
+.avatar-premium-ring.green {
+  border: 2px solid #22c55e;
+  box-shadow: 0 0 10px #22c55e, inset 0 0 10px #22c55e;
+}
+
+.avatar-premium-ring.blue {
+  border: 2px solid #3b82f6;
+  box-shadow: 0 0 10px #3b82f6, inset 0 0 10px #3b82f6;
+}
+
+.avatar-premium-ring-inner {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px dashed rgba(255, 255, 255, 0.5);
+  animation: spin 4s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}

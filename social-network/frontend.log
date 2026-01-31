@@ -1,0 +1,27 @@
+
+> social-network-react@0.0.0 dev
+> vite --host
+
+
+  VITE v6.3.4  ready in 2971 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: http://10.0.0.44:5173/
+6:31:11 PM [vite] (client) hmr update /src/pages/Home.jsx, /src/index.css
+6:31:21 PM [vite] (client) hmr update /src/pages/Home.jsx, /src/index.css
+6:31:41 PM [vite] (client) hmr update /src/components/Phone/AppScreen.jsx, /src/index.css
+6:31:53 PM [vite] (client) hmr update /src/components/Phone/Phone.jsx, /src/index.css
+6:37:30 PM [vite] (client) hmr update /src/App.jsx, /src/index.css
+6:37:50 PM [vite] (client) hmr update /src/App.jsx, /src/index.css
+6:38:01 PM [vite] (client) hmr update /src/pages/Home.jsx, /src/index.css
+6:38:11 PM [vite] (client) hmr update /src/pages/Home.jsx, /src/index.css
+6:38:31 PM [vite] (client) hmr update /src/components/Phone/AppScreen.jsx, /src/index.css
+6:38:58 PM [vite] (client) hmr update /src/components/Phone/AppScreen.jsx, /src/index.css
+6:39:08 PM [vite] (client) hmr update /src/components/Phone/AppScreen.jsx, /src/index.css
+6:39:21 PM [vite] (client) hmr update /src/components/Navigation.jsx, /src/index.css
+6:39:43 PM [vite] (client) hmr update /src/components/Layout/Layout.jsx, /src/index.css
+6:39:43 PM [vite] (client) hmr invalidate /src/components/Layout/Layout.jsx Could not Fast Refresh ("LayoutContext" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+6:39:43 PM [vite] (client) hmr update /src/App.jsx, /src/index.css, /src/pages/Home.jsx
+6:47:11 PM [vite] (client) hmr update /src/pages/Chat.jsx, /src/index.css
+6:48:01 PM [vite] (client) hmr update /src/styles/chat.css, /src/index.css
+8:17:52 PM [vite] (client) hmr update /src/pages/Chat.jsx, /src/index.css
