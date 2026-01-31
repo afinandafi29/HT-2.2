@@ -35,6 +35,9 @@ const Header = ({ onMenuClick, onProfileClick }) => {
   // Determine which avatar to display
   const profilePic = profileData?.avatar_url || currentUser?.avatar_url || defaultAvatar;
 
+  // Debug logging
+  console.log('Header - currentUser:', currentUser ? 'Logged in' : 'Not logged in');
+
   return (
     <div className="header-section">
       <div className="w-full flex justify-between items-center px-4 py-2">
@@ -90,7 +93,11 @@ const Header = ({ onMenuClick, onProfileClick }) => {
               </div>
             </div>
           ) : (
-            <Link to="/in" className="signin-button-header text-xs px-3 py-1.5 md:text-sm md:px-5 md:py-2.5 flex items-center gap-2 font-bold tracking-wider uppercase">
+            <Link
+              to="/in"
+              className="signin-button-header hidden md:flex text-xs px-3 py-1.5 md:text-sm md:px-5 md:py-2.5 items-center gap-2 font-bold tracking-wider uppercase"
+              onClick={() => console.log('Sign In button clicked')}
+            >
               <i className="fas fa-user-circle text-base"></i>
               <span>Sign In</span>
             </Link>

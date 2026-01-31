@@ -9,6 +9,7 @@ import Phone from '../components/Phone/Phone';
 import { getRoomsApi } from '../api/roomApi';
 import { getJitsiTokenApi } from '../api/jitsiApi';
 import { initialRooms } from '../data';
+import { getGuestRooms, startCleanupInterval, stopCleanupInterval } from '../utils/guestRoomManager';
 import '../styles/main.css';
 
 function Home() {
@@ -44,17 +45,23 @@ function Home() {
     setError(null);
     try {
       const fetchedRooms = await getRoomsApi();
-      // Use fetched rooms if available and not empty, otherwise use initialRooms
+      const guestRooms = getGuestRooms();
+
+      // Merge guest rooms with API rooms
+      let allRooms = [];
       if (fetchedRooms && fetchedRooms.length > 0) {
-        setRooms(fetchedRooms);
+        allRooms = [...guestRooms, ...fetchedRooms];
       } else {
-        console.log('API returned empty or null, using initialRooms');
-        setRooms(initialRooms);
+        console.log('API returned empty or null, using initialRooms + guest rooms');
+        allRooms = [...guestRooms, ...initialRooms];
       }
+
+      setRooms(allRooms);
     } catch (err) {
       console.error("Error fetching data for Home:", err);
-      // Fallback to initialRooms if API fails
-      setRooms(initialRooms);
+      // Fallback to initialRooms + guest rooms if API fails
+      const guestRooms = getGuestRooms();
+      setRooms([...guestRooms, ...initialRooms]);
     } finally {
       setIsLoading(false);
     }
@@ -75,6 +82,21 @@ function Home() {
     fetchData();
     // Auto-refresh disabled per user request
   }, [fetchData, refreshTrigger]);
+
+  // Start guest room cleanup interval
+  useEffect(() => {
+    const cleanupIntervalId = startCleanupInterval();
+
+    // Refresh rooms every minute to show updated guest rooms
+    const refreshIntervalId = setInterval(() => {
+      fetchData();
+    }, 60 * 1000); // Refresh every minute
+
+    return () => {
+      stopCleanupInterval(cleanupIntervalId);
+      clearInterval(refreshIntervalId);
+    };
+  }, [fetchData]);
 
   const socket = useSocket();
 

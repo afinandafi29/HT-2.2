@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { deleteRoomApi } from '../api/roomApi';
+import { deleteGuestRoom } from '../utils/guestRoomManager';
 
 const RoomCard = ({ room, currentUser, onTopicUpdated, onRoomDeleted }) => {
 
@@ -13,25 +14,32 @@ const RoomCard = ({ room, currentUser, onTopicUpdated, onRoomDeleted }) => {
         people: profiles,
         created_by,
         language,
-        max_capacity = 10
+        max_capacity = 10,
+        is_guest_room
     } = room;
 
     const isFull = max_capacity > 0 && profiles && profiles.length >= max_capacity;
 
     const handleJoinRoom = () => {
-        if (!currentUser) {
-            window.dispatchEvent(new CustomEvent('SHOW_AUTH'));
-            return;
-        }
-
         if (isFull) {
             window.dispatchEvent(new CustomEvent('SHOW_ALERT', { detail: { message: "This room is currently full. Please try another room or wait for someone to leave." } }));
             return;
         }
 
-        const userName = currentUser?.username || currentUser?.email?.split('@')[0] || 'User';
-        const baseUrl = meeting_url || `https://p2p.mirotalk.com/join/${mirotalk_room_name}`;
-        const finalUrl = `${baseUrl}${baseUrl.includes('?') ? '&' : '?'}name=${encodeURIComponent(userName)}`;
+        // Allow guests to join - generate a guest username if not logged in
+        let userName;
+        if (currentUser) {
+            userName = currentUser?.username || currentUser?.email?.split('@')[0] || 'User';
+        } else {
+            // Generate a random guest username
+            const randomNum = Math.floor(1000 + Math.random() * 9000);
+            userName = `Guest_${randomNum} `;
+        }
+
+        // Use local MiroTalk server instead of external URL
+        const roomName = mirotalk_room_name || `room - ${id} `;
+        const localMiroTalkUrl = `http://localhost:3001/join/${roomName}`;
+        const finalUrl = `${localMiroTalkUrl}?name=${encodeURIComponent(userName)}`;
         window.open(finalUrl, '_blank');
     };
 
@@ -60,7 +68,17 @@ const RoomCard = ({ room, currentUser, onTopicUpdated, onRoomDeleted }) => {
     const handleDelete = async (e) => {
         e.stopPropagation();
         try {
-            await deleteRoomApi(id);
+            // If it's a guest room, delete from localStorage
+            if (is_guest_room || String(id).startsWith('guest-')) {
+                deleteGuestRoom(id);
+                window.dispatchEvent(new CustomEvent('SHOW_ALERT', {
+                    detail: { message: 'Guest room deleted successfully!' }
+                }));
+            } else {
+                // Otherwise delete via API
+                await deleteRoomApi(id);
+            }
+
             if (onRoomDeleted) onRoomDeleted();
             else if (onTopicUpdated) onTopicUpdated();
         } catch (err) {
@@ -183,10 +201,10 @@ const RoomCard = ({ room, currentUser, onTopicUpdated, onRoomDeleted }) => {
 
                 {/* Creator Tag & Delete */}
                 <div className="text-[0.7rem] text-white/40 flex items-center gap-2">
-                    <span>Created by {creator?.username || 'User'}</span>
+                    <span>Created by {creator?.username || 'Guest'}</span>
 
-                    {/* Delete Button for Owner/Custom Rooms */}
-                    {(String(id).startsWith('custom-') || (currentUser && created_by === currentUser?.id)) && (
+                    {/* Delete Button for Guest Rooms, Owner/Custom Rooms */}
+                    {(is_guest_room || String(id).startsWith('guest-') || String(id).startsWith('custom-') || (currentUser && created_by === currentUser?.id)) && (
                         <button
                             onClick={handleDelete}
                             className="p-1.5 rounded-full hover:bg-red-500/20 text-red-400/60 hover:text-red-500 transition-all bg-transparent border-none cursor-pointer"

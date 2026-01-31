@@ -1,8 +1,11 @@
 import { useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 import { createRoomApi } from '../api/roomApi'; // Adjust path
 import { languages } from '../data/roomsData'; // Import languages array
+import { createGuestRoom } from '../utils/guestRoomManager';
 
 const CreateRoomModal = ({ isOpen, onClose, onRoomCreated }) => {
+    const { currentUser } = useAuth();
     const [title, setTitle] = useState('');
     const [topic, setTopic] = useState('');
     const [isPrivate, setIsPrivate] = useState(false);
@@ -20,22 +23,53 @@ const CreateRoomModal = ({ isOpen, onClose, onRoomCreated }) => {
             return;
         }
 
-        const hours = parseInt(durationHours, 10);
-        const minutes = parseInt(durationMinutes, 10);
-
-        if (isNaN(hours) || isNaN(minutes) || (hours === 0 && minutes === 0) || hours < 0 || minutes < 0 || hours > 24 || minutes >= 60) {
-            setError('Invalid room duration. Hours (0-24), Minutes (0-59). Total must be > 0.');
-            return;
-        }
-        if ((hours * 60 + minutes) < 5) {
-            setError('Minimum room duration is 5 minutes.');
-            return;
-        }
-
-
         setIsLoading(true);
         setError(null);
+
         try {
+            // If user is not logged in, create a guest room
+            if (!currentUser) {
+                const guestRoomData = {
+                    title: title.trim(),
+                    topic: language,
+                    language: language,
+                    max_capacity: parseInt(maxCapacity, 10) || 0,
+                };
+
+                const newRoom = createGuestRoom(guestRoomData);
+
+                // Show success message
+                window.dispatchEvent(new CustomEvent('SHOW_ALERT', {
+                    detail: {
+                        message: `Room "${title}" created! It will auto-delete after 15 minutes of inactivity.`
+                    }
+                }));
+
+                onRoomCreated(newRoom);
+                setTitle('');
+                setTopic('');
+                setIsPrivate(false);
+                setDurationHours(1);
+                setDurationMinutes(0);
+                setLanguage('English');
+                setMaxCapacity(0);
+                onClose();
+                return;
+            }
+
+            // For logged-in users, use the API
+            const hours = parseInt(durationHours, 10);
+            const minutes = parseInt(durationMinutes, 10);
+
+            if (isNaN(hours) || isNaN(minutes) || (hours === 0 && minutes === 0) || hours < 0 || minutes < 0 || hours > 24 || minutes >= 60) {
+                setError('Invalid room duration. Hours (0-24), Minutes (0-59). Total must be > 0.');
+                return;
+            }
+            if ((hours * 60 + minutes) < 5) {
+                setError('Minimum room duration is 5 minutes.');
+                return;
+            }
+
             const roomData = {
                 title: title.trim(),
                 topic: language || null,
