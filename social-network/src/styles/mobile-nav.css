@@ -1,0 +1,115 @@
+/* Mobile Bottom Navigation - Smaller & Floating Button */
+.mobile-bottom-nav {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(15, 23, 42, 0.98);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-top: 1px solid rgba(59, 130, 246, 0.3);
+    padding: 6px 8px 8px 8px;
+    /* Even Smaller Box */
+    z-index: 9999;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+    overflow: visible;
+    /* CRITICAL: Ensure floating button is visible */
+}
+
+/* Show only on mobile */
+@media (max-width: 768px) {
+    .mobile-bottom-nav {
+        display: flex;
+        /* Visible only on mobile */
+        justify-content: space-around;
+        align-items: flex-end;
+        /* Align items to bottom */
+    }
+
+    /* Add padding to body to prevent content from being hidden behind nav */
+    body {
+        padding-bottom: 85px;
+    }
+}
+
+.mobile-bottom-nav .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    color: #94a3b8;
+    padding: 6px;
+    cursor: pointer;
+    flex: 1;
+    position: relative;
+}
+
+.mobile-bottom-nav .nav-item.active {
+    color: #60a5fa;
+}
+
+.mobile-bottom-nav .nav-item.active svg {
+    stroke: #60a5fa;
+    filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.5));
+}
+
+.mobile-bottom-nav .nav-item svg {
+    width: 26px;
+    height: 26px;
+}
+
+.mobile-bottom-nav .nav-label {
+    font-size: 11px;
+    /* Smaller text */
+    margin-top: 4px;
+    font-weight: 500;
+}
+
+/* Floating Rounded Square Button */
+.mobile-bottom-nav .nav-item.create-btn {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+    width: 56px;
+    /* Fixed Circle Size */
+    height: 56px;
+    border-radius: 50%;
+    /* Perfect Circle */
+    margin-bottom: 32px;
+    /* FLOATING HIGHER (Top of container) */
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.5);
+    border: 4px solid #0f172a;
+    /* Match background color to create cutout effect */
+    padding: 0;
+    flex: 0 0 56px;
+    /* Don't stretch */
+    transform: translateY(0);
+    z-index: 10000;
+}
+
+.mobile-bottom-nav .nav-item.create-btn svg {
+    width: 32px;
+    height: 32px;
+    stroke: white;
+    stroke-width: 2.5;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+    margin: 0;
+}
+
+.mobile-bottom-nav .nav-item.create-btn .nav-label {
+    position: absolute;
+    bottom: -22px;
+    /* Text below the circle */
+    color: #94a3b8;
+    width: 100px;
+    text-align: center;
+    font-weight: 600;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.mobile-bottom-nav .nav-item.create-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 12px 24px rgba(37, 99, 235, 0.6);
+}

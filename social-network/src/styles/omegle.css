@@ -1,0 +1,691 @@
+/* Omegle Landing Page */
+.omegle-landing {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.omegle-container {
+  max-width: 1200px;
+  width: 100%;
+}
+
+.omegle-header {
+  text-align: center;
+  margin-bottom: 60px;
+  color: white;
+}
+
+.omegle-title {
+  font-size: 3.5rem;
+  font-weight: 800;
+  margin: 0;
+  margin-bottom: 10px;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.omegle-subtitle {
+  font-size: 1.3rem;
+  margin: 0;
+  opacity: 0.9;
+}
+
+/* Modes Grid */
+.omegle-modes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+  margin-bottom: 60px;
+}
+
+.mode-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  padding: 40px 30px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  transform: translateY(0);
+}
+
+.mode-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+}
+
+.mode-icon {
+  font-size: 60px;
+  margin-bottom: 20px;
+  display: inline-block;
+  animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.mode-title {
+  font-size: 1.8rem;
+  margin: 0 0 10px 0;
+  color: #1a1a2e;
+}
+
+.mode-description {
+  color: #666;
+  margin: 0 0 20px 0;
+  font-size: 1rem;
+}
+
+.mode-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.mode-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+/* Features Section */
+.omegle-features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-top: 40px;
+}
+
+.feature {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  padding: 25px;
+  text-align: center;
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.feature-icon {
+  font-size: 40px;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.feature h3 {
+  margin: 10px 0;
+  font-size: 1.2rem;
+}
+
+.feature p {
+  margin: 0;
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+/* Omegle Session */
+.omegle-session {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* Searching Screen */
+.omegle-searching {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.searching-container {
+  text-align: center;
+  color: white;
+}
+
+.animated-bubbles {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 40px;
+  height: 60px;
+}
+
+.bubble {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  animation: float 2s infinite ease-in-out;
+  backdrop-filter: blur(10px);
+}
+
+.bubble1 {
+  animation-delay: 0s;
+}
+
+.bubble2 {
+  animation-delay: 0.3s;
+}
+
+.bubble3 {
+  animation-delay: 0.6s;
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+.searching-title {
+  font-size: 2rem;
+  margin: 0 0 10px 0;
+}
+
+.searching-mode {
+  font-size: 1.2rem;
+  margin: 20px 0;
+  opacity: 0.9;
+}
+
+.searching-interest {
+  font-size: 1rem;
+  margin: 10px 0 20px 0;
+  opacity: 0.85;
+}
+
+.interest-tag {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 4px 12px;
+  border-radius: 15px;
+  font-weight: 600;
+  margin-left: 5px;
+}
+
+.cancel-button {
+  margin-top: 30px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid white;
+  color: white;
+  padding: 12px 30px;
+  border-radius: 25px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cancel-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
+/* Video Chat */
+.omegle-video-chat {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+}
+
+.video-container {
+  flex: 1;
+  position: relative;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 15px;
+  overflow: hidden;
+  margin-bottom: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+}
+
+.remote-video,
+.local-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.local-video {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  width: 150px;
+  height: 150px;
+  border-radius: 10px;
+  border: 3px solid #2563eb;
+  object-fit: cover;
+}
+
+.video-controls {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+/* Audio Chat */
+.omegle-audio-chat {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.audio-container {
+  text-align: center;
+  color: white;
+  margin-bottom: 40px;
+}
+
+.audio-avatar {
+  margin-bottom: 30px;
+}
+
+.avatar-circle {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.avatar-emoji {
+  font-size: 60px;
+}
+
+.waveform-container {
+  width: 100%;
+  max-width: 400px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 30px auto;
+}
+
+.waveform {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+  height: 100%;
+}
+
+.wave-bar {
+  width: 3px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 2px;
+  transition: height 0.1s ease;
+}
+
+.audio-status {
+  font-size: 1.5rem;
+  margin: 0;
+}
+
+.audio-controls {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+/* Text Chat */
+.omegle-text-chat {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.text-chat-container {
+  background: white;
+  border-radius: 15px;
+  width: 100%;
+  max-width: 500px;
+  height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+.chat-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 20px;
+  text-align: center;
+}
+
+.chat-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.partner-status {
+  margin: 10px 0 0 0;
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.messages-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.no-messages {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #999;
+  font-size: 1.2rem;
+}
+
+.message {
+  display: flex;
+  margin-bottom: 10px;
+}
+
+.message.sent {
+  justify-content: flex-end;
+}
+
+.message.received {
+  justify-content: flex-start;
+}
+
+.message-bubble {
+  max-width: 70%;
+  padding: 12px 16px;
+  border-radius: 15px;
+  word-wrap: break-word;
+}
+
+.message.sent .message-bubble {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 15px 5px 15px 15px;
+}
+
+.message.received .message-bubble {
+  background: #f0f0f0;
+  color: #1a1a1a;
+  border-radius: 5px 15px 15px 15px;
+}
+
+.message-time {
+  display: block;
+  font-size: 0.75rem;
+  margin-top: 5px;
+  opacity: 0.7;
+}
+
+.input-container {
+  border-top: 1px solid #eee;
+  padding: 15px;
+  display: flex;
+  gap: 10px;
+}
+
+.message-input {
+  flex: 1;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  padding: 10px 15px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  resize: none;
+}
+
+.message-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+}
+
+.send-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.send-button:hover {
+  transform: scale(1.05);
+}
+
+.text-controls {
+  border-top: 1px solid #eee;
+  padding: 15px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+/* Control Buttons */
+.control-btn {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.control-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
+.control-btn.disabled {
+  opacity: 0.5;
+}
+
+.control-btn.next-btn,
+.control-btn.report-btn {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border: none;
+}
+
+.control-btn.end-btn {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  border: none;
+}
+
+/* Report Modal */
+.report-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.report-content {
+  background: white;
+  border-radius: 15px;
+  padding: 30px;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.report-content h3 {
+  margin: 0 0 20px 0;
+  font-size: 1.5rem;
+  color: #1a1a1a;
+}
+
+.report-reason {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.report-submit,
+.report-close {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.report-submit {
+  background: #ef4444;
+  color: white;
+}
+
+.report-submit:hover {
+  background: #dc2626;
+}
+
+.report-close {
+  background: #f0f0f0;
+  color: #1a1a1a;
+}
+
+.report-close:hover {
+  background: #e0e0e0;
+}
+
+/* Ended Screen */
+.omegle-ended {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  text-align: center;
+  padding: 20px;
+}
+
+.omegle-ended h2 {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+}
+
+.omegle-ended p {
+  font-size: 1.2rem;
+  margin-bottom: 30px;
+  opacity: 0.9;
+}
+
+.omegle-ended button {
+  background: white;
+  color: #667eea;
+  padding: 12px 30px;
+  border: none;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.omegle-ended button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .omegle-title {
+    font-size: 2rem;
+  }
+
+  .omegle-modes-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .mode-icon {
+    font-size: 40px;
+  }
+
+  .local-video {
+    width: 100px;
+    height: 100px;
+  }
+
+  .omegle-features {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .text-chat-container {
+    height: 90vh;
+  }
+}
