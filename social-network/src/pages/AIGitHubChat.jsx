@@ -94,7 +94,9 @@ const AIGitHubChat = () => {
                                 fullText += token;
                                 setCurrentResponse(fullText);
                             }
-                        } catch { }
+                        } catch {
+                            // Ignore JSON parse errors for malformed chunks
+                        }
                     }
                 }
             }

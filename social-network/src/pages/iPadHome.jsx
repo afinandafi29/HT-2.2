@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const iPadHome = () => {
+const IPadHome = () => {
   const [currentTime, setCurrentTime] = useState('9:41');
 
   useEffect(() => {
@@ -165,4 +165,4 @@ const iPadHome = () => {
   );
 };
 
-export default iPadHome;
+export default IPadHome;

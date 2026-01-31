@@ -14,7 +14,7 @@ const safeStorage = {
   getItem: (key) => {
     try {
       return localStorage.getItem(key);
-    } catch (e) {
+    } catch {
       console.warn('LocalStorage access denied (getItem), using memory fallback');
       return null;
     }
@@ -22,14 +22,14 @@ const safeStorage = {
   setItem: (key, value) => {
     try {
       localStorage.setItem(key, value);
-    } catch (e) {
+    } catch {
       console.warn('LocalStorage access denied (setItem)');
     }
   },
   removeItem: (key) => {
     try {
       localStorage.removeItem(key);
-    } catch (e) {
+    } catch {
       console.warn('LocalStorage access denied (removeItem)');
     }
   }

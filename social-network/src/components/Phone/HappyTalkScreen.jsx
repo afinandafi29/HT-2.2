@@ -1,6 +1,6 @@
 import React from 'react';
 
-const HAPPYY TALKScreen = () => {
+const HappyTalkScreen = () => {
   return (
     <div className="h-full bg-white flex flex-col overflow-hidden">
       <iframe
@@ -13,4 +13,4 @@ const HAPPYY TALKScreen = () => {
   );
 };
 
-export default HAPPYY TALKScreen;
+export default HappyTalkScreen;

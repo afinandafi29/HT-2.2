@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import '../styles/main.css';
 
-const HAPPYY TALKChat = ({ isOpen, onClose }) => {
+const HappyTalkChat = ({ isOpen, onClose }) => {
     const [messages, setMessages] = useState([
         { id: 1, text: "👋 Welcome to HAPPYY TALK! How can we help you today?", sender: 'agent', time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }
     ]);
@@ -65,7 +65,7 @@ const HAPPYY TALKChat = ({ isOpen, onClose }) => {
             {/* Messages Area */}
             <div className="HAPPYY TALK-messages-area custom-scrollbar">
                 {messages.map((msg) => (
-                    <div key={msg.id} className={`HAPPYY TALK-message-row ${msg.sender === 'agent' ? 'agent' : 'guest'}`}>
+                    <div key={msg.id} className={`HAPPYY TALK - message - row ${msg.sender === 'agent' ? 'agent' : 'guest'} `}>
                         {msg.sender === 'agent' && (
                             <div className="HAPPYY TALK-avatar">HT</div>
                         )}
@@ -98,4 +98,4 @@ const HAPPYY TALKChat = ({ isOpen, onClose }) => {
     );
 };
 
-export default HAPPYY TALKChat;
+export default HappyTalkChat;

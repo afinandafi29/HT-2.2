@@ -30,7 +30,7 @@ import Apps from './pages/Apps';
 import Learning from './pages/Learning';
 import LearningLanguages from './pages/LearningLanguages';
 import BasicLearning from './pages/BasicLearning';
-import iPadHome from './pages/iPadHome';
+import IPadHome from './pages/iPadHome';
 import EnglishQuiz from './pages/EnglishQuiz';
 import SpanishQuiz from './pages/SpanishQuiz';
 import FrenchQuiz from './pages/FrenchQuiz';
@@ -152,7 +152,7 @@ function App() {
           <Route path="/basic-learning" element={<BasicLearning />} />
 
           {/* iPad Home Route */}
-          <Route path="/ipad" element={<iPadHome />} />
+          <Route path="/ipad" element={<IPadHome />} />
 
           {/* Quiz Routes */}
           <Route path="/english-quiz" element={<EnglishQuiz />} />
