@@ -36,10 +36,10 @@ const RoomCard = ({ room, currentUser, onTopicUpdated, onRoomDeleted }) => {
             userName = `Guest_${randomNum} `;
         }
 
-        // Use local MiroTalk server instead of external URL
+        // Use production MiroTalk server URL
         const roomName = mirotalk_room_name || `room - ${id} `;
-        const localMiroTalkUrl = `http://localhost:3001/join/${roomName}`;
-        const finalUrl = `${localMiroTalkUrl}?name=${encodeURIComponent(userName)}`;
+        const productionMiroTalkUrl = `https://happyytalk.in/join/${roomName}`;
+        const finalUrl = `${productionMiroTalkUrl}?name=${encodeURIComponent(userName)}`;
         window.open(finalUrl, '_blank');
     };
 
