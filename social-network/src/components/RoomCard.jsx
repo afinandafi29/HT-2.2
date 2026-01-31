@@ -38,8 +38,8 @@ const RoomCard = ({ room, currentUser, onTopicUpdated, onRoomDeleted }) => {
 
         // Use production MiroTalk server URL
         const roomName = (mirotalk_room_name || `room-${id}`).trim();
-        const productionMiroTalkUrl = `https://happyytalk.in/join/${encodeURIComponent(roomName)}`;
-        const finalUrl = `${productionMiroTalkUrl}?name=${encodeURIComponent(userName)}`;
+        const productionMiroTalkUrl = `https://happyytalk.in/join?room=${encodeURIComponent(roomName)}`;
+        const finalUrl = `${productionMiroTalkUrl}&name=${encodeURIComponent(userName)}`;
         window.open(finalUrl, '_blank');
     };
 
