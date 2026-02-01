@@ -982,7 +982,7 @@ function getInfo() {
  */
 function getSignalingServer() {
     console.log('00 Location', window.location);
-    return window.location.origin;
+    return window.location.protocol + '//' + window.location.hostname;
 }
 
 /**
@@ -13664,7 +13664,7 @@ function leaveFeedback() {
 }
 
 function redirectOnLeave() {
-    openURL('https://happyytalk.in/');
+    redirectActive ? openURL(redirectURL) : openURL('/newcall');
 }
 
 /**

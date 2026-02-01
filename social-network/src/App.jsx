@@ -22,6 +22,7 @@ import NewsTopStories from './pages/News/NewsTopStories';
 import YouTube from './pages/YouTube';
 import Chat from './pages/Chat';
 import OneToOne from './pages/OneToOne';
+import Meeting from './pages/Meeting';
 import Music from './pages/Music';
 import LiveTV from './pages/LiveTV';
 import Admin from './pages/Admin';
@@ -116,6 +117,7 @@ function App() {
 
           {/* 1-to-1 Chat Routes */}
           <Route path="/1to1" element={<OneToOne />} />
+          <Route path="/meeting/:roomId" element={<Meeting />} />
           <Route path="/premium" element={<PremiumPage />} />
 
 

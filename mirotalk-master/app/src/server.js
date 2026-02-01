@@ -4,7 +4,7 @@ http://patorjk.com/software/taag/#p=display&f=ANSI%20Regular&t=Server
 ███████ ███████ ██████  ██    ██ ███████ ██████  
 ██      ██      ██   ██ ██    ██ ██      ██   ██ 
 ███████ █████   ██████  ██    ██ █████   ██████  
-     ██ ██      ██   ██  ██  ██  ██      ██   ██ 
+     ██ ██      ██   ██  ██  ██  ██      ██   ██ 
 ███████ ███████ ██   ██   ████   ███████ ██   ██                                           
 
 dependencies: {
@@ -501,9 +501,9 @@ if (OIDC.enabled) {
         const baseURL = `${protocol}://${host}`;
         const config = OIDC.baseUrlDynamic
             ? {
-                ...OIDC.config,
-                baseURL,
-            }
+                  ...OIDC.config,
+                  baseURL,
+              }
             : OIDC.config;
         return config;
     };
@@ -1123,9 +1123,9 @@ function getServerConfig(tunnel = false) {
         // Ngrok Configuration
         ngrok: ngrokEnabled
             ? {
-                enabled: ngrokEnabled,
-                token: ngrokAuthToken,
-            }
+                  enabled: ngrokEnabled,
+                  token: ngrokAuthToken,
+              }
             : false,
 
         // URLs for Redirection and Survey
@@ -2310,12 +2310,12 @@ function isAllowedRoomAccess(logMessage, req, hostCfg, peers, roomId) {
     const roomCount = Object.keys(peers).length;
 
     const allowRoomAccess =
-        (!hostCfg.protected && !OIDC.enabled) ? true : // Always allow if no protection
-            (OIDCUserAuthenticated && roomExist) || // User authenticated via OIDC and room Exist
-            (hostUserAuthenticated && roomExist) || // User authenticated via Login and room Exist
-            ((OIDCUserAuthenticated || hostUserAuthenticated) && roomCount === 0) || // User authenticated joins the first room
-            (OIDCUserAuthenticated && OIDCAllowRoomCreationForAuthUsers) || // Allow room creation if authenticated via OIDC
-            roomExist; // User Or Guest join an existing Room
+        (!hostCfg.protected && !OIDC.enabled) || // No host protection and OIDC mode enabled (default)
+        (OIDCUserAuthenticated && roomExist) || // User authenticated via OIDC and room Exist
+        (hostUserAuthenticated && roomExist) || // User authenticated via Login and room Exist
+        ((OIDCUserAuthenticated || hostUserAuthenticated) && roomCount === 0) || // User authenticated joins the first room
+        (OIDCUserAuthenticated && OIDCAllowRoomCreationForAuthUsers) || // Allow room creation if authenticated via OIDC
+        roomExist; // User Or Guest join an existing Room
 
     log.debug(logMessage, {
         OIDCUserAuthenticated: OIDCUserAuthenticated,

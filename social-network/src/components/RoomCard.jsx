@@ -1,8 +1,14 @@
+import React from 'react';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import { deleteRoomApi } from '../api/roomApi';
 import { deleteGuestRoom } from '../utils/guestRoomManager';
+import { Users, Video, Calendar, Clock, Globe, Shield, Trash2, Edit } from 'lucide-react';
 
 const RoomCard = ({ room, currentUser, onTopicUpdated, onRoomDeleted }) => {
+    const navigate = useNavigate();
+    const { user } = useAuth();
 
     const {
         id,
@@ -39,23 +45,8 @@ const RoomCard = ({ room, currentUser, onTopicUpdated, onRoomDeleted }) => {
         // Use production MiroTalk server URL
         const roomName = (mirotalk_room_name || `room-${id}`).trim();
 
-        // Check if running locally (localhost, 127.0.0.1, or local IP ranges)
-        let baseUrl = 'https://meet.happyytalk.in';
-        const hostname = window.location.hostname;
-        const isLocal = hostname === 'localhost' ||
-            hostname === '127.0.0.1' ||
-            hostname.startsWith('192.168.') ||
-            hostname.startsWith('10.') ||
-            hostname.startsWith('172.');
-
-        if (isLocal) {
-            baseUrl = `http://${hostname}:3001`;
-        }
-
-        // Use clean URL format: /join/RoomName?name=UserName
-        const productionMiroTalkUrl = `${baseUrl}/join/${encodeURIComponent(roomName)}`;
-        const finalUrl = `${productionMiroTalkUrl}?name=${encodeURIComponent(userName)}`;
-        window.open(finalUrl, '_blank');
+        // Navigate to the internal meeting page
+        navigate(`/meeting/${encodeURIComponent(roomName)}?name=${encodeURIComponent(userName)}`);
     };
 
     const handleShare = async () => {
