@@ -982,7 +982,7 @@ function getInfo() {
  */
 function getSignalingServer() {
     console.log('00 Location', window.location);
-    return window.location.protocol + '//' + window.location.hostname;
+    return window.location.origin;
 }
 
 /**
