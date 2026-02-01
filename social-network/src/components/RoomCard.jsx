@@ -40,7 +40,7 @@ const RoomCard = ({ room, currentUser, onTopicUpdated, onRoomDeleted }) => {
         const roomName = (mirotalk_room_name || `room-${id}`).trim();
 
         // Check if running locally (localhost, 127.0.0.1, or local IP ranges)
-        let baseUrl = 'https://happyytalk.in';
+        let baseUrl = 'https://meet.happyytalk.in';
         const hostname = window.location.hostname;
         const isLocal = hostname === 'localhost' ||
             hostname === '127.0.0.1' ||

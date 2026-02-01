@@ -5,7 +5,7 @@ import io from 'socket.io-client';
 
 const SIGNALING_SERVER = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? 'http://localhost:3001'
-    : 'https://happyytalk.in';
+    : 'https://meet.happyytalk.in';
 
 const OneToOne = () => {
     // UI State
