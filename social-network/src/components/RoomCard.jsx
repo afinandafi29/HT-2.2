@@ -21,30 +21,7 @@ const RoomCard = ({ room, currentUser, onTopicUpdated, onRoomDeleted }) => {
     const isFull = max_capacity > 0 && profiles && profiles.length >= max_capacity;
 
     const handleJoinRoom = () => {
-        if (isFull) {
-            window.dispatchEvent(new CustomEvent('SHOW_ALERT', { detail: { message: "This room is currently full. Please try another room or wait for someone to leave." } }));
-            return;
-        }
-
-        // Allow guests to join - generate a guest username if not logged in
-        let userName;
-        if (currentUser) {
-            userName = currentUser?.username || currentUser?.email?.split('@')[0] || 'User';
-        } else {
-            // Generate a random guest username
-            const randomNum = Math.floor(1000 + Math.random() * 9000);
-            userName = `Guest_${randomNum} `;
-        }
-
-        // Use official MiroTalk P2P server URL
-        const roomName = (mirotalk_room_name || `room-${id}`).trim();
-
-        const baseUrl = 'https://p2p.mirotalk.com';
-
-        // Use clean URL format: /join/RoomName?name=UserName
-        const productionMiroTalkUrl = `${baseUrl}/join/${encodeURIComponent(roomName)}`;
-        const finalUrl = `${productionMiroTalkUrl}?name=${encodeURIComponent(userName)}`;
-        window.open(finalUrl, '_blank');
+        // Meeting setup removed as per user request
     };
 
     const handleShare = async () => {
