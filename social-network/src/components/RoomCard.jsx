@@ -45,8 +45,9 @@ const RoomCard = ({ room, currentUser, onTopicUpdated, onRoomDeleted }) => {
             baseUrl = 'http://localhost:3001';
         }
 
-        const productionMiroTalkUrl = `${baseUrl}/join?room=${encodeURIComponent(roomName)}`;
-        const finalUrl = `${productionMiroTalkUrl}&name=${encodeURIComponent(userName)}`;
+        // Use clean URL format: /join/RoomName?name=UserName
+        const productionMiroTalkUrl = `${baseUrl}/join/${encodeURIComponent(roomName)}`;
+        const finalUrl = `${productionMiroTalkUrl}?name=${encodeURIComponent(userName)}`;
         window.open(finalUrl, '_blank');
     };
 
