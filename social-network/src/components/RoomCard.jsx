@@ -21,7 +21,27 @@ const RoomCard = ({ room, currentUser, onTopicUpdated, onRoomDeleted }) => {
     const isFull = max_capacity > 0 && profiles && profiles.length >= max_capacity;
 
     const handleJoinRoom = () => {
-        // Meeting setup removed as per user request
+        if (isFull) {
+            window.dispatchEvent(new CustomEvent('SHOW_ALERT', { detail: { message: "This room is currently full. Please try another room or wait for someone to leave." } }));
+            return;
+        }
+
+        // Generate a username
+        let userName;
+        if (currentUser) {
+            userName = currentUser?.username || currentUser?.email?.split('@')[0] || 'User';
+        } else {
+            const randomNum = Math.floor(1000 + Math.random() * 9000);
+            userName = `Guest_${randomNum}`;
+        }
+
+        // Room name from data or fallback to ID
+        const roomName = (mirotalk_room_name || `room-${id}`).trim();
+        const baseUrl = 'https://p2p.mirotalk.com';
+
+        // Open official MiroTalk P2P
+        const finalUrl = `${baseUrl}/join/${encodeURIComponent(roomName)}?name=${encodeURIComponent(userName)}`;
+        window.open(finalUrl, '_blank');
     };
 
     const handleShare = async () => {

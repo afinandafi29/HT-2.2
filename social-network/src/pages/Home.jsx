@@ -185,15 +185,29 @@ function Home() {
     };
   }, [socket, fetchData]);
 
-  // Handle auto-join from shared links removed as per user request
+  // Handle auto-join from shared links
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const joinRoomName = searchParams.get('join');
 
     if (joinRoomName && rooms.length > 0) {
-      navigate('/', { replace: true });
+      const roomToJoin = rooms.find(r => r.mirotalk_room_name === joinRoomName || String(r.id) === joinRoomName);
+      if (roomToJoin) {
+        const autoJoin = async () => {
+          try {
+            const userName = currentUser?.username || currentUser?.email?.split('@')[0] || 'User';
+            const baseUrl = `https://p2p.mirotalk.com/join/${roomToJoin.mirotalk_room_name || roomToJoin.id}`;
+            const finalUrl = `${baseUrl}${baseUrl.includes('?') ? '&' : '?'}name=${encodeURIComponent(userName)}`;
+            window.open(finalUrl, '_blank');
+            navigate('/', { replace: true });
+          } catch (err) {
+            console.error('Auto-join failed:', err);
+          }
+        };
+        autoJoin();
+      }
     }
-  }, [location.search, rooms, navigate]);
+  }, [location.search, rooms, navigate, currentUser]);
 
   // Resize I suppose
   useEffect(() => {
