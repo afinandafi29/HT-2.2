@@ -1,14 +1,8 @@
-import React from 'react';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
 import { deleteRoomApi } from '../api/roomApi';
 import { deleteGuestRoom } from '../utils/guestRoomManager';
-import { Users, Video, Calendar, Clock, Globe, Shield, Trash2, Edit } from 'lucide-react';
 
 const RoomCard = ({ room, currentUser, onTopicUpdated, onRoomDeleted }) => {
-    const navigate = useNavigate();
-    const { user } = useAuth();
 
     const {
         id,
@@ -46,6 +40,7 @@ const RoomCard = ({ room, currentUser, onTopicUpdated, onRoomDeleted }) => {
         const roomName = (mirotalk_room_name || `room-${id}`).trim();
 
         // Check if running locally (localhost, 127.0.0.1, or local IP ranges)
+        let baseUrl = 'https://meet.happyytalk.in';
         const hostname = window.location.hostname;
         const isLocal = hostname === 'localhost' ||
             hostname === '127.0.0.1' ||
@@ -54,13 +49,13 @@ const RoomCard = ({ room, currentUser, onTopicUpdated, onRoomDeleted }) => {
             hostname.startsWith('172.');
 
         if (isLocal) {
-            // Run in localhost directly without internal redirect
-            const localUrl = `http://${hostname}:3001/join/${encodeURIComponent(roomName)}?name=${encodeURIComponent(userName)}`;
-            window.open(localUrl, '_blank');
-        } else {
-            // In production, navigate to the internal meeting page
-            navigate(`/meeting/${encodeURIComponent(roomName)}?name=${encodeURIComponent(userName)}`);
+            baseUrl = `http://${hostname}:3000`;
         }
+
+        // Use clean URL format: /join/RoomName?name=UserName
+        const productionMiroTalkUrl = `${baseUrl}/join/${encodeURIComponent(roomName)}`;
+        const finalUrl = `${productionMiroTalkUrl}?name=${encodeURIComponent(userName)}`;
+        window.open(finalUrl, '_blank');
     };
 
     const handleShare = async () => {
