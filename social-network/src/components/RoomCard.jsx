@@ -36,21 +36,10 @@ const RoomCard = ({ room, currentUser, onTopicUpdated, onRoomDeleted }) => {
             userName = `Guest_${randomNum} `;
         }
 
-        // Use production MiroTalk server URL
+        // Use official MiroTalk P2P server URL
         const roomName = (mirotalk_room_name || `room-${id}`).trim();
 
-        // Check if running locally (localhost, 127.0.0.1, or local IP ranges)
-        let baseUrl = 'https://meet.happyytalk.in';
-        const hostname = window.location.hostname;
-        const isLocal = hostname === 'localhost' ||
-            hostname === '127.0.0.1' ||
-            hostname.startsWith('192.168.') ||
-            hostname.startsWith('10.') ||
-            hostname.startsWith('172.');
-
-        if (isLocal) {
-            baseUrl = `http://${hostname}:3000`;
-        }
+        const baseUrl = 'https://p2p.mirotalk.com';
 
         // Use clean URL format: /join/RoomName?name=UserName
         const productionMiroTalkUrl = `${baseUrl}/join/${encodeURIComponent(roomName)}`;

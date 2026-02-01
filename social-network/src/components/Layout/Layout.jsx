@@ -174,10 +174,6 @@ const Layout = () => {
   const triggerRoomRefresh = () => setRefreshTrigger(prev => prev + 1);
 
   const handleCreateRoomClick = () => {
-    if (!currentUser) {
-      setShowLoginModal(true);
-      return;
-    }
     setCreateModalOpen(true);
   };
 
