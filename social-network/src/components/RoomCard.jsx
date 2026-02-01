@@ -38,7 +38,14 @@ const RoomCard = ({ room, currentUser, onTopicUpdated, onRoomDeleted }) => {
 
         // Use production MiroTalk server URL
         const roomName = (mirotalk_room_name || `room-${id}`).trim();
-        const productionMiroTalkUrl = `https://happyytalk.in/join?room=${encodeURIComponent(roomName)}`;
+
+        // Check if running locally
+        let baseUrl = 'https://happyytalk.in';
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            baseUrl = 'http://localhost:3001';
+        }
+
+        const productionMiroTalkUrl = `${baseUrl}/join?room=${encodeURIComponent(roomName)}`;
         const finalUrl = `${productionMiroTalkUrl}&name=${encodeURIComponent(userName)}`;
         window.open(finalUrl, '_blank');
     };

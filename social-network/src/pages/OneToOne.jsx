@@ -3,7 +3,9 @@ import { useLocation } from 'react-router-dom';
 import { Search, Moon, Sun, Video, Phone, MessageSquare, Menu, X, Mic, MicOff, Camera, CameraOff, Flag, PhoneOff } from 'lucide-react';
 import io from 'socket.io-client';
 
-const SIGNALING_SERVER = 'https://happyytalk.in';
+const SIGNALING_SERVER = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? 'http://localhost:3001'
+    : 'https://happyytalk.in';
 
 const OneToOne = () => {
     // UI State
