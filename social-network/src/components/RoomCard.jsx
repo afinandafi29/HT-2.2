@@ -45,8 +45,22 @@ const RoomCard = ({ room, currentUser, onTopicUpdated, onRoomDeleted }) => {
         // Use production MiroTalk server URL
         const roomName = (mirotalk_room_name || `room-${id}`).trim();
 
-        // Navigate to the internal meeting page
-        navigate(`/meeting/${encodeURIComponent(roomName)}?name=${encodeURIComponent(userName)}`);
+        // Check if running locally (localhost, 127.0.0.1, or local IP ranges)
+        const hostname = window.location.hostname;
+        const isLocal = hostname === 'localhost' ||
+            hostname === '127.0.0.1' ||
+            hostname.startsWith('192.168.') ||
+            hostname.startsWith('10.') ||
+            hostname.startsWith('172.');
+
+        if (isLocal) {
+            // Run in localhost directly without internal redirect
+            const localUrl = `http://${hostname}:3001/join/${encodeURIComponent(roomName)}?name=${encodeURIComponent(userName)}`;
+            window.open(localUrl, '_blank');
+        } else {
+            // In production, navigate to the internal meeting page
+            navigate(`/meeting/${encodeURIComponent(roomName)}?name=${encodeURIComponent(userName)}`);
+        }
     };
 
     const handleShare = async () => {
