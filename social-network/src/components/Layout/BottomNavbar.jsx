@@ -31,7 +31,7 @@ const BottomNavbar = ({ activeButton, onCreateClick }) => {
         </button>
 
         <button
-          className={activeButton === '/feed' ? 'active' : ''}
+          className={activeButton === '/feed' || activeButton === '/post' ? 'active' : ''}
           onClick={() => handleNav('feed')}
         >
           <i className="fas fa-rss"></i>

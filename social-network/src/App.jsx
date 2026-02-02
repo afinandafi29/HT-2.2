@@ -5,12 +5,13 @@ import Home from './pages/Home';
 import AuthForm from './pages/Login';
 import ProfileCard from './pages/Profile';
 import SinglePostPage from './pages/SinglePost';
-import Feed from './pages/Feed';
+import Post from './pages/Post';
 import AboutUs from './pages/AboutUs';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsAndConditions from './pages/TermsAndConditions';
 import AuthCallback from './pages/AuthCallback';
 import Layout from './components/Layout/Layout';
+import FeedPage from './pages/FeedPage';
 import FAQ from './pages/FAQ';
 import OmegleLanding from './pages/OmegleLanding';
 import OmegleSession from './pages/OmegleSession';
@@ -96,7 +97,8 @@ function App() {
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
           <Route path="/jitsi" element={<Home />} />
-          <Route path="/feed" element={<Feed />} />
+          <Route path="/feed" element={<FeedPage />} />
+          <Route path="/post" element={<Post />} />
           <Route path="/profile" element={
             <PrivateRoute>
               <ProfileCard />

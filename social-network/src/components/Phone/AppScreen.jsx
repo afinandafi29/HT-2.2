@@ -59,9 +59,9 @@ const AppScreen = ({ onAppClick, searchQuery }) => {
     },
     {
       id: 'feed-app',
-      title: 'Feed',
+      title: 'Post',
       type: 'svg',
-      url: '/feed',
+      url: '/post',
       svg: (
         <svg viewBox="0 0 64 64">
           <circle cx="32" cy="32" r="28" fill="#4f8cff" />

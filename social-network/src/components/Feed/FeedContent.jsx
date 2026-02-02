@@ -54,7 +54,7 @@ const FeedContent = ({ className, onBackClick }) => {
             <ActionButtons />
             <div className="feed-header flex justify-between items-center border-b border-gray-700 pb-4 mb-6">
                 {/* <button onClick={onBackClick} className="text-blue-400 hover:text-blue-300">← Back to Rooms</button> */}
-                <h2 className="text-2xl font-bold text-white">Feed</h2>
+                <h2 className="text-2xl font-bold text-white">Post</h2>
                 <button
                     onClick={() => {
                         if (currentUser) {

@@ -48,7 +48,16 @@ const Navigation = ({
                 navigate('/feed');
               }}
             >
-              FEED
+              feed
+            </button>
+            <button
+              className={activeCategory === 'post' ? 'active' : ''}
+              onClick={() => {
+                handleButtonClick('post');
+                navigate('/post');
+              }}
+            >
+              post
             </button>
             <button
               className={activeCategory === 'news' ? 'active' : ''}

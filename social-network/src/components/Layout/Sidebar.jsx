@@ -185,6 +185,11 @@ const Sidebar = ({
         if (onClose) onClose();
     };
 
+    const handlePostClick = () => {
+        navigate('/post');
+        if (onClose) onClose();
+    };
+
     const handlePrivacyClick = () => {
         navigate('/privacy');
         if (onClose) onClose();
@@ -232,6 +237,11 @@ const Sidebar = ({
                         <li>
                             <button onClick={handleFeedClick} className={currentPath === '/feed' ? 'active' : ''}>
                                 <i className="fas fa-rss"></i> <span>Feed</span>
+                            </button>
+                        </li>
+                        <li>
+                            <button onClick={handlePostClick} className={currentPath === '/post' ? 'active' : ''}>
+                                <i className="fas fa-edit"></i> <span>Post</span>
                             </button>
                         </li>
                         <li>

@@ -1,12 +1,12 @@
 import React from 'react';
 import FeedContent from '../components/Feed/FeedContent';
 
-const FeedPage = () => {
+const Post = () => {
   return (
-    <div className="feed-page-wrapper">
+    <div className="post-page-wrapper">
       <FeedContent />
     </div>
   );
 };
 
-export default FeedPage;
+export default Post;

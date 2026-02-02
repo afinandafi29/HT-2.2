@@ -868,7 +868,7 @@ const generateInitial99Rooms = () => {
 };
 
 export const initialRooms = generateInitial99Rooms();
-export const initialFeedPosts = [
+export const initialPostPosts = [
     {
         id: 1,
         avatar: getRandomAvatar(),
@@ -925,7 +925,7 @@ export const navButtonsData = [
 
 export const sidebarButtonsData = [
     { id: 'home', text: 'Home', icon: 'fa-home' },
-    { id: 'feed', text: 'Feed', icon: 'fa-rss' },
+    { id: 'feed', text: 'Post', icon: 'fa-rss' },
     { id: 'dark-mode', text: 'Dark', icon: 'fa-moon' },
     { id: 'light-mode', text: 'Light', icon: 'fa-sun' },
     { id: 'real-mode', text: 'Space', icon: 'fa-rocket' },
@@ -944,6 +944,6 @@ export const bottomNavButtonsData = [
     { id: 'home', text: 'Home', icon: 'fa-home' },
     { id: 'search', text: 'Search', icon: 'fa-search' },
     { id: 'create', text: 'Create', icon: 'fa-plus-square' },
-    { id: 'feed', text: 'Feed', icon: 'fa-rss' },
+    { id: 'feed', text: 'Post', icon: 'fa-rss' },
     { id: 'profile', text: 'Profile', icon: 'fa-user' },
 ];

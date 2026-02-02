@@ -12,7 +12,7 @@ const MobileBottomNav = ({ onCreateRoom }) => {
     // Navigation items rearranged: Home, Feed, Create, Search, Profile/SignIn
     const navItems = [
         { id: 'home', icon: Home, label: 'Home', path: '/' },
-        { id: 'feed', icon: Rss, label: 'Feed', path: '/feed' },
+        { id: 'feed', icon: Rss, label: 'Post', path: '/post' },
         { id: 'create', icon: PlusSquare, label: 'Create', action: onCreateRoom },
         { id: 'search', icon: Search, label: 'Search', path: '/news/search' },
         {

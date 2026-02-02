@@ -5,7 +5,7 @@ import YouTubeContainer from './YouTubeContainer';
 import WatchPartyScreen from './WatchPartyScreen';
 import BottomNav from './BottomNav';
 import SearchContainer from './SearchContainer';
-import FeedScreen from './FeedScreen';
+import PostScreen from './PostScreen';
 import SocialScreen from './SocialScreen';
 import MovieScreen from './MovieScreen';
 import AIToolsScreen from './AIToolsScreen';
@@ -160,7 +160,7 @@ const Phone = ({ onClose, initialScreen = 'app' }) => {
         )}
 
         {activeScreen === 'feed' && (
-          <FeedScreen />
+          <PostScreen />
         )}
 
         {activeScreen === 'social' && (

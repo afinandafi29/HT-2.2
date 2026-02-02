@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const FeedScreen = () => {
+const PostScreen = () => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -46,7 +46,7 @@ const FeedScreen = () => {
   return (
     <div className="h-full bg-black text-white overflow-y-auto">
       <div className="p-4 border-b border-gray-800">
-        <h2 className="text-xl font-semibold">Feed</h2>
+        <h2 className="text-xl font-semibold">Post</h2>
       </div>
 
       {loading ? (
@@ -83,4 +83,4 @@ const FeedScreen = () => {
   );
 };
 
-export default FeedScreen;
+export default PostScreen;

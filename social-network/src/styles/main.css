@@ -3194,7 +3194,47 @@ body {
 
 /* Add to: c:\Users\hh766\OneDrive\Documents\GitHub\Helps\Freelance11_Afinand\social_network\social-network-\social-network-react\src\styles\main.css */
 
-/* Footer styles */
+/* Feed Navigation Override */
+.feed-nav-override {
+  background: transparent !important;
+  z-index: 1002;
+  margin-top: 60px;
+}
+
+.feed-nav-override .unified-navigation {
+  margin: 10px auto;
+  background: rgba(255, 255, 255, 1) !important;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.feed-nav-override .unified-navigation button {
+  color: #262626 !important;
+}
+
+.feed-nav-override .unified-navigation button.active {
+  background: #0095F6 !important;
+  color: white !important;
+}
+
+.dark-mode .feed-nav-override .unified-navigation,
+[data-theme='dark'] .feed-nav-override .unified-navigation {
+  background: rgba(38, 38, 38, 1) !important;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.dark-mode .feed-nav-override .unified-navigation button,
+[data-theme='dark'] .feed-nav-override .unified-navigation button {
+  color: #fafafa !important;
+}
+
+
+@media (max-width: 768px) {
+  .feed-nav-override {
+    display: none !important;
+  }
+}
+
 .footer-container {
   background-color: #181e2988;
   border-top: 1px solid #2d3748;

@@ -96,6 +96,7 @@ const Layout = () => {
   useEffect(() => {
     if (pathname === '/') setActiveCategory('all');
     else if (pathname === '/feed') setActiveCategory('feed');
+    else if (pathname === '/post') setActiveCategory('post');
     else if (pathname === '/news') setActiveCategory('news');
     else if (pathname === '/youtube') setActiveCategory('youtube');
     else if (pathname === '/chat') setActiveCategory('chat');
@@ -202,7 +203,7 @@ const Layout = () => {
   const isImmersivePage = ['/premium', '/1to1'].includes(pathname);
 
   // Immersive full-screen pages that should not have main layout padding or main sidebar
-  const fullScreenApps = ['/youtube', '/live', '/learning', '/ai-chat', '/news', '/apps', '/1to1', '/premium'];
+  const fullScreenApps = ['/feed', '/youtube', '/live', '/learning', '/ai-chat', '/news', '/apps', '/1to1', '/premium'];
   const isFullScreenApp = fullScreenApps.some(route => pathname.startsWith(route));
 
   // Routes that should be wrapped in a tablet frame
@@ -234,40 +235,48 @@ const Layout = () => {
         className="layout-root-wrapper min-h-screen flex flex-col"
         data-animation-stopped={animationStopped ? 'true' : 'false'}
       >
-        <Sidebar
-          isOpen={sidebarOpen}
-          onClose={toggleSidebar}
-          onToggleAnimation={toggleAnimation}
-          animationStopped={animationStopped}
-          currentPath={pathname}
-          user={currentUser}
-        />
+        {pathname !== '/feed' && (
+          <Sidebar
+            isOpen={sidebarOpen}
+            onClose={toggleSidebar}
+            onToggleAnimation={toggleAnimation}
+            animationStopped={animationStopped}
+            currentPath={pathname}
+            user={currentUser}
+          />
+        )}
 
         <div
           className={`overlay ${sidebarOpen ? 'active' : ''}`}
           onClick={toggleSidebar}
         ></div>
 
-        <RightSidebar
-          isOpen={rightSidebarOpen}
-          onClose={toggleRightSidebar}
-          onCreateRoomClick={handleCreateRoomClick}
-        />
+        {pathname !== '/feed' && (
+          <RightSidebar
+            isOpen={rightSidebarOpen}
+            onClose={toggleRightSidebar}
+            onCreateRoomClick={handleCreateRoomClick}
+          />
+        )}
 
-        <ChatPanel
-          isOpen={chatPanelOpen}
-          onClose={() => setChatPanelOpen(false)}
-        />
+        {pathname !== '/feed' && (
+          <ChatPanel
+            isOpen={chatPanelOpen}
+            onClose={() => setChatPanelOpen(false)}
+          />
+        )}
 
         <div className={`page-content-container flex flex-col flex-grow ${(sidebarOpen && windowWidth > 768) ? 'shifted' : ''}`}>
           <div className="layout-header-sticky">
-            <Header
-              onMenuClick={toggleSidebar}
-              onProfileClick={toggleRightSidebar}
-              user={currentUser}
-            />
+            {pathname !== '/feed' && (
+              <Header
+                onMenuClick={toggleSidebar}
+                onProfileClick={toggleRightSidebar}
+                user={currentUser}
+              />
+            )}
 
-            <div className="layout-persistent-nav">
+            <div className={`layout-persistent-nav ${pathname === '/feed' ? 'feed-nav-override' : ''}`}>
               <div className="w-full px-4 flex flex-col items-center">
                 {isHomePage && (
                   <div className="w-full flex flex-col items-center">
@@ -330,14 +339,15 @@ const Layout = () => {
               <Outlet />
             )}
           </main>
-          <Footer />
+          {pathname !== '/feed' && <Footer />}
         </div>
 
-        <BottomNavbar
-          activeButton={pathname}
-          onCreateClick={handleCreateRoomClick}
-        />
-
+        {pathname !== '/feed' && (
+          <BottomNavbar
+            activeButton={pathname}
+            onCreateClick={handleCreateRoomClick}
+          />
+        )}
         {createModalOpen && (
           <CreateRoomModal
             isOpen={createModalOpen}
