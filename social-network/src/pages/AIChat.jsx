@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './AiChat.css';
+import './AIChat.css';
 
 // Using Google-like font (Poppins) via a style tag injected in component or global CSS
 // But for React best practice, we'll keep the logic in React while adopting the styles provided.
