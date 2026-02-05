@@ -30,8 +30,8 @@ function Home() {
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [showPhone, setShowPhone] = useState(false);
 
+  // Fetch rooms on mount
   const [rooms, setRooms] = useState([]);
-  const [isLoading, setIsLoading] = useState(true); // Loading state
   const [error, setError] = useState(null);
   const [highlightedAvatars, setHighlightedAvatars] = useState(new Set());
 
@@ -41,7 +41,6 @@ function Home() {
 
   // Fetch data with error handling
   const fetchData = useCallback(async () => {
-    setIsLoading(true);
     setError(null);
     try {
       const fetchedRooms = await getRoomsApi();
@@ -62,8 +61,6 @@ function Home() {
       // Fallback to initialRooms + guest rooms if API fails
       const guestRooms = getGuestRooms();
       setRooms([...guestRooms, ...initialRooms]);
-    } finally {
-      setIsLoading(false);
     }
   }, []);
 
@@ -223,18 +220,18 @@ function Home() {
 
   // Filter rooms by category or search term
   const filterRooms = useCallback((room) => {
-    if (searchTerm && !room.title.toLowerCase().includes(searchTerm.toLowerCase())) {
+    if (searchTerm && !room.title?.toLowerCase().includes(searchTerm.toLowerCase())) {
       return false;
     }
 
     if (activeCategory === 'all') return true;
     if (activeCategory === 'trending') return room.topic?.toLowerCase() === 'english' || room.language?.toLowerCase() === 'english';
-    if (activeCategory === 'news') return room.title?.toLowerCase().includes('news') || room.topic?.toLowerCase().includes('news');
     if (activeCategory === 'youtube') return room.title?.toLowerCase().includes('youtube') || room.topic?.toLowerCase().includes('video');
     if (activeCategory === 'podcast') return room.title?.toLowerCase().includes('podcast') || room.topic?.toLowerCase().includes('podcast');
     if (activeCategory === 'movies') return room.title?.toLowerCase().includes('movie') || room.topic?.toLowerCase().includes('movie');
 
     // Check both topic and language for custom language categories
+    if (!activeCategory) return true;
     return (
       room.topic?.toLowerCase() === activeCategory.toLowerCase() ||
       room.language?.toLowerCase() === activeCategory.toLowerCase()
@@ -254,20 +251,6 @@ function Home() {
   const openAIChatPage = useCallback(() => {
     navigate('/ai-chat');
   }, [navigate]);
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="loader-container">
-          <div className="premium-loader">
-            <div></div>
-            <div></div>
-            <div></div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   if (error) {
     return (

@@ -1,11 +1,23 @@
 import axios from 'axios';
 
-// API Configuration - Updated with user provided keys
-const GNEWS_API_KEY = '5779a8a7bdfa8a6883078287b0363dc3';
+// API Configuration - Dynamic resolution from Admin Panel
+const getApiKey = (key, defaultVal) => {
+    try {
+        const saved = localStorage.getItem('adminApiKeys');
+        if (saved) {
+            const keys = JSON.parse(saved);
+            return keys[key] || defaultVal;
+        }
+    } catch (e) { }
+    return defaultVal;
+};
+
+const NEWSAPI_ORG_KEY = getApiKey('news', '0fc88aab4cf5487dab215fb4563ab635');
+const GNEWS_API_KEY = getApiKey('news', '5779a8a7bdfa8a6883078287b0363dc3');
 const THENEWSAPI_TOKEN = 'LSpJOY6suv2RKeu88kXjAYZsusgpIUley64x5gYy';
-const WORLD_NEWS_API_KEY = 'da5e034f1af6422785232c8069c8ac7b';
-const NEWSDATA_API_KEY = 'pub_030a1a2f19a04ff7a1822e42e92d86ee';
-const MEDIASTACK_API_KEY = '985956a6d8dd6035e27eac39b8b9eb9e';
+const WORLD_NEWS_API_KEY = getApiKey('news', '8a87d666d7524c48adc78d449877d80c');
+const NEWSDATA_API_KEY = getApiKey('newsData', 'pub_58c787ed963a4067bf62c425d6692cd6');
+const MEDIASTACK_API_KEY = '1147dc6bf54ab90cb455783281aebc77';
 
 // Helper for robust base64 encoding
 const safeBtoa = (str) => {
@@ -97,19 +109,30 @@ const normalizeMediastack = (article) => ({
 });
 
 // Fetchers
-const fetchProxyNews = async (endpoint, params = {}) => {
+const fetchNewsAPIOrg = async (endpoint, params = {}) => {
     try {
-        const url = `http://localhost:4000/api${endpoint}`;
-        const queryParams = { ...params, page: params.page || 1 };
-        const { data } = await axios.get(url, { params: queryParams });
-        if (data.status === 'ok') {
+        const url = `https://newsapi.org/v2${endpoint}`;
+        const queryParams = {
+            apiKey: NEWSAPI_ORG_KEY,
+            language: 'en',
+            pageSize: params.limit || 10,
+            page: params.page || 1,
+            ...params
+        };
+        const urlWithParams = `${url}?${new URLSearchParams(queryParams).toString()}`;
+        const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(urlWithParams)}`;
+        const { data } = await axios.get(proxyUrl);
+        const parsedData = data;
+
+        if (parsedData.status === 'ok') {
             return {
-                articles: data.articles.map(normalizeNewsAPIOrg),
-                totalResults: data.totalResults || 0
+                articles: parsedData.articles.map(normalizeNewsAPIOrg),
+                totalResults: parsedData.totalResults || 0
             };
         }
         return { articles: [], totalResults: 0 };
     } catch (error) {
+        console.error('NewsAPI.org fetch error:', error);
         return { articles: [], totalResults: 0 };
     }
 };
@@ -124,7 +147,9 @@ const fetchGNews = async (endpoint, params = {}) => {
             page: params.page || 1,
             ...params
         };
-        const { data } = await axios.get(url, { params: queryParams });
+        const urlWithParams = `${url}?${new URLSearchParams(queryParams).toString()}`;
+        const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(urlWithParams)}`;
+        const { data } = await axios.get(proxyUrl);
         return {
             articles: (data.articles || []).map(normalizeGNews),
             totalResults: data.totalArticles || 0
@@ -144,7 +169,9 @@ const fetchWorldNews = async (params = {}) => {
             'offset': (params.page - 1) * (params.limit || 10),
             'language': 'en'
         };
-        const { data } = await axios.get(url, { params: queryParams });
+        const urlWithParams = `${url}?${new URLSearchParams(queryParams).toString()}`;
+        const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(urlWithParams)}`;
+        const { data } = await axios.get(proxyUrl);
         return {
             articles: (data.news || []).map(normalizeWorldNews),
             totalResults: data.available || 0
@@ -156,26 +183,28 @@ const fetchWorldNews = async (params = {}) => {
 
 const fetchNewsData = async (params = {}) => {
     try {
-        const url = `https://newsdata.io/api/1/news`;
+        const url = `https://newsdata.io/api/1/latest`;
         const queryParams = {
             apikey: NEWSDATA_API_KEY,
-            q: params.q || 'latest',
-            language: 'en',
-            page: params.page
+            q: params.q || 'news',
+            language: 'en'
         };
-        const { data } = await axios.get(url, { params: queryParams });
+        const urlWithParams = `${url}?${new URLSearchParams(queryParams).toString()}`;
+        const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(urlWithParams)}`;
+        const { data } = await axios.get(proxyUrl);
         return {
             articles: (data.results || []).map(normalizeNewsData),
             totalResults: data.totalResults || 0
         };
     } catch (error) {
+        console.error('NewsData Fetch Error:', error);
         return { articles: [], totalResults: 0 };
     }
 };
 
 const fetchMediastack = async (params = {}) => {
     try {
-        const url = `http://localhost:4000/api/mediastack`;
+        const url = `http://api.mediastack.com/v1/news`;
         const queryParams = {
             access_key: MEDIASTACK_API_KEY,
             keywords: params.q || 'latest',
@@ -183,7 +212,9 @@ const fetchMediastack = async (params = {}) => {
             limit: params.limit || 10,
             offset: (params.page - 1) * (params.limit || 10)
         };
-        const { data } = await axios.get(url, { params: queryParams });
+        const urlWithParams = `${url}?${new URLSearchParams(queryParams).toString()}`;
+        const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(urlWithParams)}`;
+        const { data } = await axios.get(proxyUrl);
         return {
             articles: (data.data || []).map(normalizeMediastack),
             totalResults: data.pagination?.total || 0
@@ -203,7 +234,9 @@ const fetchTheNewsAPI = async (endpoint, params = {}) => {
             page: params.page || 1,
             ...params
         };
-        const { data } = await axios.get(url, { params: queryParams });
+        const urlWithParams = `${url}?${new URLSearchParams(queryParams).toString()}`;
+        const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(urlWithParams)}`;
+        const { data } = await axios.get(proxyUrl);
         return {
             articles: data.data.map(normalizeTheNewsAPI),
             totalResults: data.meta?.found || 0
@@ -218,9 +251,9 @@ const fetchRSS = async (topic = '') => {
     try {
         const query = topic ? `search?q=${topic}&` : '';
         const url = `https://news.google.com/rss/${query}hl=en-US&gl=US&ceid=US:en`;
-        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+        const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(url)}`;
         const response = await axios.get(proxyUrl);
-        const xmlText = response.data.contents;
+        const xmlText = response.data;
         const parser = new DOMParser();
         const xmlDoc = parser.parseFromString(xmlText, "text/xml");
         const items = Array.from(xmlDoc.querySelectorAll("item")).slice(0, 10);
@@ -250,20 +283,11 @@ const fetchRSS = async (topic = '') => {
     }
 };
 
-// Mock Data
+
+
+// Mock Data removed as per user request
 const generateMockNews = (count = 10, category = 'General') => {
-    return Array.from({ length: count }).map((_, i) => ({
-        uuid: `mock-${category}-${i}-${Date.now()}`,
-        title: `${category.toUpperCase()}: Trending Story #${i + 1}`,
-        description: `Breaking news in ${category}. Reliable updates from our global stream.`,
-        snippet: `Latest developments in ${category} reported by HAPPYY TALK News.`,
-        url: 'https://news.google.com',
-        image_url: `https://images.unsplash.com/photo-${1504711434969 + i * 100}?auto=format&fit=crop&q=80&w=800`,
-        published_at: new Date(Date.now() - i * 3600000).toISOString(),
-        source: 'HAPPYY TALK News',
-        categories: [category],
-        provider: 'mock'
-    }));
+    return []; // No more mock stories
 };
 
 // Aggregator
@@ -311,14 +335,13 @@ export const getHeadlines = async (params = {}) => {
     const q = params.categories || params.search || 'latest';
     const page = params.page || 1;
 
-    // Aggregate from all 6 sources
     const result = await getAggregatedNews([
-        fetchProxyNews('/headlines', { country: 'us', category: params.categories, page }),
+        fetchNewsAPIOrg('/top-headlines', { category: params.categories, page }),
+        fetchNewsData({ q: params.categories, page }),
         fetchGNews('/top-headlines', { topic: params.categories, page }),
         fetchTheNewsAPI('/top', { categories: params.categories, page }),
-        fetchWorldNews({ q, page }),
-        fetchNewsData({ q, page }),
-        fetchMediastack({ q, page })
+        fetchWorldNews({ q: params.categories, page }),
+        fetchMediastack({ q: params.categories, page }),
     ], params);
 
     return { data: result.articles, meta: { found: result.totalResults } };
@@ -331,7 +354,7 @@ export const getAllNews = async (params = {}) => {
     const page = params.page || 1;
 
     const result = await getAggregatedNews([
-        fetchProxyNews('/news', { q, page }),
+        fetchNewsAPIOrg('/everything', { q, page }),
         fetchGNews('/search', { q, page }),
         fetchTheNewsAPI('/all', { search: q, page }),
         fetchWorldNews({ q, page }),

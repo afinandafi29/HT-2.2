@@ -1,6 +1,17 @@
 import React, { useState, useEffect } from 'react';
 
-const API_KEY = import.meta.env.VITE_YT_API_KEY || 'AIzaSyAsQ7E02xCW3qAdxwHK2PLj-pppMfm9fBw';
+const getYTKey = () => {
+  try {
+    const saved = localStorage.getItem('adminApiKeys');
+    if (saved) {
+      const keys = JSON.parse(saved);
+      return keys.youtube || import.meta.env.VITE_YT_API_KEY || 'AIzaSyAsQ7E02xCW3qAdxwHK2PLj-pppMfm9fBw';
+    }
+  } catch (e) { }
+  return import.meta.env.VITE_YT_API_KEY || 'AIzaSyAsQ7E02xCW3qAdxwHK2PLj-pppMfm9fBw';
+};
+
+const API_KEY = getYTKey();
 
 const YouTubeContainer = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -9,11 +20,12 @@ const YouTubeContainer = () => {
   const [error, setError] = useState(null);
   const [hasMore, setHasMore] = useState(true);
   const [pageToken, setPageToken] = useState('');
-  const [activeCategory, setActiveCategory] = useState('Live');
+  const [activeCategory, setActiveCategory] = useState('Reels');
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [isSearching, setIsSearching] = useState(false);
 
   const categories = [
+    { label: 'Reels', query: '#shorts' },
     { label: 'Live', query: 'live', eventType: 'live' },
     { label: 'All', query: 'trending' },
     { label: 'Music', query: 'official music videos' },
@@ -23,7 +35,7 @@ const YouTubeContainer = () => {
   ];
 
   useEffect(() => {
-    fetchVideos('live', true, 'live');
+    fetchVideos('#shorts', true);
   }, []);
 
   const fetchVideos = async (query = 'trending', reset = true, eventType = null) => {
@@ -175,8 +187,8 @@ const YouTubeContainer = () => {
               key={cat.label}
               onClick={() => handleCategoryClick(cat)}
               className={`px-4 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${activeCategory === cat.label
-                  ? 'bg-white text-black shadow-lg shadow-white/5'
-                  : 'bg-white/5 text-white/70 hover:bg-white/10'
+                ? 'bg-white text-black shadow-lg shadow-white/5'
+                : 'bg-white/5 text-white/70 hover:bg-white/10'
                 }`}
             >
               {cat.label}

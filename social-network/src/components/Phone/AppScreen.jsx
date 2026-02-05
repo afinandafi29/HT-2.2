@@ -12,6 +12,23 @@ const AppScreen = ({ onAppClick, searchQuery }) => {
       type: 'image'
     },
     {
+      id: 'reels-app',
+      title: 'Reels',
+      type: 'svg',
+      url: '/feed', // Or if there is a specific /reels route, but feed has Reels view
+      svg: (
+        <svg viewBox="0 0 64 64">
+          <circle cx="32" cy="32" r="28" fill="#ff0050" />
+          <path d="M18 22h28v20H18z" fill="#fff" opacity="0.2" />
+          <path d="M22 26l20 6-20 6z" fill="#fff" />
+          <rect x="18" y="20" width="28" height="4" fill="#000" />
+          <rect x="22" y="20" width="2" height="4" fill="#fff" />
+          <rect x="31" y="20" width="2" height="4" fill="#fff" />
+          <rect x="40" y="20" width="2" height="4" fill="#fff" />
+        </svg>
+      )
+    },
+    {
       id: 'games-folder',
       title: 'Games',
       type: 'svg',

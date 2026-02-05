@@ -239,21 +239,7 @@ const Sidebar = ({
                                 <i className="fas fa-rss"></i> <span>Feed</span>
                             </button>
                         </li>
-                        <li>
-                            <button onClick={handlePostClick} className={currentPath === '/post' ? 'active' : ''}>
-                                <i className="fas fa-edit"></i> <span>Post</span>
-                            </button>
-                        </li>
-                        <li>
-                            <button onClick={() => { navigate('/news'); if (onClose) onClose(); }} className={currentPath === '/news' ? 'active' : ''}>
-                                <i className="fas fa-newspaper"></i> <span>News</span>
-                            </button>
-                        </li>
-                        <li>
-                            <button onClick={() => { navigate('/youtube'); if (onClose) onClose(); }} className={currentPath === '/youtube' ? 'active' : ''}>
-                                <span>YouTube</span>
-                            </button>
-                        </li>
+
                         <li>
                             <button onClick={() => { navigate('/live'); if (onClose) onClose(); }} className={currentPath === '/live' ? 'active' : ''}>
                                 <i className="fas fa-tv"></i> <span>Live TV</span>

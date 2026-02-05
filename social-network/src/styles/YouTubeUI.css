@@ -1,0 +1,301 @@
+/* Base Styles */
+.youtube-clone-wrapper * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.youtube-clone-wrapper {
+    background-color: #0f0f0f;
+    color: white;
+    font-family: "Roboto", Arial, sans-serif;
+    overflow: hidden;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 9999;
+}
+
+/* Top Header */
+.youtube-clone-wrapper header {
+    height: 56px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 16px;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background: #0f0f0f;
+    z-index: 100;
+}
+
+.youtube-clone-wrapper .left-section,
+.youtube-clone-wrapper .right-section {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.youtube-clone-wrapper .left-section i,
+.youtube-clone-wrapper .right-section i {
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+}
+
+.youtube-clone-wrapper .left-section i:hover,
+.youtube-clone-wrapper .right-section i:hover {
+    background: #272727;
+}
+
+.youtube-clone-wrapper .left-section img {
+    cursor: pointer;
+}
+
+.youtube-clone-wrapper .search-container {
+    display: flex;
+    flex-grow: 1;
+    max-width: 720px;
+    margin: 0 40px;
+    align-items: center;
+}
+
+.youtube-clone-wrapper .search-bar {
+    flex: 1;
+    background: #121212;
+    border: 1px solid #333;
+    border-radius: 40px 0 0 40px;
+    padding: 8px 16px;
+    color: white;
+    outline: none;
+    font-size: 16px;
+}
+
+.youtube-clone-wrapper .search-bar::placeholder {
+    color: #888;
+}
+
+.youtube-clone-wrapper .search-btn {
+    background: #222;
+    border: 1px solid #333;
+    border-left: none;
+    padding: 7px 20px;
+    border-radius: 0 40px 40px 0;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.youtube-clone-wrapper .search-btn:hover {
+    background: #2a2a2a;
+}
+
+/* Sidebar */
+.youtube-clone-wrapper aside {
+    width: 240px;
+    height: calc(100vh - 56px);
+    position: fixed;
+    top: 56px;
+    overflow-y: auto;
+    padding: 12px;
+    background: #0f0f0f;
+}
+
+.youtube-clone-wrapper .nav-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    color: white;
+}
+
+.youtube-clone-wrapper .nav-item:hover {
+    background: #272727;
+}
+
+.youtube-clone-wrapper .nav-item.active {
+    background: #272727;
+    font-weight: bold;
+}
+
+.youtube-clone-wrapper .nav-item i {
+    margin-right: 20px;
+}
+
+.youtube-clone-wrapper hr {
+    border: none;
+    border-top: 1px solid #333;
+    margin: 12px 0;
+}
+
+/* Main Content Area */
+.youtube-clone-wrapper main {
+    margin-left: 240px;
+    margin-top: 56px;
+    height: calc(100vh - 56px);
+    overflow-y: auto;
+    padding: 0 16px;
+}
+
+/* Tags/Filters Bar */
+.youtube-clone-wrapper .filters {
+    display: flex;
+    gap: 12px;
+    padding: 12px 0;
+    background: #0f0f0f;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    overflow-x: auto;
+}
+
+.youtube-clone-wrapper .filters::-webkit-scrollbar {
+    display: none;
+}
+
+.youtube-clone-wrapper .filter-chip {
+    background: #272727;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    white-space: nowrap;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.youtube-clone-wrapper .filter-chip:hover {
+    background: #3f3f3f;
+}
+
+.youtube-clone-wrapper .filter-chip.active {
+    background: white;
+    color: black;
+}
+
+/* Video Grid */
+.youtube-clone-wrapper .video-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+    padding-top: 20px;
+    padding-bottom: 40px;
+}
+
+.youtube-clone-wrapper .video-card {
+    cursor: pointer;
+}
+
+.youtube-clone-wrapper .thumbnail {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: #333;
+    border-radius: 12px;
+    position: relative;
+    overflow: hidden;
+}
+
+.youtube-clone-wrapper .thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.youtube-clone-wrapper .video-info {
+    display: flex;
+    margin-top: 12px;
+    gap: 12px;
+}
+
+.youtube-clone-wrapper .channel-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #444;
+    flex-shrink: 0;
+}
+
+.youtube-clone-wrapper .video-text h3 {
+    font-size: 16px;
+    margin-bottom: 4px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.4;
+    font-weight: 500;
+}
+
+.youtube-clone-wrapper .video-meta {
+    color: #aaa;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+/* Sidebar scrollbar styling */
+.youtube-clone-wrapper aside::-webkit-scrollbar {
+    width: 8px;
+}
+
+.youtube-clone-wrapper aside::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 10px;
+}
+
+.youtube-clone-wrapper aside:hover::-webkit-scrollbar-thumb {
+    background: #717171;
+}
+
+/* Main scrollbar */
+.youtube-clone-wrapper main::-webkit-scrollbar {
+    width: 8px;
+}
+
+.youtube-clone-wrapper main::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 10px;
+}
+
+.youtube-clone-wrapper main:hover::-webkit-scrollbar-thumb {
+    background: #717171;
+}
+
+/* Material Icons */
+.youtube-clone-wrapper .material-icons {
+    font-family: 'Material Icons';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    display: inline-block;
+    line-height: 1;
+    text-transform: none;
+    letter-spacing: normal;
+    word-wrap: normal;
+    white-space: nowrap;
+    direction: ltr;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .youtube-clone-wrapper aside {
+        display: none;
+    }
+
+    .youtube-clone-wrapper main {
+        margin-left: 0;
+    }
+
+    .youtube-clone-wrapper .search-container {
+        margin: 0 10px;
+    }
+
+    .youtube-clone-wrapper .video-grid {
+        grid-template-columns: 1fr;
+    }
+}

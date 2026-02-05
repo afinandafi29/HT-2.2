@@ -238,6 +238,23 @@ body {
   }
 }
 
+@keyframes pulse {
+  0% {
+    transform: scaleY(1);
+    transform-origin: 50% 50%;
+  }
+
+  50% {
+    transform: scaleY(0.7);
+    transform-origin: 50% 50%;
+  }
+
+  100% {
+    transform: scaleY(1);
+    transform-origin: 50% 50%;
+  }
+}
+
 /* Diagonal streaks like in the image */
 .streak {
   position: absolute;
@@ -285,6 +302,19 @@ body {
   opacity: 0.2;
 }
 
+/* Page Content Container */
+.page-content-container {
+  width: 100%;
+  transition: margin-left 0.5s cubic-bezier(0.4, 0, 0.2, 1), width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (min-width: 769px) {
+  .page-content-container.shifted {
+    margin-left: 280px;
+    /* Match sidebar width */
+    width: calc(100% - 280px);
+  }
+}
 
 
 @keyframes twinkling {
@@ -405,6 +435,8 @@ body {
   bottom: 0;
   left: -280px;
   width: 280px;
+  height: 100vh;
+  /* Ensure full viewport height */
   background: rgba(15, 23, 42, 0.3);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
@@ -421,6 +453,14 @@ body {
   overflow-y: auto;
   overflow-x: hidden;
 }
+
+/* Ensure it stays fixed on desktop */
+@media (min-width: 769px) {
+  .sidebar.active {
+    left: 0;
+  }
+}
+
 
 /* Custom scrollbar for sidebar */
 .sidebar::-webkit-scrollbar {
@@ -3057,6 +3097,11 @@ body {
     display: none;
   }
 
+  .feed-custom-bottom-nav {
+    display: none;
+    /* Hidden on desktop */
+  }
+
   .feed-main {
     margin: 0 auto;
     max-width: 100%;
@@ -3189,6 +3234,41 @@ body {
 
 .mobile-button button {
   border-radius: 100;
+}
+
+/* Prominent Plus Button for Bottom Nav */
+.plus-nav-btn {
+  transform: translateY(-10px);
+}
+
+.plus-icon-wrapper {
+  width: 48px;
+  height: 48px;
+  background: var(--primary);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+  margin-bottom: 4px;
+  border: 2px solid #000;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.plus-nav-btn:hover .plus-icon-wrapper {
+  transform: scale(1.1);
+  background: var(--secondary);
+}
+
+.plus-icon-wrapper i {
+  color: white !important;
+  margin-bottom: 0 !important;
+  font-size: 20px !important;
+}
+
+.plus-nav-btn span {
+  display: none;
+  /* Hide 'Create' text for the plus btn to keep it clean */
 }
 
 

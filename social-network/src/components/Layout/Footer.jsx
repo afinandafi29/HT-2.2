@@ -18,7 +18,7 @@ const Footer = () => {
             </img>
             <h3>HAPPYY TALK</h3>
           </div>
-          <p> Connect with friends & Speak Freely</p>
+          <p className="text-[11px] md:text-sm font-black tracking-[0.2em] text-blue-400 uppercase mt-3 py-1 px-3 bg-blue-500/10 rounded-full inline-block">Learn Earn Grow</p>
         </div>
 
         <div className="footer-links">

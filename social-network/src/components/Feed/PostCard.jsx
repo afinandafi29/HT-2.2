@@ -75,27 +75,15 @@ const PostCard = ({ post, currentUser, onLikeToggled, onPostDeleted }) => {
     const handleShare = async (e) => {
         e.stopPropagation(); // Prevent navigation when clicking share button
         const postUrl = `${window.location.origin}/posts/${post.id}`;
-        const shareData = {
-            title: post.title || 'HAPPYY TALK Post',
-            text: post.content,
-            url: postUrl
-        };
 
-        if (navigator.share) {
-            try {
-                await navigator.share(shareData);
-            } catch (err) {
-                console.error('Error sharing:', err);
-            }
-        } else {
-            try {
-                await navigator.clipboard.writeText(postUrl);
-                setCopied(true);
-                setTimeout(() => setCopied(false), 2000);
-                window.dispatchEvent(new CustomEvent('SHOW_ALERT', { detail: { message: 'Link copied to clipboard!' } }));
-            } catch (err) {
-                console.error('Failed to copy link:', err);
-            }
+        try {
+            await navigator.clipboard.writeText(postUrl);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+            window.dispatchEvent(new CustomEvent('SHOW_ALERT', { detail: { message: 'Link copied to clipboard!' } }));
+        } catch (err) {
+            console.error('Failed to copy link:', err);
+            window.dispatchEvent(new CustomEvent('SHOW_ALERT', { detail: { message: 'Failed to copy link' } }));
         }
     };
 

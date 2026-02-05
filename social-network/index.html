@@ -9,6 +9,11 @@
   <!-- Global Error Handler for Debugging -->
   <script>
     window.onerror = function (message, source, lineno, colno, error) {
+      // Ignore non-fatal third-party script errors
+      if (message === 'Script error.' || !source) {
+        console.warn('Silent Script Error caught (likely CORS):', message);
+        return;
+      }
       const errorContainer = document.getElementById('global-error-display') || document.createElement('div');
       errorContainer.id = 'global-error-display';
       errorContainer.style.cssText = 'position:fixed;top:0;left:0;width:100%;background:rgba(255,0,0,0.9);color:white;padding:20px;z-index:99999;font-family:monospace;white-space:pre-wrap;';
@@ -27,16 +32,21 @@
   </script>
 
   <!-- PWA Meta Tags -->
-
   <link rel="manifest" href="/manifest.json" />
-  <link rel="apple-touch-icon" href="/happytalk.png" />
-  <meta name="theme-color" content="#0f172a" />
+  <link rel="apple-touch-icon" href="/HAPPYY TALK.png" />
+  <meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="HappyTalk" />
+  <meta name="mobile-web-app-capable" content="yes" />
 
-  <title>HAPPY TALK</title>
+  <title>HappyTalk - Connect, Share, Explore</title>
   <meta name="description"
-    content="Happy Talk is a social networking platform where you can connect with friends, join discussion rooms in multiple languages, and speak freely." />
-  <meta name="keywords" content="social network, language learning, rooms, discussion, community, connect, happytalk" />
-  <meta name="author" content="Happy Talk" />
+    content="HappyTalk is a modern social networking platform where you can connect with friends, share stories, watch reels, and explore content from around the world." />
+  <meta name="keywords"
+    content="social network, stories, reels, photos, explore, connect, happytalk, feed, social media" />
+  <meta name="author" content="HappyTalk" />
 
   <!-- Font Awesome -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" />

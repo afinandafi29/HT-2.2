@@ -109,13 +109,7 @@ const NewsHome = () => {
         }
     };
 
-    if (loading) {
-        return (
-            <div className="flex flex-col items-center justify-center min-h-screen pt-20">
-                <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-            </div>
-        );
-    }
+    if (loading && Object.keys(categoryNews).length === 0 && !topStory) return null;
 
     if (error) {
         return (
@@ -265,16 +259,10 @@ const NewsHome = () => {
                             ))}
                         </div>
                     ) : (
-                        <div className="text-center py-40 bg-white/5 rounded-[4rem] border border-white/5 border-dashed">
-                            <p className="text-white/50 text-2xl font-bold uppercase tracking-widest animate-pulse">Scanning news waves...</p>
-                        </div>
+                        null
                     )}
 
-                    {loadingMore && (
-                        <div className="flex justify-center py-24">
-                            <div className="w-20 h-20 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                        </div>
-                    )}
+                    {/* loadingMore spinner removed */}
 
                     {!hasMore && generalNews.length > 0 && (
                         <div className="text-center py-32">

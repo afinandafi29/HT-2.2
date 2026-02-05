@@ -24,7 +24,7 @@ export const LayoutContext = React.createContext({});
 
 const Layout = () => {
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 1024 && window.location.pathname !== '/' && window.location.pathname !== '/jitsi' && window.location.pathname !== '/premium');
   const [rightSidebarOpen, setRightSidebarOpen] = useState(false);
   const { theme, changeTheme } = useTheme();
   const [animationStopped, setAnimationStopped] = useState(false);
@@ -94,10 +94,12 @@ const Layout = () => {
 
   // Sync activeCategory with pathname
   useEffect(() => {
-    if (pathname === '/') setActiveCategory('all');
+    if (pathname === '/' || pathname === '/jitsi') {
+      setActiveCategory('all');
+      setSidebarOpen(false); // Close sidebar on home screen
+    }
     else if (pathname === '/feed') setActiveCategory('feed');
     else if (pathname === '/post') setActiveCategory('post');
-    else if (pathname === '/news') setActiveCategory('news');
     else if (pathname === '/youtube') setActiveCategory('youtube');
     else if (pathname === '/chat') setActiveCategory('chat');
     else if (pathname === '/premium') setActiveCategory('premium');
@@ -235,7 +237,7 @@ const Layout = () => {
         className="layout-root-wrapper min-h-screen flex flex-col"
         data-animation-stopped={animationStopped ? 'true' : 'false'}
       >
-        {pathname !== '/feed' && (
+        {(pathname !== '/feed' && pathname !== '/youtube') && (
           <Sidebar
             isOpen={sidebarOpen}
             onClose={toggleSidebar}
@@ -251,83 +253,81 @@ const Layout = () => {
           onClick={toggleSidebar}
         ></div>
 
-        {pathname !== '/feed' && (
-          <RightSidebar
-            isOpen={rightSidebarOpen}
-            onClose={toggleRightSidebar}
-            onCreateRoomClick={handleCreateRoomClick}
-          />
-        )}
+        <RightSidebar
+          isOpen={rightSidebarOpen}
+          onClose={toggleRightSidebar}
+          onCreateRoomClick={handleCreateRoomClick}
+        />
 
-        {pathname !== '/feed' && (
-          <ChatPanel
-            isOpen={chatPanelOpen}
-            onClose={() => setChatPanelOpen(false)}
-          />
-        )}
+        <ChatPanel
+          isOpen={chatPanelOpen}
+          onClose={() => setChatPanelOpen(false)}
+        />
 
         <div className={`page-content-container flex flex-col flex-grow ${(sidebarOpen && windowWidth > 768) ? 'shifted' : ''}`}>
           <div className="layout-header-sticky">
-            {pathname !== '/feed' && (
-              <Header
-                onMenuClick={toggleSidebar}
-                onProfileClick={toggleRightSidebar}
-                user={currentUser}
-              />
-            )}
+            {(pathname !== '/feed' && pathname !== '/youtube') ? (
+              <>
+                <Header
+                  onMenuClick={toggleSidebar}
+                  onProfileClick={toggleRightSidebar}
+                  user={currentUser}
+                />
 
-            <div className={`layout-persistent-nav ${pathname === '/feed' ? 'feed-nav-override' : ''}`}>
-              <div className="w-full px-4 flex flex-col items-center">
-                {isHomePage && (
-                  <div className="w-full flex flex-col items-center">
-                    {/* Banner Section */}
-                    {showBanner && banners.length > 0 && (
-                      <div className="w-full max-w-7xl mt-8 mb-4 px-4">
-                        <BannerCarousel onClose={() => {
-                          setShowBanner(false);
-                          localStorage.setItem('showBanner', 'false');
-                        }} />
+                <div className="layout-persistent-nav">
+                  <div className="w-full px-4 flex flex-col items-center">
+                    {isHomePage && (
+                      <div className="w-full flex flex-col items-center">
+                        {/* Banner Section */}
+                        {showBanner && banners.length > 0 && (
+                          <div className="w-full max-w-7xl mt-8 mb-4 px-4">
+                            <BannerCarousel onClose={() => {
+                              setShowBanner(false);
+                              localStorage.setItem('showBanner', 'false');
+                            }} />
+                          </div>
+                        )}
+
+                        <div className={`${(showBanner && banners.length > 0) ? 'pt-4' : 'pt-20'} w-full flex justify-center mb-4`}>
+                          <div className="search-section relative w-full max-w-2xl px-2">
+                            <input
+                              id="search-input"
+                              value={searchTerm}
+                              onChange={handleSearchChange}
+                              placeholder="Search rooms..."
+                              type="text"
+                              className="w-full py-2.5 pl-10 pr-4 rounded-full bg-transparent border border-blue-500/50 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium"
+                              style={{ color: 'var(--text-primary)' }}
+                            />
+                            <i className="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-500"></i>
+                          </div>
+                        </div>
                       </div>
                     )}
 
-                    <div className={`${(showBanner && banners.length > 0) ? 'pt-4' : 'pt-20'} w-full flex justify-center mb-4`}>
-                      <div className="search-section relative w-full max-w-2xl px-2">
-                        <input
-                          id="search-input"
-                          value={searchTerm}
-                          onChange={handleSearchChange}
-                          placeholder="Search rooms..."
-                          type="text"
-                          className="w-full py-2.5 pl-10 pr-4 rounded-full bg-transparent border border-blue-500/50 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium"
-                          style={{ color: 'var(--text-primary)' }}
-                        />
-                        <i className="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-500"></i>
-                      </div>
+                    <div className="w-full pt-1">
+                      <Navigation
+                        onExpandClick={() => setCategoryVisible(!categoryVisible)}
+                        onCreateRoomClick={handleCreateRoomClick}
+                        activeCategory={activeCategory}
+                        setActiveCategory={setActiveCategory}
+                        isExpanded={categoryVisible}
+                        onThemeClick={() => {
+                          const themes = ['space', 'dark', 'light'];
+                          const nextIndex = (themes.indexOf(theme) + 1) % themes.length;
+                          changeTheme(themes[nextIndex]);
+                        }}
+                        onChatClick={() => setActiveCategory('chat')}
+                        languages={languages}
+                        onCategoryClick={(language) => {
+                          setActiveCategory(language.toLowerCase());
+                        }}
+                      />
                     </div>
                   </div>
-                )}
-
-                <div className="w-full pt-1">
-                  <Navigation
-                    onExpandClick={() => setCategoryVisible(!categoryVisible)}
-                    onCreateRoomClick={handleCreateRoomClick}
-                    activeCategory={activeCategory}
-                    setActiveCategory={setActiveCategory}
-                    isExpanded={categoryVisible}
-                    onThemeClick={() => {
-                      const themes = ['space', 'dark', 'light'];
-                      const nextIndex = (themes.indexOf(theme) + 1) % themes.length;
-                      changeTheme(themes[nextIndex]);
-                    }}
-                    onChatClick={() => setActiveCategory('chat')}
-                    languages={languages}
-                    onCategoryClick={(language) => {
-                      setActiveCategory(language.toLowerCase());
-                    }}
-                  />
                 </div>
-              </div>
-            </div>
+              </>
+            ) : null}
           </div>
 
           <main className={`main-content-area flex-grow overflow-x-hidden ${(!isFullScreenApp) ? 'p-4' : ''}`}>
@@ -339,10 +339,10 @@ const Layout = () => {
               <Outlet />
             )}
           </main>
-          {pathname !== '/feed' && <Footer />}
+          {(pathname !== '/feed' && pathname !== '/youtube') && <Footer />}
         </div>
 
-        {pathname !== '/feed' && (
+        {(pathname !== '/feed' && pathname !== '/youtube') && (
           <BottomNavbar
             activeButton={pathname}
             onCreateClick={handleCreateRoomClick}

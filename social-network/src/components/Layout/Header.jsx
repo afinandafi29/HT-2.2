@@ -50,15 +50,18 @@ const Header = ({ onMenuClick, onProfileClick }) => {
             <i className="fas fa-bars text-2xl transition-all duration-300 group-hover:scale-110"></i>
           </button>
           <Link to="/" className='flex items-center gap-3 no-underline group'>
-            <div className="relative">
-              <img
-                src="/logo.png"
-                alt="HAPPYY TALK Logo"
-                className="h-10 w-12 object-contain transition-transform duration-500 group-hover:rotate-[360deg]"
-              />
-              <div className="absolute inset-0 bg-blue-500/20 blur-xl rounded-full -z-10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <h1 className="text-xl md:text-2xl font-black tracking-tighter" style={{ color: '#ffffff', transition: 'all 0.3s ease' }} onMouseEnter={(e) => e.target.style.color = '#ffffff'} onMouseLeave={(e) => e.target.style.color = '#ffffff'}>HAPPYY TALK</h1>
+            <div className="loader" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '40px' }}>
+              <svg id="wave" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 42.5 48" style={{ height: '30px', width: '25px', fill: '#ffffff', transition: 'fill 0.3s ease' }}>
+                <title>Audio Wave</title>
+                <path id="Line_1" data-name="Line 1" d="M0.91,15L0.78,15A1,1,0,0,0,0,16v6a1,1,0,1,0,2,0s0,0,0,0V16a1,1,0,0,0-1-1H0.91Z" style={{ animation: 'pulse 1s infinite', animationDelay: '0.15s' }} />
+                <path id="Line_2" data-name="Line 2" d="M6.91,9L6.78,9A1,1,0,0,0,6,10V28a1,1,0,1,0,2,0s0,0,0,0V10A1,1,0,0,0,7,9H6.91Z" style={{ animation: 'pulse 1s infinite', animationDelay: '0.3s' }} />
+                <path id="Line_3" data-name="Line 3" d="M12.91,0L12.78,0A1,1,0,0,0,12,1V37a1,1,0,1,0,2,0s0,0,0,0V1a1,1,0,0,0-1-1H12.91Z" style={{ animation: 'pulse 1s infinite', animationDelay: '0.45s' }} />
+                <path id="Line_4" data-name="Line 4" d="M18.91,10l-0.12,0A1,1,0,0,0,18,11V27a1,1,0,1,0,2,0s0,0,0,0V11a1,1,0,0,0-1-1H18.91Z" style={{ animation: 'pulse 1s infinite', animationDelay: '0.6s' }} />
+                <path id="Line_5" data-name="Line 5" d="M24.91,15l-0.12,0A1,1,0,0,0,24,16v6a1,1,0,0,0,2,0s0,0,0,0V16a1,1,0,0,0-1-1H24.91Z" style={{ animation: 'pulse 1s infinite', animationDelay: '0.75s' }} />
+                <path id="Line_6" data-name="Line 6" d="M30.91,10l-0.12,0A1,1,0,0,0,30,11V27a1,1,0,1,0,2,0s0,0,0,0V11a1,1,0,0,0-1-1H30.91Z" style={{ animation: 'pulse 1s infinite', animationDelay: '0.9s' }} />
+              </svg>
             </div>
-            <h1 className="text-xl md:text-2xl font-black tracking-tighter text-primary" style={{ color: '#ffffff', textShadow: '0 0 10px rgba(255, 255, 255, 0.5)' }}>HAPPYY TALK</h1>
           </Link>
         </div>
 
@@ -78,18 +81,12 @@ const Header = ({ onMenuClick, onProfileClick }) => {
                 </div>
               </div>
               <div className="relative">
-                {isLoading ? (
-                  <div className="w-10 h-10 md:w-11 md:h-11 rounded-full bg-blue-500/10 animate-pulse border-2 border-blue-500/30"></div>
-                ) : (
-                  <>
-                    <img
-                      alt={profileData?.username || "Profile"}
-                      className="w-10 h-10 md:w-11 md:h-11 rounded-full object-cover border-2 border-blue-500 shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-transform"
-                      src={profilePic || defaultAvatar}
-                    />
-                    <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-[#0f172a] rounded-full sm:hidden"></div>
-                  </>
-                )}
+                <img
+                  alt={profileData?.username || "Profile"}
+                  className="w-10 h-10 md:w-11 md:h-11 rounded-full object-cover border-2 border-blue-500 shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-transform"
+                  src={profilePic || defaultAvatar}
+                />
+                <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-[#0f172a] rounded-full sm:hidden"></div>
               </div>
             </div>
           ) : (

@@ -26,6 +26,7 @@ import OneToOne from './pages/OneToOne';
 import Music from './pages/Music';
 import LiveTV from './pages/LiveTV';
 import Admin from './pages/Admin';
+import AIChat from './pages/AiChat';
 import AIGitHubChat from './pages/AIGitHubChat';
 import Apps from './pages/Apps';
 import Learning from './pages/Learning';
@@ -92,6 +93,7 @@ function App() {
         <Route path="/terms" element={<TermsAndConditions />} />
         <Route path="/faq" element={<FAQ />} />
         <Route path="/admin" element={<Admin />} />
+        <Route path="/ai-chat" element={<AIChat />} />
 
         {/* Routes with Layout */}
         <Route element={<Layout />}>
@@ -140,8 +142,7 @@ function App() {
           {/* Live Route */}
           <Route path="/live" element={<LiveTV />} />
 
-          {/* AI Chat Route */}
-          <Route path="/ai-chat" element={<AIGitHubChat />} />
+
 
           {/* Apps Route */}
           <Route path="/apps" element={<Apps />} />

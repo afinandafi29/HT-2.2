@@ -1,268 +1,748 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Sun, Moon } from 'lucide-react';
+import { ArrowLeft, Check, Sun, Moon, Coffee } from 'lucide-react';
 
 const PremiumPage = () => {
-    const navigate = useNavigate();
-    const [period, setPeriod] = useState('1mo');
-    const [isDarkMode, setIsDarkMode] = useState(true);
+  const navigate = useNavigate();
+  const [activeDuration, setActiveDuration] = useState('1');
+  const [isDarkMode, setIsDarkMode] = useState(false); // Default to Light Mode
+  const [showServices, setShowServices] = useState(false);
 
-    const prices = {
-        'Starter': { '1mo': '$5', '3mo': '$12', '6mo': '$20', '1yr': '$40' },
-        'Plus': { '1mo': '$15', '3mo': '$40', '6mo': '$70', '1yr': '$120' },
-        'Pro': { '1mo': '$25', '3mo': '$65', '6mo': '$110', '1yr': '$180' },
-        'Ultimate': { '1mo': '$100', '3mo': '$250', '6mo': '$400', '1yr': '$600' }
-    };
+  // Pricing Data
+  const monthlyBase = { basic: 5, plus: 15, pro: 25, elite: 50, diamond: 75, titanium: 100 };
+  const totals = {
+    1: { basic: 5, plus: 15, pro: 25, elite: 50, diamond: 75, titanium: 100 },
+    3: { basic: 15, plus: 45, pro: 75, elite: 150, diamond: 225, titanium: 300 },
+    6: { basic: 30, plus: 90, pro: 150, elite: 300, diamond: 450, titanium: 600 },
+    12: { basic: 60, plus: 180, pro: 300, elite: 600, diamond: 900, titanium: 1200 }
+  };
 
-    const metas = {
-        'Starter': { '1mo': 'Base access', '3mo': 'Save 20%', '6mo': 'Save 33%', '1yr': 'Save 33%' },
-        'Plus': { '1mo': 'Core premium', '3mo': 'Save 11%', '6mo': 'Save 22%', '1yr': 'Save 33%' },
-        'Pro': { '1mo': 'Best value', '3mo': 'Save 13%', '6mo': 'Save 27%', '1yr': 'Save 40%' },
-        'Ultimate': { '1mo': 'Full access', '3mo': 'Save 17%', '6mo': 'Save 33%', '1yr': 'Save 50%' }
-    };
+  const plans = [
+    {
+      name: 'Free',
+      price: '$0',
+      desc: 'Basic access to start',
+      buttonClass: 'btn-free',
+      buttonText: 'Continue Free',
+      features: [
+        'Up to 2h/day Focus Rooms',
+        'Limited translations & corrections',
+        'Pin up to 4 partners',
+        'Ads included'
+      ]
+    },
+    {
+      name: 'Basic',
+      id: 'basic',
+      desc: 'Better for regular practice',
+      buttonClass: 'btn-basic',
+      buttonText: 'Select Basic',
+      features: [
+        'Up to 4h/day Focus Rooms',
+        'Ad-free experience',
+        'Unlimited message translations',
+        'Unlimited grammar corrections',
+        'Pin up to 15 partners',
+        'Unlimited saved words & phrases',
+        '60 encouragements / day'
+      ]
+    },
+    {
+      name: 'Plus',
+      id: 'plus',
+      desc: 'Enhanced learning tools',
+      buttonClass: 'btn-plus',
+      buttonText: 'Select Plus',
+      features: [
+        'Up to 8h/day Focus Rooms',
+        'Advanced partner search filters',
+        'Smart partner recommendations',
+        'Voice-to-text conversion',
+        'Save & organize learning notes',
+        '120 encouragements / day',
+        'Priority profile visibility'
+      ]
+    },
+    {
+      name: 'Pro',
+      id: 'pro',
+      popular: true,
+      desc: 'Full language mastery',
+      buttonClass: 'btn-pro',
+      buttonText: 'Select Pro',
+      features: [
+        'Unlimited Focus Room time',
+        'Pin up to 50 partners',
+        'Pronunciation feedback tools',
+        'Unlimited audio transcriptions',
+        'See who pinned / viewed you',
+        'Private Focus Rooms',
+        '200 encouragements / day'
+      ]
+    },
+    {
+      name: 'Elite',
+      id: 'elite',
+      desc: 'Premium global access',
+      buttonClass: 'btn-elite',
+      buttonText: 'Select Elite',
+      features: [
+        'All Pro features',
+        'Premium badge + custom ID',
+        'Early access to new features',
+        'Priority customer support',
+        '300 encouragements / day',
+        'Location-based discovery boost'
+      ]
+    },
+    {
+      name: 'Diamond',
+      id: 'diamond',
+      desc: 'Ultimate Power User',
+      buttonClass: 'btn-diamond',
+      buttonText: 'Select Diamond',
+      features: [
+        'Dedicated account manager',
+        'Unlimited everything',
+        '500 encouragements / day',
+        'Exclusive "Diamond" Profile Ring',
+        'Direct access to dev team feedback',
+        'Monthly 1:1 Coaching Session'
+      ]
+    },
+    {
+      name: 'Titanium',
+      id: 'titanium',
+      desc: 'Legendary Status',
+      buttonClass: 'btn-titanium',
+      buttonText: 'Select Titanium',
+      features: [
+        'Founder\'s Circle Access',
+        'Lifetime "Legend" Badge',
+        '1000 encouragements / day',
+        'Beta test new groundbreaking features',
+        'Personalized App Theme',
+        'VIP Event Invitations'
+      ]
+    },
+    {
+      name: 'Donation',
+      price: 'Support Us',
+      desc: 'Help the community grow',
+      buttonClass: 'btn-donate',
+      buttonText: 'Make Donation',
+      isDonation: true,
+      features: [
+        'Thank-you badge on profile',
+        'Community shoutout in newsletter',
+        'Help keep servers running',
+        'Contribute to student scholarships',
+        'Support future development',
+        'Developer love 💙'
+      ]
+    }
+  ];
 
-    const cycleText = {
-        '1mo': '/ 1 month',
-        '3mo': '/ 3 months',
-        '6mo': '/ 6 months',
-        '1yr': '/ 1 year'
-    };
+  const getPriceDisplay = (plan) => {
+    if (plan.name === 'Free') return plan.price;
+    if (plan.name === 'Donation') return plan.price;
 
-    // Load Buy Me A Coffee Widget ONLY for this page
-    useEffect(() => {
-        const script = document.createElement('script');
-        script.setAttribute('data-name', 'BMC-Widget');
-        script.setAttribute('data-cfasync', 'false');
-        script.src = 'https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js';
-        script.setAttribute('data-id', 'socialnetworking');
-        script.setAttribute('data-description', 'Support me on Buy me a coffee!');
-        script.setAttribute('data-message', '');
-        script.setAttribute('data-color', '#5F7FFF');
-        script.setAttribute('data-position', 'Right');
-        script.setAttribute('data-x_margin', '18');
-        script.setAttribute('data-y_margin', '18');
-        script.async = true;
+    // In this new logic, we display the Total Price for the selected duration
+    const duration = parseInt(activeDuration);
+    const total = totals[duration][plan.id];
 
-        document.head.appendChild(script);
+    // Calculate simple savings label if needed (optional, keeping logic simple)
+    // We compare monthly breakdown vs base monthly
+    const monthlyBreakdown = total / duration;
+    const basePrice = monthlyBase[plan.id];
+    const savings = Math.round((1 - (monthlyBreakdown / basePrice)) * 100);
 
-        return () => {
-            // Cleanup: remove the script and the injected widget button/iframe
-            if (document.head.contains(script)) {
-                document.head.removeChild(script);
-            }
-
-            // BMC widget usually creates an element with id 'bmc-wbtn' and possibly others
-            const widgetBtn = document.getElementById('bmc-wbtn');
-            if (widgetBtn) widgetBtn.remove();
-
-            const widgetContainer = document.querySelectorAll('iframe[id^="bmc"], div[id^="bmc"]');
-            widgetContainer.forEach(el => el.remove());
-        };
-    }, []);
-
-    // Toggle dark mode class on body for global consistency if needed, 
-    // but the styles below are fairly self-contained for the dark look the user provided.
-    // We will support a light mode toggle that flips the CSS mainly.
+    let durationLabel = '/ month';
+    if (duration === 3) durationLabel = '/ 3 months';
+    if (duration === 6) durationLabel = '/ 6 months';
+    if (duration === 12) durationLabel = '/ year';
 
     return (
-        <div className={`min-h-screen font-sans transition-colors duration-300 ${isDarkMode ? 'bg-[#020617] text-[#e5e7eb]' : 'bg-[#f8fafc] text-slate-900'}`} style={{
-            backgroundImage: isDarkMode ? 'radial-gradient(circle at top,#0f172a 0,#020617 50%,#000 100%)' : 'none'
-        }}>
+      <>
+        ${total} <small style={{ fontSize: '1rem', fontWeight: 400 }}>{durationLabel}</small>
+        {duration > 1 && savings > 0 && (
+          <span style={{ fontSize: '0.9rem', color: '#22c55e', marginLeft: '8px' }}>Save {savings}%</span>
+        )}
+      </>
+    );
+  };
 
-            {/* Navbar removed as we use global layout header now */}
+  // Removed getBilledText as requested
 
+  return (
+    <div className={`premium-page-container ${isDarkMode ? 'dark' : 'light'}`}>
+      <style>{`
+        .premium-page-container {
+          --bg: #0a0a0f;
+          --text: #ffffff;
+          --muted: #ffffff; /* User requested all text white in dark mode */
+          --card: rgba(30,30,45,0.8);
+          --border: rgba(255,255,255,0.15);
+          --accent: #00d4ff;
+          --green: #22c55e;
+          --purple: #a855f7;
+          --orange: #f97316;
+          --ig-gradient: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+          
+          background: var(--bg);
+          color: var(--text);
+          font-family: 'Poppins', sans-serif;
+          min-height: 100vh;
+          padding: 24px;
+          line-height: 1.6;
+          transition: background 0.4s, color 0.4s;
+          overflow-x: hidden;
+        }
 
-            {/* Main Content from User's HTML */}
-            <div className="w-full px-8 pb-8">
-                <header className="text-center mb-16">
-                    <h1 className="text-[48px] md:text-[64px] font-black tracking-tight mb-6 bg-gradient-to-r from-white via-blue-100 to-blue-200 bg-clip-text text-transparent drop-shadow-2xl">
-                        Unlock HAPPYY TALK Premium
-                    </h1>
-                </header>
+        .premium-page-container.light {
+          --bg: #f9fafb;
+          --text: #111827;
+          --muted: #6b7280;
+          --card: #ffffff;
+          --border: rgba(0,0,0,0.1);
+          --accent: #0ea5e9;
+          --green: #16a34a;
+          --purple: #7c3aed;
+          --orange: #ea580c;
+        }
 
-                <div className="flex flex-col items-center gap-4 mb-10">
-                    <div className={`inline-flex p-1.5 rounded-full border gap-1 ${isDarkMode ? 'bg-[#0f172a] border-[#94a3b8]/40' : 'bg-slate-100 border-slate-200'}`}>
-                        {['1mo', '3mo', '6mo', '1yr'].map((p) => (
-                            <div
-                                key={p}
-                                onClick={() => setPeriod(p)}
-                                className={`px-4 py-2 rounded-full cursor-pointer text-[13px] font-medium transition-all ${period === p
-                                    ? 'bg-[#38bdf8]/20 text-[#e5e7eb] font-semibold'
-                                    : (isDarkMode ? 'text-[#9ca3af] hover:text-[#e5e7eb]' : 'text-slate-500 hover:text-slate-900')
-                                    } ${period === p && !isDarkMode ? '!bg-white !text-blue-600 shadow-sm' : ''}`}
-                            >
-                                {p === '1mo' ? '1 Month' : p === '3mo' ? '3 Months' : p === '6mo' ? '6 Months' : '1 Year'}
-                            </div>
-                        ))}
-                    </div>
-                    <div className="text-[12px] text-[#bbf7d0] bg-green-900/20 px-3 py-1.5 rounded-full border border-green-600/50">
-                        Save up to 40% on longer plans
-                    </div>
-                </div>
+        .premium-page-container.dark .plan-card .price,
+        .premium-page-container.dark .plan-card .per-month,
+        .premium-page-container.dark .plan-card p,
+        .premium-page-container.dark .service-desc,
+        .premium-page-container.dark .plan-name,
+        .premium-page-container.dark .feature-item span {
+          color: #ffffff !important; /* Force white text in dark mode */
+        }
+        
+        /* Muted text in light mode should stay dark/gray */
+        .premium-page-container.light .per-month,
+        .premium-page-container.light p,
+        .premium-page-container.light .service-desc {
+           color: var(--muted) !important;
+        }
 
-                <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
-                    {/* Starter */}
-                    <PlanCard
-                        title="Starter"
-                        tag="Starter"
-                        desc="Perfect for casual language explorers"
-                        price={prices['Starter'][period]}
-                        cycle={cycleText[period]}
-                        meta={metas['Starter'][period]}
-                        isPopular={false}
-                        isDarkMode={isDarkMode}
-                        features={[
-                            { text: 'Limited text translations (daily cap)', type: 'warn' },
-                            { text: 'Basic chat (text + voice messages)', type: 'check' },
-                            { text: 'Join public chat rooms', type: 'check' },
-                            { text: '1 language only', type: 'neutral' },
-                            { text: 'Ads included', type: 'cross' }
-                        ]}
-                    />
+        .inner-container { max-width: 1400px; margin: 0 auto; position: relative; z-index: 1; }
 
-                    {/* Plus */}
-                    <PlanCard
-                        title="Plus"
-                        tag="Plus"
-                        desc="Better tools for regular practice"
-                        price={prices['Plus'][period]}
-                        cycle={cycleText[period]}
-                        meta={metas['Plus'][period]}
-                        isPopular={false}
-                        isDarkMode={isDarkMode}
-                        features={[
-                            { text: 'Unlimited text translations', type: 'check' },
-                            { text: 'Voice-to-text (limited)', type: 'warn' },
-                            { text: 'No ads', type: 'check' },
-                            { text: 'Basic advanced search', type: 'warn' },
-                            { text: 'Learn up to 2 languages', type: 'neutral' },
-                            { text: 'More daily contacts', type: 'neutral' }
-                        ]}
-                    />
+        header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 16px;
+          margin-bottom: 24px;
+        }
 
-                    {/* Pro */}
-                    <PlanCard
-                        title="Pro"
-                        tag="Pro ⭐ Most Popular"
-                        desc="Full language practice toolkit"
-                        price={prices['Pro'][period]}
-                        cycle={cycleText[period]}
-                        meta={metas['Pro'][period]}
-                        isPopular={true}
-                        isDarkMode={isDarkMode}
-                        features={[
-                            { text: 'Unlimited translations + voice-to-text', type: 'check' },
-                            { text: 'Full advanced search filters', type: 'check' },
-                            { text: 'Nearby user discovery', type: 'check' },
-                            { text: 'Learn up to 3 languages', type: 'check' },
-                            { text: 'View profile visitors', type: 'check' },
-                            { text: 'Pin Moments/posts', type: 'check' },
-                            { text: 'Higher profile visibility', type: 'check' }
-                        ]}
-                    />
+        .back-btn {
+          background: var(--card);
+          border: 1px solid var(--border);
+          color: var(--text);
+          padding: 8px 16px;
+          border-radius: 999px;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-weight: 500;
+        }
 
-                    {/* Ultimate */}
-                    <PlanCard
-                        title="Ultimate"
-                        tag="Ultimate"
-                        desc="Everything + creator tools"
-                        price={prices['Ultimate'][period]}
-                        cycle={cycleText[period]}
-                        meta={metas['Ultimate'][period]}
-                        isPopular={false}
-                        isDarkMode={isDarkMode}
-                        features={[
-                            { text: 'All Pro features', type: 'check' },
-                            { text: 'Maximum profile boost (9× visibility)', type: 'check' },
-                            { text: 'Unlimited daily contacts', type: 'check' },
-                            { text: 'Priority customer support', type: 'check' },
-                            { text: 'Early access to new features', type: 'check' },
-                            { text: 'Exclusive stickers & badges', type: 'check' },
-                            { text: 'Live rooms + host tools', type: 'check' }
-                        ]}
-                    />
-                </section>
+        h1 {
+          font-size: clamp(2rem, 8vw, 3rem);
+          font-weight: 800;
+          background: linear-gradient(90deg, var(--text), var(--accent));
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          margin: 0;
+        }
 
-                <div className={`mt-8 text-[12px] text-center p-5 rounded-xl border ${isDarkMode ? 'text-[#9ca3af] bg-[#0f172a]/60 border-[#1f2937]/80' : 'text-slate-500 bg-slate-100 border-slate-200'}`}>
-                    <strong>Features by tier:</strong> Starter gets basics, Plus adds core tools, Pro unlocks full language practice (most popular), Ultimate includes everything + creator perks. Prices increase with duration as requested.
-                </div>
+        .theme-toggle {
+          padding: 10px 20px;
+          background: var(--card);
+          border: 1px solid var(--border);
+          border-radius: 999px;
+          color: var(--text);
+          cursor: pointer;
+          font-size: 0.95rem;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          transition: all 0.3s;
+        }
 
-                {/* Buy Me A Coffee Section */}
-                <div className={`mt-16 text-center flex flex-col items-center gap-6 p-8 rounded-3xl border-2 border-dashed ${isDarkMode ? 'border-[#38bdf8]/30 bg-[#0f172a]/40' : 'border-blue-200 bg-blue-50/50'}`}>
-                    <h2 className="text-2xl font-bold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">Support Our Development</h2>
-                    <p className={`max-w-xl text-[14px] ${isDarkMode ? 'text-gray-400' : 'text-slate-600'}`}>
-                        If you love using HAPPYY TALK and want to support our mission to connect the world, consider buying us a coffee! Your support helps keep the servers running.
-                    </p>
-                    <div className="flex flex-wrap justify-center gap-6 items-center">
-                        <a href="https://www.buymeacoffee.com/socialnetworking" target="_blank" rel="noreferrer">
-                            <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style={{ height: '60px', width: '217px' }} className="hover:scale-105 transition-transform" />
-                        </a>
-                    </div>
-                </div>
-            </div>
+        .subtitle {
+          text-align: center;
+          color: var(--muted);
+          font-size: clamp(1rem, 4vw, 1.25rem);
+          margin-bottom: 32px;
+          max-width: 800px;
+          margin-left: auto;
+          margin-right: auto;
+        }
+
+        .duration-selector {
+          display: flex;
+          justify-content: center;
+          flex-wrap: wrap;
+          gap: 10px;
+          margin: 32px 0 48px;
+        }
+
+        .duration-btn {
+          padding: 12px 24px;
+          border: 1px solid var(--border);
+          border-radius: 999px;
+          background: var(--card);
+          color: var(--text);
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          font-size: 0.95rem;
+        }
+
+        .duration-btn.active {
+          background: var(--accent);
+          color: #ffffff; /* White text for active button */
+          border-color: var(--accent);
+          box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+          transform: scale(1.05);
+        }
+
+        .plans-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+          gap: 24px;
+          margin-bottom: 64px;
+        }
+
+        .plan-card {
+          padding: 32px;
+          background: var(--card);
+          border-radius: 24px;
+          border: 1px solid var(--border);
+          transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.35s; /* Removed border transition */
+          display: flex;
+          flex-direction: column;
+          position: relative;
+          overflow: hidden;
+          backdrop-filter: blur(10px);
+        }
+
+        .plan-card:hover { 
+          transform: translateY(-10px); 
+          /* border-color change removed as requested */
+          box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .plan-card.popular {
+          border-color: var(--accent);
+          border-width: 2px;
+        }
+        
+        /* Force white text for donation card in light mode */
+        .premium-page-container.light .plan-card.donation-card {
+            background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+            color: #ffffff;
+            border: none;
+        }
+        
+        .premium-page-container.light .plan-card.donation-card .plan-name,
+        .premium-page-container.light .plan-card.donation-card .price,
+        .premium-page-container.light .plan-card.donation-card p,
+        .premium-page-container.light .plan-card.donation-card .feature-item span {
+            color: #ffffff !important;
+        }
+        
+        .premium-page-container.light .plan-card.donation-card .tick-icon {
+            color: #ffffff;
+        }
+
+        .popular-badge {
+          position: absolute;
+          top: 0;
+          left: 50%;
+          transform: translateX(-50%);
+          background: var(--accent);
+          color: #000;
+          padding: 6px 20px;
+          border-radius: 0 0 12px 12px;
+          font-size: 0.85rem;
+          font-weight: 700;
+          text-transform: uppercase;
+        }
+
+        .plan-name { font-size: 1.75rem; font-weight: 700; margin-bottom: 16px; }
+
+        .price {
+          font-size: 2.75rem;
+          font-weight: 800;
+          line-height: 1;
+          margin-bottom: 8px;
+          display: flex;
+          align-items: baseline;
+          flex-wrap: wrap;
+        }
+
+        .per-month { font-size: 0.9rem; color: var(--muted); display: block; margin-bottom: 20px; }
+
+        .btn {
+          width: 100%;
+          padding: 16px;
+          margin: 24px 0;
+          border: none;
+          border-radius: 16px;
+          font-weight: 700;
+          font-size: 1.1rem;
+          cursor: pointer;
+          transition: all 0.3s;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .btn:hover { transform: scale(1.03); box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+
+        /* All buttons to have white text as requested */
+        .btn-free    { background: rgba(255,255,255,0.1); color: var(--text); border: 1px solid var(--border); }
+        .btn-basic   { background: var(--green); color: #ffffff; }
+        .btn-plus    { background: #059669; color: #ffffff; }
+        .btn-pro     { background: var(--accent); color: #ffffff; }
+        .btn-elite   { background: var(--purple); color: #ffffff; }
+        .btn-diamond { background: linear-gradient(135deg, #00d4ff, #005bea); color: #ffffff; }
+        .btn-titanium { background: linear-gradient(135deg, #2b5876, #4e4376); color: #ffffff; }
+        .btn-donate  { background: var(--orange); color: #ffffff; }
+        
+        .premium-page-container.light .btn-donate {
+            background: #ffffff;
+            color: #ea580c;
+        }
+
+        .features-list {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+          font-size: 1rem;
+          flex-grow: 1;
+        }
+
+        .feature-item {
+          display: flex;
+          align-items: flex-start;
+          gap: 12px;
+        }
+
+        .tick-icon {
+          color: var(--green);
+          flex-shrink: 0;
+          margin-top: 4px;
+        }
+
+        .section-divider {
+          font-size: 2rem;
+          text-align: center;
+          color: var(--accent);
+          margin: 80px 0 24px;
+          font-weight: 700;
+        }
+
+        .services-toggle-btn {
+          display: block;
+          margin: 0 auto 32px;
+          padding: 16px 40px;
+          background: var(--accent);
+          color: #000;
+          border: none;
+          border-radius: 999px;
+          font-size: 1.1rem;
+          font-weight: 700;
+          cursor: pointer;
+          transition: all 0.3s;
+          box-shadow: 0 0 30px rgba(0, 212, 255, 0.2);
+        }
+
+        .services-toggle-btn:hover { transform: translateY(-3px); box-shadow: 0 0 40px rgba(0, 212, 255, 0.4); }
+
+        .services-container { 
+          max-height: 0;
+          overflow: hidden;
+          transition: max-height 0.8s ease-in-out, opacity 0.5s;
+          opacity: 0;
+        }
+
+        .services-container.active { 
+          max-height: 4000px;
+          opacity: 1;
+        }
+
+        .services-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+          gap: 24px;
+          margin-bottom: 40px;
+        }
+
+        .service-card {
+          background: var(--card);
+          border: 1px solid var(--border);
+          border-radius: 20px;
+          padding: 32px;
+          transition: all 0.3s;
+        }
+
+        .service-card:hover { border-color: var(--accent); }
+
+        .service-name {
+          font-size: 1.5rem;
+          color: var(--accent);
+          margin-bottom: 16px;
+          font-weight: 700;
+        }
+
+        .service-desc { color: var(--muted); font-size: 0.95rem; }
+
+        .contact-info {
+          text-align: center;
+          margin-top: 48px;
+          padding: 40px;
+          background: var(--card);
+          border-radius: 24px;
+          border: 1px solid var(--border);
+        }
+
+        .contact-info a {
+          color: var(--accent);
+          text-decoration: none;
+          font-weight: 600;
+          font-size: 1.25rem;
+        }
+
+        .footer-note {
+          text-align: center;
+          color: var(--muted);
+          margin-top: 80px;
+          padding-bottom: 40px;
+          font-size: 1rem;
+        }
+
+        .bmc-section {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 20px;
+          margin: 60px 0;
+        }
+
+        .bmc-btn {
+          height: 60px;
+          transition: transform 0.2s;
+        }
+
+        .bmc-btn:hover { transform: scale(1.05); }
+
+        @media (max-width: 768px) {
+          .premium-page-container { padding: 16px; }
+          .duration-selector { gap: 8px; }
+          .duration-btn { padding: 10px 16px; font-size: 0.85rem; }
+          .plans-grid { grid-template-columns: 1fr; }
+          .plan-card { padding: 24px; }
+          .price { font-size: 2.25rem; }
+          h1 { margin-top: 20px; text-align: center; }
+          header { flex-direction: column-reverse; }
+        }
+      `}</style>
+
+      <div className="inner-container">
+        <header>
+          <button className="back-btn" onClick={() => navigate(-1)}>
+            <ArrowLeft size={20} /> Back
+          </button>
+          <h1>HappyTalk Premium</h1>
+          <button className="theme-toggle" onClick={() => setIsDarkMode(!isDarkMode)}>
+            {isDarkMode ? <><Sun size={20} /> Light Mode</> : <><Moon size={20} /> Dark Mode</>}
+          </button>
+        </header>
+
+        <p className="subtitle">Choose your plan — unlock powerful language learning & study abroad features designed to help you connect naturally.</p>
+
+        <div className="duration-selector">
+          {['1', '3', '6', '12'].map((d) => (
+            <button
+              key={d}
+              className={`duration-btn ${activeDuration === d ? 'active' : ''}`}
+              onClick={() => setActiveDuration(d)}
+            >
+              {d === '1' ? 'Monthly' : `${d} Months`}
+            </button>
+          ))}
         </div>
-    );
-};
 
-// Helper Component for the Cards to keep code clean
-const PlanCard = ({ title, tag, desc, price, cycle, meta, isPopular, features, isDarkMode }) => {
-    return (
-        <article className={`relative flex flex-col p-6 rounded-[20px] border transition-all duration-300 group ${isDarkMode
-            ? 'bg-[radial-gradient(circle_at_top,#020617_0,#020617_60%,#000_100%)] border-[#1f2937]/90 shadow-[0_16px_36px_rgba(15,23,42,0.9)] hover:border-[#38bdf8]/90 hover:shadow-[0_24px_50px_rgba(15,23,42,1)]'
-            : 'bg-white border-slate-200 shadow-xl hover:border-blue-400 hover:shadow-2xl'
-            } ${isPopular ? 'hover:-translate-y-2 transform' : 'hover:-translate-y-2 transform'}`}>
-
-            {/* Top Border Gradient */}
-            <div className={`absolute top-0 left-0 right-0 h-1 ${isPopular ? 'bg-[#facc15] shadow-[0_0_20px_rgba(250,204,21,0.4)]' : 'bg-gradient-to-r from-[#38bdf8] to-[#0ea5e9]'
-                }`} />
-
-            <div className={`text-[12px] px-2.5 py-1 rounded-full border mb-1.5 inline-block w-fit ${isPopular
-                ? 'border-[#facc15]/85 text-[#fef9c3] bg-[#facc15]/10'
-                : (isDarkMode ? 'border-[#94a3b8]/60 text-[#9ca3af]' : 'border-slate-300 text-slate-500 bg-slate-50')
-                } ${isPopular && !isDarkMode ? '!text-yellow-700 !bg-yellow-50' : ''}`}>
-                {tag}
-            </div>
-
-            <div className="text-[18px] font-bold mb-1">{title}</div>
-            <div className={`text-[13px] mb-3 ${isDarkMode ? 'text-[#9ca3af]' : 'text-slate-500'}`}>{desc}</div>
-
-            <div className="flex items-baseline gap-1.5 mt-1">
-                <span className="text-[24px] font-extrabold tracking-tight">{price}</span>
-                <span className={`text-[12px] ${isDarkMode ? 'text-[#9ca3af]' : 'text-slate-400'}`}>{cycle}</span>
-            </div>
-            <div className="text-[12px] text-[#a5b4fc] mt-1 mb-4">{meta}</div>
-
-            <div className={`my-4 border-b border-dashed ${isDarkMode ? 'border-[#374151]/90' : 'border-slate-200'}`} />
-
-            <ul className="list-none p-0 m-0 mb-3 space-y-2 text-[12px] flex-1">
-                {features.map((f, i) => (
-                    <li key={i} className={`flex items-start gap-2 ${isDarkMode ? 'text-[#9ca3af]' : 'text-slate-600'}`}>
-                        <div className={`w-[18px] h-[18px] rounded-full border flex items-center justify-center shrink-0 mt-px ${f.type === 'check'
-                            ? 'border-[#38bdf8]/90 text-[#7dd3fc]' + (isDarkMode ? '' : ' !border-blue-500 !text-blue-500')
-                            : f.type === 'warn'
-                                ? 'border-[#94a3b8]/80 text-[#94a3b8]/90' // muted
-                                : 'border-[#94a3b8]/80 text-[#94a3b8]/90' // neutral/cross
-                            }`}>
-                            {f.type === 'check' ? '✓' : f.type === 'warn' ? '⚠️' : f.type === 'cross' ? '✖' : '•'}
-                        </div>
-                        <span>{f.text}</span>
-                    </li>
+        <div className="plans-grid">
+          {plans.map((plan, idx) => (
+            <div key={idx} className={`plan-card ${plan.popular ? 'popular' : ''} ${plan.isDonation ? 'donation-card' : ''}`}>
+              {plan.popular && <div className="popular-badge">Most Popular</div>}
+              <div className="plan-name">{plan.name}</div>
+              <div className="price">{getPriceDisplay(plan)}</div>
+              {/* getBilledText removed */}
+              <p style={{ color: 'var(--muted)', marginBottom: '20px', fontSize: '0.95rem' }}>{plan.desc}</p>
+              <button className={`btn ${plan.buttonClass}`} onClick={() => {
+                if (plan.name === 'Free') {
+                  console.log('Continuing with Free plan');
+                } else if (plan.name === 'Donation') {
+                  const section = document.querySelector('.bmc-section');
+                  if (section) section.scrollIntoView({ behavior: 'smooth' });
+                } else {
+                  // All other paid plans (Basic, Plus, Pro, Elite, Diamond, Titanium)
+                  window.open('https://ko-fi.com/D1D41TKUCQ', '_blank');
+                }
+              }}>
+                {plan.buttonText}
+              </button>
+              <div className="features-list">
+                {plan.features.map((feature, i) => (
+                  <div key={i} className="feature-item">
+                    <Check className="tick-icon" size={18} />
+                    <span>{feature}</span>
+                  </div>
                 ))}
-            </ul>
-
-            <div className="mt-auto pt-3">
-                <button
-                    onClick={() => window.open('https://www.buymeacoffee.com/HAPPYY TALK', '_blank')}
-                    className={`w-full py-3 rounded-full border-none cursor-pointer text-[13px] font-semibold text-[#f9fafb] flex items-center justify-center gap-2 transition-all shadow-[0_12px_30px_rgba(37,99,235,0.5)] hover:scale-105 hover:shadow-[0_16px_40px_rgba(37,99,235,0.6)] ${isPopular
-                        ? 'bg-gradient-to-r from-[#facc15] to-[#eab308]'
-                        : 'bg-gradient-to-r from-[#0ea5e9] to-[#6366f1]'
-                        }`}>
-                    Get {title}
-                </button>
+              </div>
             </div>
+          ))}
+        </div>
 
-        </article>
-    );
+        <h2 className="section-divider">Our Premium Services</h2>
+        <button className="services-toggle-btn" onClick={() => setShowServices(!showServices)}>
+          {showServices ? 'Hide Premium Services' : 'Show Premium Services'}
+        </button>
+
+        <div className={`services-container ${showServices ? 'active' : ''}`}>
+          <div className="services-grid">
+            <div className="service-card">
+              <div className="service-name">Language Learning</div>
+              <div className="service-desc">
+                AI courses • Spoken English / IELTS / TOEFL / PTE • Vocabulary packs • Grammar crash courses • Pronunciation training • AI conversation bots • Daily challenges • Offline lessons • 1:1 tutoring • Group classes • Native sessions • Mock interviews • Kids & corporate programs
+              </div>
+            </div>
+            <div className="service-card">
+              <div className="service-name">Study Abroad Support</div>
+              <div className="service-desc">
+                Country & university selection • SOP / LOR writing • Application tracking • Exam coaching • Visa consultation • Document verification • Loan & scholarship help • Accommodation • Pre-departure orientation • Flight & insurance
+              </div>
+            </div>
+            <div className="service-card">
+              <div className="service-name">Visa & Legal Services</div>
+              <div className="service-desc">
+                Student visa consultation • Visa application assistance • Document verification • Interview preparation • Visual refusal handling • Embassy appointment booking • Translation & Apostille services
+              </div>
+            </div>
+            <div className="service-card">
+              <div className="service-name">Financial Products</div>
+              <div className="service-desc">
+                Education loan assistance • Loan comparison • Scholarship search & application • Financial planning • Forex services • International bank account setup • Blocked account services (Germany, etc.)
+              </div>
+            </div>
+            <div className="service-card">
+              <div className="service-name">Pre-Departure Services</div>
+              <div className="service-desc">
+                Cultural training • Language survival kits • Country-specific guides • Packing checklists • Accommodation guidance • Flight booking help • Travel insurance
+              </div>
+            </div>
+            <div className="service-card">
+              <div className="service-name">Accommodation & Living</div>
+              <div className="service-desc">
+                Student housing partnerships • Hostel / shared apartment booking • Temporary stay bookings • Roommate matching • City guides • Cost-of-living calculators
+              </div>
+            </div>
+            <div className="service-card">
+              <div className="service-name">Career & Job Support</div>
+              <div className="service-desc">
+                International CV / LinkedIn • Cover letter writing • Part-time job guidance • Interview preparation • Internship placement • Freelancing guidance • Post-study work visa guidance
+              </div>
+            </div>
+            <div className="service-card">
+              <div className="service-name">Community & Networking</div>
+              <div className="service-desc">
+                Paid student communities • Country-specific student groups • Alumni networks • Mentorship programs • Language practice communities • Mental health support groups • Weekly live Q&A
+              </div>
+            </div>
+            <div className="service-card">
+              <div className="service-name">Physical Products</div>
+              <div className="service-desc">
+                Language learning books • Flashcards • Study planners • Notebooks • Pronunciation guides • Branded merchandise (bags, bottles, hoodies) • Exam prep kits
+              </div>
+            </div>
+            <div className="service-card">
+              <div className="service-name">Digital Tools & SaaS</div>
+              <div className="service-desc">
+                Study planner app • Language progress tracker • AI SOP reviewer • University comparison tool • Visa checklist tool • Country eligibility checker • Scholarship finder
+              </div>
+            </div>
+            <div className="service-card">
+              <div className="service-name">Content & Media</div>
+              <div className="service-desc">
+                YouTube courses • Paid webinars • Workshops • E-books • Email courses • Premium newsletters • Sponsored podcasts
+              </div>
+            </div>
+            <div className="service-card">
+              <div className="service-name">Add-Ons & Upsells</div>
+              <div className="service-desc">
+                Priority support • Fast-track applications • 24/7 chat support • Personal mentor access • Country relocation concierge • Emergency support abroad
+              </div>
+            </div>
+          </div>
+
+          <div className="contact-info">
+            <p style={{ marginBottom: '10px', color: 'var(--muted)' }}>Have unique requirements or need customized support?</p>
+            Questions? Contact: <a href="mailto:happyytalk@gmail.com">happyytalk@gmail.com</a>
+          </div>
+        </div>
+
+        <div className="bmc-section">
+          <h2 className="section-divider" style={{ marginTop: 0 }}>Support Our Development</h2>
+
+          <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', justifyContent: 'center', marginBottom: '40px', alignItems: 'center' }}>
+            {/* Ko-fi Image Button */}
+            <a href='https://ko-fi.com/D1D41TKUCQ' target='_blank' rel="noreferrer">
+              <img height='36' style={{ border: '0px', height: '36px' }} src='https://storage.ko-fi.com/cdn/kofi6.png?v=6' border='0' alt='Buy Me a Coffee at ko-fi.com' />
+            </a>
+
+            {/* Existing BMC Button */}
+            <a href="https://www.buymeacoffee.com/happyytalk" target="_blank" rel="noreferrer">
+              <img
+                src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png"
+                alt="Buy Me A Coffee"
+                className="bmc-btn"
+                style={{ height: '36px', width: 'auto' }}
+              />
+            </a>
+          </div>
+
+          <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+            <p style={{ marginBottom: '10px', color: 'var(--muted)' }}>Scan to Support</p>
+            <img src="/kofi_qr.png" alt="Ko-fi QR Code" style={{ width: '200px', borderRadius: '12px' }} />
+          </div>
+
+          <div style={{ width: '100%', maxWidth: '600px', margin: '0 auto' }}>
+            <iframe
+              id='kofiframe'
+              src='https://ko-fi.com/happyytalk/?hidefeed=true&widget=true&embed=true&preview=true'
+              style={{ border: 'none', width: '100%', padding: '4px', background: '#f9f9f9', borderRadius: '12px' }}
+              height='712'
+              title='happyytalk'
+            ></iframe>
+          </div>
+
+          <p style={{ color: 'var(--muted)', marginTop: '20px' }}>Your support helps us keep HappyTalk free and evolving for everyone!</p>
+        </div>
+
+        <p className="footer-note">
+          Cancel anytime • Longer plans = bigger savings<br />
+          <strong>Learn naturally. Connect globally. — HappyTalk 💙</strong>
+        </p>
+      </div>
+    </div>
+  );
 };
 
 export default PremiumPage;

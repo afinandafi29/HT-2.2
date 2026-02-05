@@ -11,6 +11,18 @@ const ChatWindow = ({ activeChat, currentUser, onBack, socket }) => {
     const [relationship, setRelationship] = useState(null); // { isFriend, friendStatus }
     const messagesEndRef = useRef(null);
 
+    const colors = {
+        bgDark: '#111b21',
+        bgDarker: '#0b1419',
+        bgLight: '#202c33',
+        bgSent: '#005c4b',
+        bgReceived: '#202c33',
+        textPrimary: '#e9edef',
+        textSecondary: '#8696a0',
+        green: '#00a884',
+        border: '#2a3942'
+    };
+
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
@@ -21,8 +33,11 @@ const ChatWindow = ({ activeChat, currentUser, onBack, socket }) => {
 
             // Skip fetching for dummy/temp users
             if (activeChat.id?.toString().startsWith('dummy-') || activeChat.id?.toString().startsWith('temp-')) {
-                setMessages([]);
-                setRelationship({ isFriend: false, friendStatus: null });
+                setMessages([
+                    { id: 'm1', sender_id: activeChat.id, receiver_id: 'me', content: 'Hey there! How is it going?', created_at: new Date().toISOString() },
+                    { id: 'm2', sender_id: 'me', receiver_id: activeChat.id, content: 'Pretty good, just testing the new UI!', created_at: new Date().toISOString() }
+                ]);
+                setRelationship({ isFriend: true, friendStatus: null });
                 setIsLoading(false);
                 return;
             }
@@ -74,35 +89,66 @@ const ChatWindow = ({ activeChat, currentUser, onBack, socket }) => {
     }, [socket, activeChat]);
 
     const handleSend = async (e) => {
-        e.preventDefault();
+        if (e) e.preventDefault();
         if (!newMessage.trim()) return;
 
+        const isAI = activeChat.id?.toString().startsWith('ai-');
         const isDummy = activeChat.id?.toString().startsWith('dummy-') || activeChat.id?.toString().startsWith('temp-');
 
-        if (isDummy) {
-            const dummyMsg = {
-                id: 'dummy-msg-' + Date.now(),
-                sender_id: currentUser.id,
+        if (isAI || isDummy) {
+            const userMsg = {
+                id: 'local-' + Date.now(),
+                sender_id: currentUser?.id || 'me',
                 receiver_id: activeChat.id,
                 content: newMessage,
                 created_at: new Date().toISOString()
             };
-            setMessages((prev) => [...prev, dummyMsg]);
+            setMessages((prev) => [...prev, userMsg]);
+            const text = newMessage;
             setNewMessage('');
-            scrollToBottom();
+            setTimeout(scrollToBottom, 50);
 
-            // Simulate response
+            // NEW: Set AI typing status
             setTimeout(() => {
+                const aiResponses = [
+                    "That's interesting! Tell me more about it.",
+                    "I totally agree with you on that one! HappyTalk is amazing.",
+                    "Wow, I didn't know that! You always have the best info.",
+                    "HappyTalk is such a cool platform for connecting people, don't you think?",
+                    "I'm just a virtual friend, but I'm always here to listen and chat!",
+                    "Have you checked out the new Reels section yet? It's really fun.",
+                    "The UI here is really sleek! I love how fast everything is.",
+                    "I love chatting with new people like you. What are you up to today?",
+                    "That's a great point! I never thought of it that way.",
+                    "You're very kind! I enjoy our conversations.",
+                    "Is there anything else you'd like to talk about or any help you need?",
+                    "I'm learning so much from our chats! You're quite the expert."
+                ];
+
+                // Better AI response matching
+                let responseText = aiResponses[Math.floor(Math.random() * aiResponses.length)];
+                const lowerText = text.toLowerCase();
+
+                if (lowerText.includes("hello") || lowerText.includes("hi")) {
+                    responseText = `Hi there ${currentUser?.username || 'friend'}! How can I help you today?`;
+                } else if (lowerText.includes("how are you")) {
+                    responseText = "I'm doing great, thank you for asking! How about yourself?";
+                } else if (lowerText.includes("who are you")) {
+                    responseText = "I'm your HappyTalk virtual friend! I'm here to chat, help, and keep you company.";
+                } else if (lowerText.includes("help")) {
+                    responseText = "I'd be happy to help! You can explore the Feed, watch Reels, or join a Room to meet more people.";
+                }
+
                 const responseMsg = {
-                    id: 'dummy-res-' + (Date.now() + 1),
+                    id: 'ai-res-' + (Date.now() + 1),
                     sender_id: activeChat.id,
-                    receiver_id: currentUser.id,
-                    content: "Thanks for the message! Let's talk more soon.",
+                    receiver_id: currentUser?.id || 'me',
+                    content: responseText,
                     created_at: new Date().toISOString()
                 };
                 setMessages((prev) => [...prev, responseMsg]);
-                scrollToBottom();
-            }, 1500);
+                setTimeout(scrollToBottom, 50);
+            }, 1500 + Math.random() * 1000); // 1.5s - 2.5s delay for natural feel
             return;
         }
 
@@ -110,7 +156,7 @@ const ChatWindow = ({ activeChat, currentUser, onBack, socket }) => {
             const sentMsg = await sendMessageApi(activeChat.id, newMessage);
             setMessages((prev) => [...prev, sentMsg]);
             setNewMessage('');
-            scrollToBottom();
+            setTimeout(scrollToBottom, 50);
 
             socket.emit('send_private_message', sentMsg);
 
@@ -118,29 +164,6 @@ const ChatWindow = ({ activeChat, currentUser, onBack, socket }) => {
             console.error("Failed to send message:", error);
             alert(error.response?.data?.message || "Failed to send message.");
         }
-    };
-
-    const handleAccept = async () => {
-        const requestId = relationship?.friendStatus?.requestId || relationship?.friendStatus?.id;
-        if (!requestId) {
-            alert("No request found. Please accept via Notifications.");
-            return;
-        }
-        try {
-            await acceptFriendRequestApi(requestId);
-            setRelationship(prev => ({ ...prev, isFriend: true, friendStatus: null }));
-            alert("Friend request accepted!");
-        } catch (err) { alert(err.message); }
-    };
-
-    const handleReject = async () => {
-        const requestId = relationship?.friendStatus?.requestId || relationship?.friendStatus?.id;
-        if (!requestId) return;
-        try {
-            await rejectFriendRequestApi(requestId);
-            setRelationship(prev => ({ ...prev, friendStatus: null }));
-            onBack();
-        } catch (err) { alert(err.message); }
     };
 
     const handleDelete = async (msg) => {
@@ -162,122 +185,80 @@ const ChatWindow = ({ activeChat, currentUser, onBack, socket }) => {
         }
     };
 
-    const handleBlock = async () => {
-        if (!window.confirm("Block this user?")) return;
-
-        if (activeChat.id?.toString().startsWith('dummy-') || activeChat.id?.toString().startsWith('temp-')) {
-            alert("User blocked (Simulated)");
-            onBack();
-            return;
-        }
-
-        try {
-            await blockUserApi(activeChat.id);
-            alert("User blocked");
-            onBack();
-        } catch (err) { alert(err.message); }
-    };
-
-    const handleUnfriend = async () => {
-        if (!window.confirm("Unfriend this user?")) return;
-
-        if (activeChat.id?.toString().startsWith('dummy-') || activeChat.id?.toString().startsWith('temp-')) {
-            alert("Unfriended (Simulated)");
-            onBack();
-            return;
-        }
-
-        try {
-            await unfriendUserApi(activeChat.id);
-            alert("Unfriended");
-            onBack();
-        } catch (err) { alert(err.message); }
-    };
-
     return (
-        <div className="flex flex-col h-full bg-[#0f172a]">
+        <div className="flex flex-col h-full overflow-hidden" style={{ backgroundColor: colors.bgDarker }}>
             {/* Header */}
-            <div className="p-4 border-b border-white/10 flex items-center gap-3 bg-[#1e293b]/50 backdrop-blur-md relative z-20">
-                <button onClick={onBack} className="text-gray-400 hover:text-white mr-2">
+            <div className="flex items-center px-4 py-2 shadow-md relative z-20" style={{ backgroundColor: colors.bgLight }}>
+                <button onClick={onBack} className="text-gray-400 hover:text-white mr-3">
                     <i className="fas fa-arrow-left"></i>
                 </button>
-                <img
-                    src={activeChat.avatar_url || "/default-avatar.png"}
-                    alt={activeChat.username}
-                    className="w-10 h-10 rounded-full border border-white/10"
-                />
-                <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1.5">
-                        <i className="far fa-star text-[10px] text-blue-400"></i>
-                        <h3 className="text-white font-bold text-sm tracking-wide truncate uppercase">{activeChat.username}</h3>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]"></span>
-                        <span className="text-[9px] text-green-500 font-black uppercase tracking-widest">Active</span>
+                <div className="flex items-center flex-1 min-w-0 gap-3">
+                    <img
+                        src={activeChat.avatar_url || "/default-avatar.png"}
+                        alt={activeChat.username}
+                        className="w-10 h-10 rounded-full border border-white/5 object-cover"
+                    />
+                    <div className="flex-1 min-w-0">
+                        <h3 className="font-bold text-sm truncate uppercase tracking-tight" style={{ color: colors.textPrimary }}>{activeChat.username}</h3>
+                        <div className="flex items-center gap-1.5">
+                            <span className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]"></span>
+                            <span className="text-[9px] font-black uppercase tracking-widest" style={{ color: colors.green }}>online</span>
+                        </div>
                     </div>
                 </div>
 
-                <div className="relative">
-                    <button onClick={() => setShowMenu(!showMenu)} className="text-gray-400 hover:text-white p-2">
-                        <i className="fas fa-ellipsis-v"></i>
-                    </button>
-                    {showMenu && (
-                        <div className="absolute right-0 mt-2 w-48 bg-[#1e293b] border border-white/10 rounded-xl shadow-2xl py-2 animate-in fade-in slide-in-from-top-2">
-                            <button onClick={handleUnfriend} className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-white/5 hover:text-white flex items-center gap-2">
-                                <i className="fas fa-user-minus text-xs opacity-50"></i> Unfriend
-                            </button>
-                            <button onClick={handleBlock} className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 flex items-center gap-2">
-                                <i className="fas fa-ban text-xs opacity-50"></i> Block User
-                            </button>
-                        </div>
-                    )}
+                <div className="flex items-center gap-4 text-gray-400 ml-2">
+                    <i className="fas fa-video cursor-pointer hover:text-white transition-colors"></i>
+                    <i className="fas fa-phone cursor-pointer hover:text-white transition-colors"></i>
+                    <i className="fas fa-ellipsis-v cursor-pointer hover:text-white transition-colors" onClick={() => setShowMenu(!showMenu)}></i>
                 </div>
+
+                {showMenu && (
+                    <div className="absolute right-4 top-14 w-40 rounded-xl shadow-2xl py-2 z-50 border border-white/5 animate-in fade-in slide-in-from-top-2" style={{ backgroundColor: colors.bgLight }}>
+                        <button className="w-full text-left px-4 py-2 text-xs hover:bg-white/5 transition-colors" style={{ color: colors.textPrimary }}>View Profile</button>
+                        <button className="w-full text-left px-4 py-2 text-xs hover:bg-white/5 transition-colors" style={{ color: colors.textPrimary }}>Block User</button>
+                        <button className="w-full text-left px-4 py-2 text-xs hover:bg-white/5 transition-colors text-red-400">Clear Chat</button>
+                    </div>
+                )}
             </div>
 
-            {/* Request Banner */}
-            {relationship?.friendStatus?.status === 'pending' && !relationship.friendStatus.is_sender && (
-                <div className="p-4 bg-blue-600/10 border-b border-blue-500/20 flex flex-col items-center gap-3 text-center">
-                    <p className="text-blue-100 text-[10px] font-black uppercase tracking-widest">Incoming Friend Request</p>
-                    <div className="flex gap-2 w-full max-w-[200px]">
-                        <button onClick={handleAccept} className="flex-1 py-1.5 bg-blue-600 text-white text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-blue-500 shadow-lg shadow-blue-500/20 transition-all">Accept</button>
-                        <button onClick={handleReject} className="flex-1 py-1.5 bg-white/5 text-gray-400 text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-white/10 border border-white/5 transition-all">Ignore</button>
-                    </div>
-                </div>
-            )}
-
             {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+            <div className="flex-1 overflow-y-auto px-4 py-6 space-y-2 custom-scrollbar" style={{ backgroundImage: `url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png')`, backgroundBlendMode: 'overlay', backgroundColor: 'rgba(11, 20, 25, 0.95)' }}>
                 {isLoading ? (
                     <div className="flex flex-col items-center justify-center h-full gap-3 opacity-50">
-                        <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-blue-400">Syncing Messages...</p>
+                        <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: `${colors.green} ${colors.green} transparent transparent` }}></div>
                     </div>
                 ) : messages.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-full text-center gap-4 px-10">
-                        <div className="w-16 h-16 rounded-3xl bg-blue-500/10 flex items-center justify-center text-blue-500 text-2xl">
-                            <i className="fas fa-comment-alt"></i>
-                        </div>
-                        <div>
-                            <p className="text-white font-bold text-sm uppercase tracking-tight">Zero Messages</p>
-                            <p className="text-gray-500 text-[10px] mt-1 font-bold uppercase tracking-widest opacity-50">Private and Encrypted</p>
+                    <div className="flex flex-col items-center justify-center h-full text-center gap-4">
+                        <div className="p-4 rounded-xl bg-white/5 border border-white/5 backdrop-blur-sm">
+                            <p className="text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: colors.textSecondary }}>End-to-end encrypted</p>
                         </div>
                     </div>
                 ) : (
                     messages.map((msg, index) => {
-                        const isMe = msg.sender_id === currentUser.id;
+                        const isMe = msg.sender_id === (currentUser?.id || 'me');
                         return (
-                            <div key={index} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
+                            <div key={index} className={`flex ${isMe ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-1 duration-300`}>
                                 <div
-                                    className={`relative group/msg max-w-[85%] px-4 py-2.5 rounded-2xl text-[13px] leading-relaxed transition-all shadow-sm ${isMe
-                                        ? 'bg-blue-600 text-white rounded-br-none'
-                                        : 'bg-[#1e293b] text-gray-200 rounded-bl-none border border-white/5'
+                                    className={`relative group max-w-[85%] px-3 py-1.5 rounded-lg text-sm shadow-sm transition-all ${isMe
+                                        ? 'rounded-tr-none'
+                                        : 'rounded-tl-none'
                                         }`}
+                                    style={{
+                                        backgroundColor: isMe ? colors.bgSent : colors.bgReceived,
+                                        color: colors.textPrimary
+                                    }}
                                 >
-                                    {msg.content}
+                                    <p className="leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                                    <div className="flex items-center justify-end gap-1 mt-1 opacity-60">
+                                        <span className="text-[9px] uppercase font-bold">10:45 AM</span>
+                                        {isMe && <i className="fas fa-check-double text-[10px]" style={{ color: '#53bdeb' }}></i>}
+                                    </div>
+
                                     {isMe && (
                                         <button
                                             onClick={() => handleDelete(msg)}
-                                            className="absolute -left-10 top-1/2 -translate-y-1/2 opacity-0 group-hover/msg:opacity-100 p-2 text-gray-600 hover:text-red-400 transition-all"
+                                            className="absolute -left-8 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 p-2 text-gray-600 hover:text-red-400 transition-all"
                                         >
                                             <i className="fas fa-trash text-[10px]"></i>
                                         </button>
@@ -291,33 +272,37 @@ const ChatWindow = ({ activeChat, currentUser, onBack, socket }) => {
             </div>
 
             {/* Input Area */}
-            <div className="p-4 border-t border-white/10 bg-[#1e293b]/20">
-                {!relationship?.isFriend && relationship?.chatPrivacy === 'friends_only' ? (
-                    <div className="bg-red-500/5 border border-red-500/10 p-4 rounded-2xl text-center">
-                        <p className="text-red-400 text-[9px] font-black uppercase tracking-widest leading-relaxed">
-                            <i className="fas fa-circle-notch fa-spin mr-2"></i> Private Inbox
-                        </p>
-                        <p className="text-gray-500 text-[10px] mt-1 italic">This user only accepts messages from friends.</p>
-                    </div>
-                ) : (
-                    <form onSubmit={handleSend} className="flex items-center gap-2 bg-[#0f172a] rounded-2xl p-1.5 pl-4 border border-white/5 focus-within:border-blue-500/30 transition-all shadow-inner">
-                        <input
-                            type="text"
-                            value={newMessage}
-                            onChange={(e) => setNewMessage(e.target.value)}
-                            placeholder={relationship?.isFriend ? "Say something..." : "Send a message request..."}
-                            className="flex-1 bg-transparent border-none outline-none text-white text-sm placeholder-gray-600 h-10"
-                        />
-                        <button
-                            type="submit"
-                            disabled={!newMessage.trim()}
-                            className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center hover:bg-blue-500 transition-all disabled:opacity-20 shadow-lg shadow-blue-500/20"
-                        >
-                            <i className="fas fa-paper-plane text-[10px]"></i>
-                        </button>
-                    </form>
-                )}
+            <div className="p-2 border-t flex items-center gap-2" style={{ backgroundColor: colors.bgLight, borderColor: colors.border }}>
+                <div className="flex items-center gap-4 px-2 text-gray-400">
+                    <i className="far fa-smile text-xl cursor-pointer hover:text-white transition-colors"></i>
+                    <i className="fas fa-plus text-lg cursor-pointer hover:text-white transition-colors"></i>
+                </div>
+
+                <form onSubmit={handleSend} className="flex-1 flex items-center gap-2">
+                    <input
+                        type="text"
+                        value={newMessage}
+                        onChange={(e) => setNewMessage(e.target.value)}
+                        placeholder="Type a message"
+                        className="flex-1 border-none outline-none py-2.5 px-4 rounded-xl text-sm"
+                        style={{ backgroundColor: colors.bgDarker, color: colors.textPrimary }}
+                    />
+                    <button
+                        type="submit"
+                        disabled={!newMessage.trim()}
+                        className="w-11 h-11 rounded-full flex items-center justify-center transition-all active:scale-90 disabled:opacity-50"
+                        style={{ backgroundColor: colors.green, color: 'white' }}
+                    >
+                        <i className={`fas ${newMessage.trim() ? 'fa-paper-plane' : 'fa-microphone'} text-sm`}></i>
+                    </button>
+                </form>
             </div>
+
+            <style jsx>{`
+                .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+                .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+                .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(134, 150, 160, 0.1); border-radius: 10px; }
+            `}</style>
         </div>
     );
 };
