@@ -26,7 +26,7 @@ import OneToOne from './pages/OneToOne';
 import Music from './pages/Music';
 import LiveTV from './pages/LiveTV';
 import Admin from './pages/Admin';
-import AIChat from './pages/AiChat';
+import AIChat from './pages/AIChat';
 import AIGitHubChat from './pages/AIGitHubChat';
 import Apps from './pages/Apps';
 import Learning from './pages/Learning';
