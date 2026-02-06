@@ -5,10 +5,10 @@ const getYTKey = () => {
     const saved = localStorage.getItem('adminApiKeys');
     if (saved) {
       const keys = JSON.parse(saved);
-      return keys.youtube || import.meta.env.VITE_YT_API_KEY || 'AIzaSyAsQ7E02xCW3qAdxwHK2PLj-pppMfm9fBw';
+      return keys.youtube || import.meta.env.VITE_YT_API_KEY || 'AIzaSyDtLX6171RySOtqd-U2Pgcjy_9o2rWDNrc';
     }
   } catch (e) { }
-  return import.meta.env.VITE_YT_API_KEY || 'AIzaSyAsQ7E02xCW3qAdxwHK2PLj-pppMfm9fBw';
+  return import.meta.env.VITE_YT_API_KEY || 'AIzaSyDtLX6171RySOtqd-U2Pgcjy_9o2rWDNrc';
 };
 
 const API_KEY = getYTKey();

@@ -3,7 +3,6 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import Sidebar from './Sidebar';
-import RightSidebar from './RightSidebar';
 import ChatPanel from './ChatPanel';
 import Header from './Header';
 import BottomNavbar from './BottomNavbar';
@@ -25,7 +24,6 @@ export const LayoutContext = React.createContext({});
 const Layout = () => {
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 1024 && window.location.pathname !== '/' && window.location.pathname !== '/jitsi' && window.location.pathname !== '/premium');
-  const [rightSidebarOpen, setRightSidebarOpen] = useState(false);
   const { theme, changeTheme } = useTheme();
   const [animationStopped, setAnimationStopped] = useState(false);
   const [customColor, setCustomColor] = useState(null);
@@ -87,7 +85,7 @@ const Layout = () => {
         }));
         setChatPanelOpen(true);
       } else {
-        setRightSidebarOpen(true);
+        // Removed setRightSidebarOpen(true);
       }
     }
   };
@@ -126,20 +124,14 @@ const Layout = () => {
   // ... (existing code)
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
-  const toggleRightSidebar = () => {
-    setRightSidebarOpen(!rightSidebarOpen);
-    if (!rightSidebarOpen) setChatPanelOpen(false); // Close chat if opening profile
-  };
   const toggleChatPanel = () => {
     setChatPanelOpen(!chatPanelOpen);
-    if (!chatPanelOpen) setRightSidebarOpen(false); // Close profile if opening chat
   };
 
   // Listen for global Open Chat events
   useEffect(() => {
     const handleOpenChat = () => {
       setChatPanelOpen(true);
-      setRightSidebarOpen(false); // Ensure profile is closed
     };
     window.addEventListener('OPEN_CHAT_PANEL', handleOpenChat);
 
@@ -198,7 +190,8 @@ const Layout = () => {
     openProfile: (user, context = {}) => {
       setProfileModalUser(user);
       setProfileModalContext(context);
-    }
+    },
+    toggleSidebar: () => setSidebarOpen(!sidebarOpen)
   };
 
   const isYouTubePage = pathname === '/youtube';
@@ -253,11 +246,7 @@ const Layout = () => {
           onClick={toggleSidebar}
         ></div>
 
-        <RightSidebar
-          isOpen={rightSidebarOpen}
-          onClose={toggleRightSidebar}
-          onCreateRoomClick={handleCreateRoomClick}
-        />
+
 
         <ChatPanel
           isOpen={chatPanelOpen}
@@ -270,7 +259,6 @@ const Layout = () => {
               <>
                 <Header
                   onMenuClick={toggleSidebar}
-                  onProfileClick={toggleRightSidebar}
                   user={currentUser}
                 />
 

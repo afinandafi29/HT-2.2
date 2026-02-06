@@ -558,7 +558,7 @@ const PremiumPage = () => {
           <button className="back-btn" onClick={() => navigate(-1)}>
             <ArrowLeft size={20} /> Back
           </button>
-          <h1>HappyTalk Premium</h1>
+          <h1>HAPPYY TALK Premium</h1>
           <button className="theme-toggle" onClick={() => setIsDarkMode(!isDarkMode)}>
             {isDarkMode ? <><Sun size={20} /> Light Mode</> : <><Moon size={20} /> Dark Mode</>}
           </button>
@@ -738,7 +738,7 @@ const PremiumPage = () => {
 
         <p className="footer-note">
           Cancel anytime • Longer plans = bigger savings<br />
-          <strong>Learn naturally. Connect globally. — HappyTalk 💙</strong>
+          <strong>Learn naturally. Connect globally. — HAPPYY TALK 💙</strong>
         </p>
       </div>
     </div>

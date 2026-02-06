@@ -139,6 +139,7 @@ const Sidebar = ({
     onToggleAnimation,
     animationStopped,
     currentPath,
+    user
 }) => {
     const navigate = useNavigate();
     const { logout } = useAuth();
@@ -263,6 +264,11 @@ const Sidebar = ({
                                 <i className="fas fa-graduation-cap"></i> <span>Learning</span>
                             </button>
                         </li>
+                        <li>
+                            <button onClick={handleProfileClick} className={currentPath === '/profile' ? 'active' : ''}>
+                                <i className="fas fa-user"></i> <span>Profile</span>
+                            </button>
+                        </li>
                     </ul>
                 </nav>
 
@@ -356,6 +362,7 @@ const Sidebar = ({
                                 )}
                             </button>
                         </li>
+                        <PWAInstallButton />
                     </ul>
                 </nav>
 
@@ -372,12 +379,13 @@ const Sidebar = ({
                                 <i className="fas fa-fingerprint"></i> <span>Privacy</span>
                             </button>
                         </li>
-                        <PWAInstallButton />
-                        <li>
-                            <button onClick={handleLogout} className="logout-btn-new">
-                                <i className="fas fa-power-off"></i> <span>Logout</span>
-                            </button>
-                        </li>
+                        {user && (
+                            <li>
+                                <button onClick={handleLogout} className="logout-btn-new">
+                                    <i className="fas fa-power-off"></i> <span>Logout</span>
+                                </button>
+                            </li>
+                        )}
                     </ul>
                 </nav>
             </aside>

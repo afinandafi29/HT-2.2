@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
 import { newsApi } from '../api/newsApi';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Home, Search, PlusSquare, User, RefreshCw, Camera, Heart, MessageCircle, Send, Bookmark, MoreHorizontal, Moon, Sun, Menu, X, Compass, Radio, Youtube } from 'lucide-react';
+import { Home, Search, PlusSquare, User, RefreshCw, Camera, Heart, MessageCircle, Send, Bookmark, MoreHorizontal, Moon, Sun, Menu, X, Compass, Radio, Youtube, ChevronLeft } from 'lucide-react';
 import YouTubeUI from '../components/YouTubeUI';
 import '../styles/feed-page.css';
 
@@ -91,7 +91,7 @@ const FeedSidebarInsta = ({ activeView, setActiveView, onGoHome, onOpenProfile, 
             )}
             <nav className={`navbar-insta ${isCollapsed ? 'collapsed' : ''} ${isOpen ? 'active' : ''}`}>
                 <div className="instagram-text-logo" onClick={onGoHome} style={{ cursor: 'pointer', marginBottom: '30px' }}>
-                    <span style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '24px', color: 'var(--ig-font)' }}>{isCollapsed ? 'HT.' : 'HappyTalk.'}</span>
+                    <span style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '24px', color: '#3b82f6' }}>{isCollapsed ? 'HT.' : 'HAPPYY TALK.'}</span>
                 </div>
                 <div className={`sub-section ${activeView === 'home' ? 'clicked' : ''}`} onClick={() => { setActiveView('home'); setIsOpen(false); }}>
                     <Home size={24} color="var(--ig-font)" />
@@ -157,7 +157,7 @@ const FeedMobileHeader = ({ navigate, isDarkMode, toggleTheme, onMenuOpen }) => 
             <button className="mobile-sidebar-toggle" onClick={onMenuOpen}>
                 <Menu size={26} />
             </button>
-            <h1 className="mobile-header-title" onClick={() => navigate('/')}>HappyTalk</h1>
+            <h1 className="mobile-header-title" onClick={() => navigate('/')}>HAPPYY TALK</h1>
             <button className="mobile-theme-toggle" onClick={toggleTheme}>
                 {isDarkMode ? <Sun size={24} /> : <Moon size={24} />}
             </button>
@@ -172,7 +172,7 @@ const MobileSidebarDrawer = ({ isOpen, onClose, activeView, setActiveView, onOpe
             <div className={`mobile-sidebar-overlay ${isOpen ? 'open' : ''}`} onClick={onClose} />
             <div className={`mobile-sidebar-drawer ${isOpen ? 'open' : ''}`}>
                 <div className="mobile-sidebar-header">
-                    <span className="mobile-sidebar-logo">HappyTalk.</span>
+                    <span className="mobile-sidebar-logo">HAPPYY TALK.</span>
                     <button className="mobile-sidebar-close" onClick={onClose}>
                         <X size={28} />
                     </button>
@@ -217,6 +217,10 @@ const MobileSidebarDrawer = ({ isOpen, onClose, activeView, setActiveView, onOpe
                         {isDarkMode ? <Sun size={24} /> : <Moon size={24} />}
                         <span>{isDarkMode ? 'Light Mode' : 'Dark Mode'}</span>
                     </div>
+                    <div className="mobile-menu-item" onClick={() => { onOpenProfile(null, true); onClose(); }}>
+                        <User size={24} />
+                        <span>Profile</span>
+                    </div>
                 </div>
 
 
@@ -241,8 +245,8 @@ const FeedBottomNav = ({ activeView, setActiveView, onOpenProfile, setIsCreation
             <button className={activeView === 'reels' ? 'active' : ''} onClick={() => setActiveView('reels')}>
                 <ReelIcon />
             </button>
-            <button className={activeView === 'user' ? 'active' : ''} onClick={() => onOpenProfile(null, true)}>
-                <User size={24} />
+            <button onClick={() => window.history.back()}>
+                <ChevronLeft size={24} />
             </button>
         </div>
     );
@@ -592,7 +596,7 @@ const SearchGrid = ({ onOpenPost }) => {
 // ExploreGrid Component - Mixed Images, News, and YouTube Videos
 const ExploreGrid = ({ onOpenPost }) => {
     const PEXELS_KEY = 'XkN36hK2S0z876lWSlI5YoB9ZscPAq4cZbcL6SXABt9CyZmqBwwjov1P';
-    const YT_KEY = 'AIzaSyB3GWPQbVRRM3yOqDIKWmRdt333u8Gy-iU';
+    const YT_KEY = 'AIzaSyDtLX6171RySOtqd-U2Pgcjy_9o2rWDNrc';
     const [items, setItems] = useState([]);
     const [page, setPage] = useState(1);
     const [loading, setLoading] = useState(false);
@@ -675,7 +679,7 @@ const ExploreGrid = ({ onOpenPost }) => {
 
     return (
         <div className="discovery-container">
-            <div className="discover-search-bar" style={{ padding: '10px 15px', background: 'var(--card-bg)', borderBottom: '1px solid var(--border-color)', position: 'sticky', top: 0, zIndex: 10 }}>
+            <div className="discover-search-bar" style={{ padding: '10px 15px', background: 'var(--card-bg)', borderBottom: 'none', position: 'sticky', top: 0, zIndex: 10 }}>
                 <div style={{ position: 'relative' }}>
                     <Search size={18} style={{ position: 'absolute', left: 15, top: '50%', transform: 'translateY(-50%)', color: '#888' }} />
                     <input
@@ -753,7 +757,7 @@ const ReelSection = () => {
     const fetchReels = async (pageToken = '') => {
         try {
             setLoading(true);
-            const YT_KEY = 'AIzaSyB3GWPQbVRRM3yOqDIKWmRdt333u8Gy-iU';
+            const YT_KEY = 'AIzaSyDtLX6171RySOtqd-U2Pgcjy_9o2rWDNrc';
             // Fetch recent trending videos
             const queries = ['trending now', 'viral videos', 'popular today', 'latest videos'];
             const query = queries[Math.floor(Math.random() * queries.length)];
@@ -894,7 +898,7 @@ const LiveSection = () => {
     const fetchLive = async (pageToken = '') => {
         try {
             setLoading(true);
-            const YT_KEY = 'AIzaSyB3GWPQbVRRM3yOqDIKWmRdt333u8Gy-iU';
+            const YT_KEY = 'AIzaSyDtLX6171RySOtqd-U2Pgcjy_9o2rWDNrc';
             const queries = ['breaking news live', 'crypto live', 'gaming live', 'lofi hip hop live'];
             const query = queries[Math.floor(Math.random() * queries.length)];
 
@@ -1169,13 +1173,13 @@ const FeedPage = () => {
     };
 
     const handleShare = async (post) => {
-        const shareUrl = `${window.location.origin}/post/${post.id}`;
-        const shareText = `Check out this post on HappyTalk!`;
+        const shareUrl = `${window.location.origin}/posts/${post.id}`;
+        const shareText = `Check out this post on HAPPYY TALK!`;
 
         if (navigator.share) {
             try {
                 await navigator.share({
-                    title: 'HappyTalk',
+                    title: 'HAPPYY TALK',
                     text: shareText,
                     url: shareUrl,
                 });
@@ -1212,11 +1216,11 @@ const FeedPage = () => {
 
     const renderHome = () => {
         return (
-            <div className="post-section-insta home-no-gap">
+            <div className="post-section-insta home-no-gap stories-top-fix">
                 <div className="story-section-insta">
                     <div className="story-insta" onClick={() => openProfile(null, true)}>
                         <div className="story-image-insta" style={{ background: 'none', padding: 0 }}>
-                            <div style={{ position: 'relative', width: '65px', height: '65px', borderRadius: '50%', border: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--ig-bg)' }}>
+                            <div style={{ position: 'relative', width: '65px', height: '65px', borderRadius: '50%', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--ig-bg)' }}>
                                 <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'var(--hover-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                     <User size={30} color="var(--ig-sec-font)" />
                                 </div>
@@ -1255,7 +1259,7 @@ const FeedPage = () => {
                                 <MoreHorizontal size={20} color="var(--ig-font)" />
                             </div>
                             <div className="post-main-image-insta" onClick={() => setDetailModal({ isOpen: true, post })} style={{ cursor: 'pointer' }}>
-                                <img src={post.image} alt="" style={{ width: '100%', borderRadius: '4px', border: '1px solid var(--border-color)' }} />
+                                <img src={post.image} alt="" style={{ width: '100%', borderRadius: '4px', border: 'none' }} />
                             </div>
                             <div className="post-footer-insta" style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0' }}>
                                 <div style={{ display: 'flex', gap: '15px' }}>
@@ -1378,7 +1382,7 @@ const FeedPage = () => {
                                     </div>
                                     <div className="profile-follow-content">
                                         <p className="profile-id">user_421</p>
-                                        <p className="profile-name">HappyTalk User</p>
+                                        <p className="profile-name">HAPPYY TALK User</p>
                                     </div>
                                 </div>
                                 <a href="#" className="follow" onClick={(e) => e.preventDefault()}>switch</a>

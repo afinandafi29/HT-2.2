@@ -75,8 +75,10 @@ const YouTubeUI = ({ onBack }) => {
         setSearchTerm('');
     };
 
+    const [activeVideoId, setActiveVideoId] = useState(null);
+
     const handleVideoClick = (videoId) => {
-        window.open(`https://www.youtube.com/watch?v=${videoId}`, '_blank');
+        setActiveVideoId(videoId);
     };
 
     // Infinite Scroll Logic
@@ -174,6 +176,26 @@ const YouTubeUI = ({ onBack }) => {
                 </div>
 
                 <div className="video-grid">
+                    {activeVideoId ? (
+                        <div className="inline-player-container" style={{ gridColumn: '1/-1', width: '100%', aspectRatio: '16/9', marginBottom: '20px', position: 'relative' }}>
+                            <button
+                                onClick={() => setActiveVideoId(null)}
+                                style={{ position: 'absolute', top: '-40px', right: '0', background: '#ff0000', color: 'white', border: 'none', padding: '5px 15px', borderRadius: '4px', cursor: 'pointer', zIndex: 10 }}
+                            >
+                                Close Player
+                            </button>
+                            <iframe
+                                width="100%"
+                                height="100%"
+                                src={`https://www.youtube.com/embed/${activeVideoId}?autoplay=1`}
+                                title="YouTube video player"
+                                frameBorder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowFullScreen
+                                style={{ borderRadius: '12px' }}
+                            ></iframe>
+                        </div>
+                    ) : null}
                     {loading && videos.length === 0 ? (
                         <div style={{ color: 'white', padding: '40px', gridColumn: '1/-1', textAlign: 'center' }}>
                             <div style={{ display: 'inline-block', width: '40px', height: '40px', border: '3px solid rgba(255,255,255,0.3)', borderRadius: '50%', borderTopColor: '#ff0000', animation: 'spin 1s ease-in-out infinite' }}></div>

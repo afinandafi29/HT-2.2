@@ -13,7 +13,7 @@ const YouTube = () => {
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const navigate = useNavigate();
 
-    const YT_KEY = 'AIzaSyB3GWPQbVRRM3yOqDIKWmRdt333u8Gy-iU';
+    const YT_KEY = 'AIzaSyDtLX6171RySOtqd-U2Pgcjy_9o2rWDNrc';
 
     const categories = [
         'All', 'Music', 'Mixes', 'Malayalam cinema', 'Tamil Cinema',
@@ -66,8 +66,10 @@ const YouTube = () => {
         setSearchTerm('');
     };
 
+    const [activeVideoId, setActiveVideoId] = useState(null);
+
     const handleVideoClick = (videoId) => {
-        window.open(`https://www.youtube.com/watch?v=${videoId}`, '_blank');
+        setActiveVideoId(videoId);
     };
 
     return (
@@ -226,6 +228,26 @@ const YouTube = () => {
 
                 {/* Video Grid */}
                 <div className="yt-video-grid">
+                    {activeVideoId ? (
+                        <div className="inline-player-container" style={{ gridColumn: '1/-1', width: '100%', aspectRatio: '16/9', marginBottom: '20px', position: 'relative' }}>
+                            <button
+                                onClick={() => setActiveVideoId(null)}
+                                style={{ position: 'absolute', top: '10px', right: '10px', background: '#ff0000', color: 'white', border: 'none', padding: '5px 15px', borderRadius: '4px', cursor: 'pointer', zIndex: 101 }}
+                            >
+                                Close Player
+                            </button>
+                            <iframe
+                                width="100%"
+                                height="100%"
+                                src={`https://www.youtube.com/embed/${activeVideoId}?autoplay=1`}
+                                title="YouTube video player"
+                                frameBorder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowFullScreen
+                                style={{ borderRadius: '12px' }}
+                            ></iframe>
+                        </div>
+                    ) : null}
                     {loading && (
                         <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px', color: '#aaa' }}>
                             Loading {contentType}...
@@ -290,6 +312,29 @@ const YouTube = () => {
                     </div>
                 )}
             </main>
+
+            {/* Mobile Bottom Navigation */}
+            <div className="yt-mobile-bottom-nav">
+                <button onClick={() => navigate('/')}>
+                    <i className="material-icons">home</i>
+                    <span>Home</span>
+                </button>
+                <button onClick={() => { setSearchTerm(''); fetchVideos(''); }}>
+                    <i className="material-icons">search</i>
+                    <span>Search</span>
+                </button>
+                <button className="yt-mobile-plus-btn" onClick={() => navigate('/feed')}>
+                    <i className="material-icons">add_box</i>
+                </button>
+                <button onClick={() => setContentType('shorts')}>
+                    <i className="material-icons">movie</i>
+                    <span>Shots</span>
+                </button>
+                <button onClick={() => window.history.back()}>
+                    <i className="material-icons">chevron_left</i>
+                    <span>Back</span>
+                </button>
+            </div>
         </div>
     );
 };

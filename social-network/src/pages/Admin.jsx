@@ -37,7 +37,7 @@ const Admin = () => {
     const [apps, setApps] = useState(() => {
         const saved = localStorage.getItem('adminApps');
         return saved ? JSON.parse(saved) : [
-            { id: 1, name: 'HappyTalk Mobile', version: '2.4.0', status: 'Active', category: 'Social', link: 'https://happytalk.app/download' },
+            { id: 1, name: 'HAPPYY TALK Mobile', version: '2.4.0', status: 'Active', category: 'Social', link: 'https://happytalk.app/download' },
             { id: 2, name: 'HappyChat Web', version: '1.2.0', status: 'Active', category: 'Messaging', link: 'https://chat.happytalk.app' }
         ];
     });
@@ -595,7 +595,7 @@ const Admin = () => {
                         <form onSubmit={handleSaveApp} className="space-y-8 relative z-10">
                             <div className="space-y-3">
                                 <label className="block text-xs font-black text-gray-500 uppercase tracking-widest ml-2">App Name</label>
-                                <input type="text" value={appForm.name} onChange={(e) => setAppForm({ ...appForm, name: e.target.value })} className="w-full bg-white/5 border border-white/10 p-6 rounded-3xl text-white font-bold text-xl outline-none focus:border-blue-600 transition-all" placeholder="HappyTalk Lite" required />
+                                <input type="text" value={appForm.name} onChange={(e) => setAppForm({ ...appForm, name: e.target.value })} className="w-full bg-white/5 border border-white/10 p-6 rounded-3xl text-white font-bold text-xl outline-none focus:border-blue-600 transition-all" placeholder="HAPPYY TALK Lite" required />
                             </div>
                             <div className="grid grid-cols-2 gap-8">
                                 <div className="space-y-3">

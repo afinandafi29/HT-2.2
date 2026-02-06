@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, Rss, User, Search, PlusSquare, LogIn } from 'lucide-react';
+import { Home, Rss, User, Search, PlusSquare, ChevronLeft } from 'lucide-react';
 import InstallApp from '../InstallApp';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -16,10 +16,10 @@ const MobileBottomNav = ({ onCreateRoom }) => {
         { id: 'create', icon: PlusSquare, label: 'Create', action: onCreateRoom },
         { id: 'search', icon: Search, label: 'Search', path: '/news/search' },
         {
-            id: 'profile',
-            icon: currentUser ? User : LogIn,
-            label: currentUser ? 'Profile' : 'Sign In',
-            path: currentUser ? '/profile' : '/in'
+            id: 'back',
+            icon: ChevronLeft,
+            label: 'Back',
+            action: () => window.history.back()
         },
     ];
 

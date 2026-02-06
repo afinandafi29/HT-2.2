@@ -39,11 +39,11 @@ const CreateRoomModal = ({ isOpen, onClose, onRoomCreated }) => {
                 const newRoom = createGuestRoom(guestRoomData);
 
                 // Show success message
-                window.dispatchEvent(new CustomEvent('SHOW_ALERT', {
+                /* window.dispatchEvent(new CustomEvent('SHOW_ALERT', {
                     detail: {
                         message: `Room "${title}" created! It will auto-delete after 15 minutes of inactivity.`
                     }
-                }));
+                })); */
 
                 onRoomCreated(newRoom);
                 setTitle('');

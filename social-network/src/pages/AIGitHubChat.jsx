@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 
 const AIGitHubChat = () => {
-    const TOKEN = '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';
+    const TOKEN = import.meta.env.VITE_GITHUB_AI_TOKEN || '';
     const API_BASE = 'https://models.github.ai';
 
     const [messages, setMessages] = useState([{

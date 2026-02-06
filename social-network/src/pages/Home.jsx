@@ -6,6 +6,7 @@ import RoomCard from '../components/RoomCard';
 import { LayoutContext } from '../components/Layout/Layout';
 import CreateRoomModal from '../components/CreateRoomModal';
 import Phone from '../components/Phone/Phone';
+import InstallApp from '../components/InstallApp';
 import { getRoomsApi } from '../api/roomApi';
 import { getJitsiTokenApi } from '../api/jitsiApi';
 import { initialRooms } from '../data';
@@ -24,7 +25,8 @@ function Home() {
     sidebarOpen,
     refreshTrigger,
     unreadCount,
-    setUnreadCount
+    setUnreadCount,
+    toggleSidebar
   } = React.useContext(LayoutContext);
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -298,6 +300,7 @@ function Home() {
         >
           <i className="fas fa-plus text-2xl"></i>
         </button>
+
       </div>
 
       <div className="room-grid px-3 md:px-4 mt-0" id="room-grid">

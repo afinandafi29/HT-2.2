@@ -15,7 +15,7 @@ const AIChat = () => {
     const chatContainerRef = useRef(null);
 
     // GitHub AI Integration Constants
-    const TOKEN = import.meta.env.VITE_GITHUB_AI_TOKEN; // Use environment variable for GitHub AI Token
+    const TOKEN = import.meta.env.VITE_GITHUB_AI_TOKEN || ''; // Use environment variable for GitHub AI Token
     // Ensure VITE_GITHUB_AI_TOKEN is set in your .env file
     const API_BASE = 'https://models.github.ai';
     const MODEL = 'openai/gpt-4o'; // Updated to a reliable model from GitHub marketplace

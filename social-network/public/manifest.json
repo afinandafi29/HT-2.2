@@ -1,62 +1,24 @@
 {
-  "name": "HappyTalk - Social Network",
-  "short_name": "HappyTalk",
-  "start_url": "/",
-  "display": "standalone",
-  "display_override": [
-    "window-controls-overlay",
-    "standalone",
-    "minimal-ui"
-  ],
-  "background_color": "#fafafa",
-  "theme_color": "#0095f6",
-  "description": "HappyTalk is a modern social networking platform where you can connect with friends, share stories, watch reels, and explore content from around the world.",
-  "orientation": "portrait-primary",
-  "scope": "/",
-  "categories": [
-    "social",
-    "photo",
-    "entertainment"
-  ],
-  "prefer_related_applications": false,
-  "icons": [
-    {
-      "src": "/HAPPYY TALK.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/HAPPYY TALK.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
-  ],
-  "shortcuts": [
-    {
-      "name": "Feed",
-      "short_name": "Feed",
-      "description": "View your feed",
-      "url": "/feed",
-      "icons": [
+    "name": "HAPPYY TALK",
+    "short_name": "HAPPYY TALK",
+    "description": "Connect, Share, Explore",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#000000",
+    "theme_color": "#3b82f6",
+    "icons": [
         {
-          "src": "/HAPPYY TALK.png",
-          "sizes": "192x192"
-        }
-      ]
-    },
-    {
-      "name": "Explore",
-      "short_name": "Explore",
-      "description": "Discover new content",
-      "url": "/feed?view=explore",
-      "icons": [
+            "src": "/logo.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
         {
-          "src": "/HAPPYY TALK.png",
-          "sizes": "192x192"
+            "src": "/logo.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
         }
-      ]
-    }
-  ]
+    ],
+    "orientation": "portrait"
 }

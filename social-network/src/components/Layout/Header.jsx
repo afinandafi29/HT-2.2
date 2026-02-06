@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { getCurrentUserProfileApi } from '../../api/userApi';
 
@@ -38,6 +38,9 @@ const Header = ({ onMenuClick, onProfileClick }) => {
   // Debug logging
   console.log('Header - currentUser:', currentUser ? 'Logged in' : 'Not logged in');
 
+  const location = useLocation();
+  const isHomePage = location.pathname === '/' || location.pathname === '/jitsi';
+
   return (
     <div className="header-section">
       <div className="w-full flex justify-between items-center px-4 py-2">
@@ -66,7 +69,7 @@ const Header = ({ onMenuClick, onProfileClick }) => {
         </div>
 
         <div className="profile-section flex items-center">
-          {currentUser ? (
+          {(currentUser && !isHomePage) ? (
             <div
               onClick={onProfileClick}
               className="flex items-center gap-3 no-underline group px-3 py-1.5 rounded-2xl hover:bg-white/5 transition-all border border-transparent hover:border-white/10 cursor-pointer"
@@ -89,16 +92,7 @@ const Header = ({ onMenuClick, onProfileClick }) => {
                 <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-[#0f172a] rounded-full sm:hidden"></div>
               </div>
             </div>
-          ) : (
-            <Link
-              to="/in"
-              className="signin-button-header hidden md:flex text-xs px-3 py-1.5 md:text-sm md:px-5 md:py-2.5 items-center gap-2 font-bold tracking-wider uppercase"
-              onClick={() => console.log('Sign In button clicked')}
-            >
-              <i className="fas fa-user-circle text-base"></i>
-              <span>Sign In</span>
-            </Link>
-          )}
+          ) : null}
         </div>
       </div>
 

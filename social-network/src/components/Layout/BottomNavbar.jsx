@@ -10,7 +10,7 @@ const BottomNavbar = ({ activeButton, onCreateClick }) => {
     if (action === 'home') navigate('/');
     else if (action === 'feed') navigate('/feed');
     else if (action === 'reels') navigate('/youtube');
-    else if (action === 'profile') navigate('/profile');
+    else if (action === 'back') window.history.back();
     else if (action === 'create') {
       onCreateClick();
     }
@@ -54,19 +54,10 @@ const BottomNavbar = ({ activeButton, onCreateClick }) => {
         </button>
 
         <button
-          className={activeButton.startsWith('/profile') ? 'active' : ''}
-          onClick={() => handleNav('profile')}
+          onClick={() => handleNav('back')}
         >
-          {currentUser?.avatar_url ? (
-            <img
-              src={currentUser.avatar_url}
-              alt="Profile"
-              className="w-6 h-6 rounded-full object-cover border border-white/20"
-            />
-          ) : (
-            <i className="fas fa-user"></i>
-          )}
-          <span>Profile</span>
+          <i className="fas fa-chevron-left"></i>
+          <span>Back</span>
         </button>
       </div>
     </div>

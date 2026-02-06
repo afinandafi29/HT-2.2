@@ -9,7 +9,7 @@ const plans = [
       'Access to all public chat rooms',
       'Standard text chat',
       'Basic emojis & reactions',
-      'Daily login bonus features',
+      'Daily bonus features',
       'Standard profile theme customization',
       'Ability to send voice messages'
     ]

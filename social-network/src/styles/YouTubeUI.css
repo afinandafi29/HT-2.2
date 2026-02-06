@@ -15,7 +15,13 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    z-index: 9999;
+    z-index: 999;
+}
+
+@media (max-width: 768px) {
+    .youtube-clone-wrapper {
+        height: calc(100vh - 60px);
+    }
 }
 
 /* Top Header */
