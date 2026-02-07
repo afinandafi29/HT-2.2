@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './YouTubeClone.css';
 
@@ -8,9 +8,10 @@ const YouTube = () => {
     const [selectedCategory, setSelectedCategory] = useState('All');
     const [contentType, setContentType] = useState('videos'); // 'videos', 'shorts', 'live'
     const [loading, setLoading] = useState(false);
+    const [loadingMore, setLoadingMore] = useState(false);
     const [nextPageToken, setNextPageToken] = useState('');
-    const [prevPageToken, setPrevPageToken] = useState('');
     const [sidebarOpen, setSidebarOpen] = useState(true);
+    const scrollSentinelRef = useRef(null);
     const navigate = useNavigate();
 
     const YT_KEY = 'AIzaSyDtLX6171RySOtqd-U2Pgcjy_9o2rWDNrc';
@@ -21,9 +22,10 @@ const YouTube = () => {
         'Web Development', 'AI & ML', 'Live Coding', 'Tech News'
     ];
 
-    const fetchVideos = useCallback(async (query = '', pageToken = '') => {
+    const fetchVideos = useCallback(async (query = '', pageToken = '', append = false) => {
         try {
-            setLoading(true);
+            if (append) setLoadingMore(true);
+            else setLoading(true);
             const searchQuery = query || (selectedCategory === 'All' ? 'trending' : selectedCategory);
 
             let apiUrl = '';
@@ -39,20 +41,43 @@ const YouTube = () => {
             const data = await response.json();
 
             if (data.items) {
-                setVideos(data.items);
+                if (append) {
+                    setVideos(prev => [...prev, ...data.items]);
+                } else {
+                    setVideos(data.items);
+                }
                 setNextPageToken(data.nextPageToken || '');
-                setPrevPageToken(data.prevPageToken || '');
             }
         } catch (error) {
             console.error('YouTube API Error:', error);
         } finally {
             setLoading(false);
+            setLoadingMore(false);
         }
     }, [selectedCategory, contentType]);
 
     useEffect(() => {
+        setNextPageToken('');
         fetchVideos();
     }, [selectedCategory, contentType, fetchVideos]);
+
+    // Infinite scroll: load more when sentinel is visible
+    useEffect(() => {
+        if (!nextPageToken || loading || loadingMore) return;
+        const el = scrollSentinelRef.current;
+        if (!el) return;
+        const observer = new IntersectionObserver(
+            (entries) => {
+                if (entries[0].isIntersecting) {
+                    const q = searchTerm || (selectedCategory === 'All' ? '' : selectedCategory);
+                    fetchVideos(q, nextPageToken, true);
+                }
+            },
+            { rootMargin: '200px', threshold: 0 }
+        );
+        observer.observe(el);
+        return () => observer.disconnect();
+    }, [nextPageToken, loading, loadingMore, searchTerm, selectedCategory, fetchVideos]);
 
     const handleSearch = (e) => {
         e.preventDefault();
@@ -290,51 +315,13 @@ const YouTube = () => {
                     ))}
                 </div>
 
-                {/* Pagination */}
-                {!loading && videos.length > 0 && (
-                    <div className="yt-pagination">
-                        {prevPageToken && (
-                            <button
-                                onClick={() => fetchVideos(searchTerm || (selectedCategory === 'All' ? '' : selectedCategory), prevPageToken)}
-                                className="yt-page-btn"
-                            >
-                                Previous
-                            </button>
-                        )}
-                        {nextPageToken && (
-                            <button
-                                onClick={() => fetchVideos(searchTerm || (selectedCategory === 'All' ? '' : selectedCategory), nextPageToken)}
-                                className="yt-page-btn"
-                            >
-                                Next
-                            </button>
-                        )}
+                {/* Infinite scroll sentinel */}
+                {!loading && videos.length > 0 && nextPageToken && (
+                    <div ref={scrollSentinelRef} style={{ gridColumn: '1 / -1', minHeight: '20px', display: 'flex', justifyContent: 'center', padding: '20px' }}>
+                        {loadingMore && <span style={{ color: '#aaa' }}>Loading more...</span>}
                     </div>
                 )}
             </main>
-
-            {/* Mobile Bottom Navigation */}
-            <div className="yt-mobile-bottom-nav">
-                <button onClick={() => navigate('/')}>
-                    <i className="material-icons">home</i>
-                    <span>Home</span>
-                </button>
-                <button onClick={() => { setSearchTerm(''); fetchVideos(''); }}>
-                    <i className="material-icons">search</i>
-                    <span>Search</span>
-                </button>
-                <button className="yt-mobile-plus-btn" onClick={() => navigate('/feed')}>
-                    <i className="material-icons">add_box</i>
-                </button>
-                <button onClick={() => setContentType('shorts')}>
-                    <i className="material-icons">movie</i>
-                    <span>Shots</span>
-                </button>
-                <button onClick={() => window.history.back()}>
-                    <i className="material-icons">chevron_left</i>
-                    <span>Back</span>
-                </button>
-            </div>
         </div>
     );
 };

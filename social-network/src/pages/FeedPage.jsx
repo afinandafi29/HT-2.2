@@ -460,6 +460,13 @@ const ProfileView = ({ user, isSelf }) => {
     );
 };
 
+// Cache-bust image URL so search always shows fresh images
+const freshImageUrl = (url) => {
+    if (!url) return url;
+    const sep = url.includes('?') ? '&' : '?';
+    return `${url}${sep}t=${Date.now()}`;
+};
+
 // SearchGrid Component - ONLY Images (Pexels + SourceSplash)
 const SearchGrid = ({ onOpenPost }) => {
     const PEXELS_KEY = 'XkN36hK2S0z876lWSlI5YoB9ZscPAq4cZbcL6SXABt9CyZmqBwwjov1P';
@@ -468,6 +475,7 @@ const SearchGrid = ({ onOpenPost }) => {
     const [page, setPage] = useState(1);
     const [loading, setLoading] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+    const [searchRunId, setSearchRunId] = useState(0); // force new images per search
     const observer = useRef();
 
     const fetchSearchItems = useCallback(async (p, query = '') => {
@@ -533,6 +541,7 @@ const SearchGrid = ({ onOpenPost }) => {
     }, []);
 
     useEffect(() => {
+        setSearchRunId(prev => prev + 1);
         fetchSearchItems(1, searchQuery);
         setPage(1);
     }, [searchQuery, fetchSearchItems]);
@@ -552,7 +561,7 @@ const SearchGrid = ({ onOpenPost }) => {
 
     return (
         <div className="discovery-container">
-            <div className="discover-search-bar" style={{ padding: '10px 15px', background: 'var(--card-bg)', borderBottom: '1px solid var(--border-color)', position: 'sticky', top: 0, zIndex: 10 }}>
+            <div className="discover-search-bar feed-search-bar-sticky" style={{ padding: '10px 15px', background: 'var(--card-bg)', borderBottom: '1px solid var(--border-color)' }}>
                 <div style={{ position: 'relative' }}>
                     <Search size={18} style={{ position: 'absolute', left: 15, top: '50%', transform: 'translateY(-50%)', color: '#888' }} />
                     <input
@@ -567,7 +576,7 @@ const SearchGrid = ({ onOpenPost }) => {
 
             <div className="img-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)', gap: '4px' }}>
                 {items.map((item, i) => (
-                    <div key={`${item.id}-${i}`} className="grid-item" ref={i === items.length - 1 ? lastRef : null}
+                    <div key={`${item.id}-${searchRunId}-${i}`} className="grid-item" ref={i === items.length - 1 ? lastRef : null}
                         onClick={() => onOpenPost({
                             id: item.id,
                             image: item.url,
@@ -581,7 +590,7 @@ const SearchGrid = ({ onOpenPost }) => {
                             source: item.id.startsWith('ss-') ? 'SourceSplash' : (item.type === 'news' ? 'News' : 'Pexels')
                         })}
                         style={{ aspectRatio: '1/1', background: '#000', cursor: 'pointer', position: 'relative', overflow: 'hidden' }}>
-                        <img src={item.url} alt={item.alt} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <img src={freshImageUrl(item.url)} alt={item.alt} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         {item.id.startsWith('ss-') && (
                             <div style={{ position: 'absolute', bottom: 5, right: 5, background: 'rgba(0,0,0,0.5)', color: 'white', padding: '2px 4px', borderRadius: '4px', fontSize: '10px' }}>SS</div>
                         )}

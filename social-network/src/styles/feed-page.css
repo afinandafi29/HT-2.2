@@ -2290,7 +2290,7 @@
     }
 
     .feed-page-root .discover-search-bar {
-        top: 0;
+        top: 50px; /* Below fixed mobile header so title + search bar stay visible */
     }
 
     .feed-page-root .post-section.cartModel {
@@ -2760,6 +2760,7 @@
     .feed-page-root .middle-section-insta {
         gap: 0;
         flex-direction: column;
+        padding-top: 50px; /* Clear fixed mobile header so title and search bar are visible */
     }
 
     .feed-page-root .post-section-insta {
