@@ -26,7 +26,7 @@ const RoomCard = ({ room, currentUser, onTopicUpdated, onRoomDeleted }) => {
             return;
         }
 
-        // Generate a username
+        // Generate a username if needed
         let userName;
         if (currentUser) {
             userName = currentUser?.username || currentUser?.email?.split('@')[0] || 'User';
@@ -39,7 +39,7 @@ const RoomCard = ({ room, currentUser, onTopicUpdated, onRoomDeleted }) => {
         const roomName = (mirotalk_room_name || `room-${id}`).trim();
         const baseUrl = 'http://localhost:3000';
 
-        // Open local Meet.happytalk
+        // Open meet.happytalk directly
         const finalUrl = `${baseUrl}/join/${encodeURIComponent(roomName)}?name=${encodeURIComponent(userName)}`;
         window.open(finalUrl, '_blank');
     };
@@ -165,9 +165,18 @@ const RoomCard = ({ room, currentUser, onTopicUpdated, onRoomDeleted }) => {
                     <span className="text-[1.2em]">🌐</span> {(language || 'GLOBAL').toUpperCase()}
                 </div>
 
-                {/* Mic Box */}
-                <div className="bg-[rgba(255,165,0,0.15)] border border-[rgba(255,165,0,0.3)] rounded-[6px] p-1 w-6 h-6 flex justify-center items-center text-[#ffa500] text-[0.8rem]">
-                    🎙️
+                <div className="flex items-center gap-2">
+                    {/* Mic Box */}
+                    <div className="bg-[rgba(255,165,0,0.15)] border border-[rgba(255,165,0,0.3)] rounded-[6px] p-1 w-6 h-6 flex justify-center items-center text-[#ffa500] text-[0.8rem]">
+                        🎙️
+                    </div>
+
+                    {/* Lock Icon for Private Rooms */}
+                    {room.is_private && (
+                        <div className="bg-[rgba(255,0,0,0.15)] border border-[rgba(255,0,0,0.3)] rounded-[6px] p-1 w-6 h-6 flex justify-center items-center text-red-500 text-[0.8rem]" title="Private Room">
+                            🔒
+                        </div>
+                    )}
                 </div>
             </div>
 

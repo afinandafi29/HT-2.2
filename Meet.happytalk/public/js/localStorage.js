@@ -9,8 +9,8 @@ class LocalStorage {
         };
 
         this.P2P_INIT_CONFIG = {
-            audio: true,
-            video: true,
+            audio: false,
+            video: false,
         };
 
         this.P2P_SETTINGS = {

@@ -222,6 +222,11 @@ function Home() {
 
   // Filter rooms by category or search term
   const filterRooms = useCallback((room) => {
+    // Privacy check: If room is private, only creator allows to see it
+    if (room.is_private && (!currentUser || room.created_by !== currentUser.id)) {
+      return false;
+    }
+
     if (searchTerm && !room.title?.toLowerCase().includes(searchTerm.toLowerCase())) {
       return false;
     }
@@ -238,7 +243,7 @@ function Home() {
       room.topic?.toLowerCase() === activeCategory.toLowerCase() ||
       room.language?.toLowerCase() === activeCategory.toLowerCase()
     );
-  }, [searchTerm, activeCategory]);
+  }, [searchTerm, activeCategory, currentUser]);
 
   const [phoneInitialScreen, setPhoneInitialScreen] = useState('app');
 

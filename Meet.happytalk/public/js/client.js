@@ -1945,9 +1945,15 @@ function selectOptionByValueExist(selectElement, value) {
 async function checkInitConfig() {
     const initConfig = lS.getInitConfig();
     console.log('Get init config', initConfig);
-    if (initConfig) {
-        if (useAudio && !initConfig.audio) initAudioBtn.click();
-        if (useVideo && !initConfig.video) initVideoBtn.click();
+    // Audio
+    if (useAudio) {
+        const audioStatus = initConfig ? initConfig.audio : false;
+        if (!audioStatus && myAudioStatus) initAudioBtn.click();
+    }
+    // Video
+    if (useVideo) {
+        const videoStatus = initConfig ? initConfig.video : false;
+        if (!videoStatus && myVideoStatus) initVideoBtn.click();
     }
 }
 
@@ -13621,7 +13627,7 @@ function showAbout() {
  * Init Exit Meeting
  */
 function initExitMeeting() {
-    openURL('/newcall');
+    openURL('http://localhost:5173/');
 }
 
 /**
@@ -13629,7 +13635,7 @@ function initExitMeeting() {
  */
 function leaveRoom() {
     checkRecording();
-    surveyActive ? leaveFeedback() : redirectOnLeave();
+    redirectOnLeave();
 }
 
 /**
@@ -13664,7 +13670,7 @@ function leaveFeedback() {
 }
 
 function redirectOnLeave() {
-    redirectActive ? openURL(redirectURL) : openURL('/newcall');
+    openURL('http://localhost:5173/');
 }
 
 /**

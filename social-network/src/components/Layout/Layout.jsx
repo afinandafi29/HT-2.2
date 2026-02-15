@@ -31,7 +31,7 @@ const Layout = () => {
   const [refreshTrigger, setRefreshTrigger] = useState(0); // Add refresh trigger
   const [profileModalUser, setProfileModalUser] = useState(null);
   const [profileModalContext, setProfileModalContext] = useState({});
-  const [showLoginModal, setShowLoginModal] = useState(false);
+
   const [alertModal, setAlertModal] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
   const location = useLocation();
   const { currentUser } = useAuth();
@@ -143,15 +143,11 @@ const Layout = () => {
         onConfirm: e.detail.onConfirm || null
       });
     };
-    const handleShowAuth = () => setShowLoginModal(true);
 
-    window.addEventListener('SHOW_ALERT', handleShowAlert);
-    window.addEventListener('SHOW_AUTH', handleShowAuth);
 
     return () => {
       window.removeEventListener('OPEN_CHAT_PANEL', handleOpenChat);
       window.removeEventListener('SHOW_ALERT', handleShowAlert);
-      window.removeEventListener('SHOW_AUTH', handleShowAuth);
     };
   }, []);
 
@@ -356,22 +352,7 @@ const Layout = () => {
           />
         )}
 
-        {/* Login Modal */}
-        {showLoginModal && (
-          <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-            <div className="w-full max-w-sm bg-[#1e293b] border border-white/10 p-8 rounded-3xl text-center shadow-2xl">
-              <div className="w-16 h-16 bg-blue-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i className="fas fa-lock text-blue-400 text-xl"></i>
-              </div>
-              <h3 className="text-xl font-bold text-white mb-2">Login Required</h3>
-              <p className="text-gray-400 mb-6 text-sm">Join the community to start speaking.</p>
-              <div className="flex gap-3 justify-center">
-                <button onClick={() => setShowLoginModal(false)} className="flex-1 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-medium text-sm transition-all border-none cursor-pointer">Cancel</button>
-                <button onClick={() => window.location.href = '/in'} className="flex-1 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm transition-all shadow-lg shadow-blue-600/20 border-none cursor-pointer">Login</button>
-              </div>
-            </div>
-          </div>
-        )}
+
 
         {/* Generic Alert Modal */}
         {alertModal.isOpen && (

@@ -78,6 +78,7 @@ const CreateRoomModal = ({ isOpen, onClose, onRoomCreated }) => {
                 duration_minutes: minutes,
                 language: language,
                 max_capacity: parseInt(maxCapacity, 10) || 0,
+                created_by: currentUser?.id, // Add creator ID
             };
             const newRoom = await createRoomApi(roomData);
             onRoomCreated(newRoom);
