@@ -1,8 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import axios from 'axios';
 import { Send, Bot, User, Loader2, Trash2, Cpu } from 'lucide-react';
-
-const OPENAI_API_KEY = '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';
+import { fetchAIReply } from '../../api/aiApi';
 
 const ChatGPTScreen = () => {
     const [messages, setMessages] = useState([
@@ -30,27 +28,22 @@ const ChatGPTScreen = () => {
         setLoading(true);
 
         try {
-            const response = await axios.post(
-                'https://api.openai.com/v1/chat/completions',
-                {
-                    model: 'gpt-3.5-turbo',
-                    messages: [...messages, userMessage].map(m => ({ role: m.role, content: m.content })),
-                },
-                {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${OPENAI_API_KEY}`,
-                    },
-                }
-            );
+            const history = messages.map(m => ({ role: m.role, content: m.content }));
+            const apiMessages = [
+                { role: 'system', content: 'You are ChatGPT, a helpful and friendly AI assistant.' },
+                ...history,
+                userMessage
+            ];
+
+            const responseText = await fetchAIReply(apiMessages);
 
             const aiMessage = {
                 role: 'assistant',
-                content: response.data.choices[0].message.content,
+                content: responseText,
             };
             setMessages(prev => [...prev, aiMessage]);
         } catch (error) {
-            console.error('OpenAI Error:', error);
+            console.error('AI Error:', error);
             setMessages(prev => [...prev, {
                 role: 'assistant',
                 content: 'Sorry, I encountered an error. Please check your API key or try again later.',

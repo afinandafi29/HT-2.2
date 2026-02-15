@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import PostCard from './PostCard';
 import CreatePostForm from './CreatePostForm';
 import { getPostsApi } from '../../api/postApi';
+import { newsApi } from '../../api/newsApi';
 import { useAuth } from '../../contexts/AuthContext';
 import ActionButtons from '../ActionButtons';
 import '../../styles/feed.css';
@@ -17,8 +18,38 @@ const FeedContent = ({ className, onBackClick }) => {
         setIsLoading(true);
         setError(null);
         try {
-            const data = await getPostsApi();
-            setPosts(data.posts || []);
+            // Fetch User Posts
+            let userPosts = [];
+            try {
+                const data = await getPostsApi();
+                userPosts = data.posts || data.data || (Array.isArray(data) ? data : []);
+            } catch (err) {
+                console.error("Failed to fetch user posts:", err);
+            }
+
+            // Fetch News Posts
+            let newsPosts = [];
+            try {
+                const newsRes = await newsApi.getTopStories({ limit: 20 });
+                newsPosts = (newsRes.data || []).map(ns => ({
+                    id: `news-${ns.uuid || Math.random().toString(36).substr(2, 9)}`,
+                    username: ns.source || 'News Hub',
+                    profile_pic_url: `https://ui-avatars.com/api/?name=${encodeURIComponent(ns.source || 'N')}&background=random&color=fff`,
+                    content: ns.title + (ns.description ? "\n\n" + ns.description : ""),
+                    image_url: ns.image_url || 'https://images.unsplash.com/photo-1504711434969?auto=format&fit=crop&q=80&w=800',
+                    likes_count: Math.floor(Math.random() * 500),
+                    comments_count: Math.floor(Math.random() * 50),
+                    created_at: ns.published_at || new Date().toISOString(),
+                    is_news: true,
+                    url: ns.url
+                }));
+            } catch (err) {
+                console.error("Failed to fetch news:", err);
+            }
+
+            // Interleave and sort
+            const combined = [...userPosts, ...newsPosts].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+            setPosts(combined);
         } catch (err) {
             setError(err.message || 'Failed to load posts.');
         } finally {

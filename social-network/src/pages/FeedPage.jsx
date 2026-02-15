@@ -6,7 +6,7 @@ import { newsApi } from '../api/newsApi';
 import { getPostsApi, createPostApi } from '../api/postApi';
 import { useAuth } from '../contexts/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Home, Search, PlusSquare, User, RefreshCw, Camera, Heart, MessageCircle, Send, Bookmark, MoreHorizontal, Moon, Sun, Menu, X, Compass, Radio, Youtube, ChevronLeft } from 'lucide-react';
+import { Home, Search, PlusSquare, User, RefreshCw, Camera, Heart, MessageCircle, Send, Bookmark, MoreHorizontal, Moon, Sun, Menu, X, Compass, Radio, Youtube, ChevronLeft, CheckCircle } from 'lucide-react';
 import YouTubeUI from '../components/YouTubeUI';
 import '../styles/feed-page.css';
 
@@ -1171,33 +1171,132 @@ const FeedPage = () => {
         fetchStories();
     }, []);
 
-    // Fetch posts with pagination - EXCLUSIVELY NEWS
+    const DEFAULT_POSTS = [
+        {
+            id: 'def-1',
+            type: 'social',
+            user: { name: "Adem Lane", username: "adem_lane", pic: "/profiles/Adem Lane.webp", location: "London, UK", isActive: true },
+            image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&q=80&w=1000",
+            likes: 1240,
+            caption: "Exploring the beautiful mountains today! 🏔️ #adventure #nature",
+            time: "2 hours ago",
+            comments: 45,
+            source: "HappyTalk"
+        },
+        {
+            id: 'def-2',
+            type: 'social',
+            user: { name: "Sophia", username: "sophia_sky", pic: "https://i.pravatar.cc/150?u=sophia", location: "Paris, France", isActive: true },
+            image: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&q=80&w=1000",
+            likes: 850,
+            caption: "Sunset in Paris is something else... 🌅 #paris #sunset #travel",
+            time: "5 hours ago",
+            comments: 12,
+            source: "HappyTalk"
+        },
+        {
+            id: 'def-3',
+            type: 'social',
+            user: { name: "Marcus", username: "marcus_official", pic: "https://i.pravatar.cc/150?u=marcus", location: "New York, USA", isActive: false },
+            image: "https://images.unsplash.com/photo-1449034446853-66c86144b0ad?auto=format&fit=crop&q=80&w=1000",
+            likes: 3200,
+            caption: "The city that never sleeps. 🗽 #NYC #urban #lifestyle",
+            time: "10 hours ago",
+            comments: 89,
+            source: "HappyTalk"
+        },
+        {
+            id: 'def-4',
+            type: 'social',
+            user: { name: "Yuki Tanaka", username: "yuki_camera", pic: "https://i.pravatar.cc/150?u=yuki", location: "Tokyo, Japan", isActive: true },
+            image: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&q=80&w=1000",
+            likes: 1500,
+            caption: "Cherry blossoms are in full bloom! 🌸 #tokyo #sakura #spring",
+            time: "1 hour ago",
+            comments: 67,
+            source: "HappyTalk"
+        }
+    ];
+
+    // Fetch posts with pagination - Real Posts + News
     const fetchHomePosts = useCallback(async (p) => {
         setLoading(true);
         try {
-            // Fetch news only
-            const newsRes = await newsApi.getHeadlines({ page: p, limit: 20 });
+            // 1. Fetch live news articles
+            let newsPosts = [];
+            try {
+                // Fetch top headlines which are generally "Live" news
+                const newsRes = await newsApi.getHeadlines({ page: p, limit: 30 });
+                newsPosts = (newsRes.data || []).map(ns => {
+                    const img = ns.image_url || ns.image || (ns.multimedia && ns.multimedia[0]?.url) || 'https://images.unsplash.com/photo-1504711434969?auto=format&fit=crop&q=80&w=800';
+                    const pubDate = ns.published_at ? new Date(ns.published_at) : new Date();
 
-            const newPosts = (newsRes.data || []).map(ns => {
-                const img = ns.image_url || ns.image || (ns.multimedia && ns.multimedia[0]?.url) || 'https://images.unsplash.com/photo-1504711434969?auto=format&fit=crop&q=80&w=800';
-                return {
-                    id: `news-${ns.uuid || ns.id}-${Date.now()}-${Math.random()}`,
-                    type: 'news',
-                    user: getRandomUser(),
-                    image: img,
-                    likes: Math.floor(Math.random() * 5000) + 100,
-                    caption: ns.title + (ns.description ? "\n\n" + ns.description : ""),
+                    return {
+                        id: `news-${ns.uuid || ns.id}-${Date.now()}`,
+                        type: 'news',
+                        user: {
+                            name: ns.source || 'Social Hub',
+                            username: (ns.source || 'user').toLowerCase().replace(/\s+/g, '_'),
+                            pic: `https://ui-avatars.com/api/?name=${encodeURIComponent(ns.source || 'N')}&background=random&color=fff`,
+                            location: 'Social Feed',
+                            isActive: true
+                        },
+                        image: img,
+                        likes: Math.floor(Math.random() * 8000) + 100,
+                        caption: ns.title + (ns.description ? "\n\n" + ns.description : ""),
+                        time: pubDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                        comments: Math.floor(Math.random() * 120),
+                        source: "Social"
+                    };
+                }).filter(p => p.image);
+            } catch (e) {
+                console.warn("News fetch failed", e);
+            }
+
+            // 2. Try to fetch user posts from database
+            let userPosts = [];
+            try {
+                const dbRes = await getPostsApi();
+                userPosts = (Array.isArray(dbRes) ? dbRes : (dbRes?.posts || dbRes?.data || [])).map(post => ({
+                    id: `db-${post.id}-${Date.now()}`,
+                    type: 'social',
+                    user: {
+                        name: post.user?.full_name || post.username || 'User',
+                        username: post.username || 'user',
+                        pic: post.user?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(post.username || 'U')}&background=random&color=fff`,
+                        location: post.location || 'Somewhere',
+                        isActive: true,
+                        isVerified: false
+                    },
+                    image: post.image_url || post.image || 'https://images.unsplash.com/photo-1504711434969?auto=format&fit=crop&q=80&w=800',
+                    likes: post.likes_count || 0,
+                    caption: post.content || post.caption || '',
                     time: "Just now",
-                    comments: Math.floor(Math.random() * 200),
-                    source: ns.source || 'News Source'
-                };
-            }).filter(p => p.image && !p.image.includes('placeholder'));
+                    comments: post.comments_count || 0,
+                    source: "Community"
+                }));
+            } catch (e) {
+                // Ignore DB failures
+            }
 
-            if (p === 1) setPosts(newPosts);
-            else setPosts(prev => [...prev, ...newPosts]);
+            // Combine and interleave
+            let combined = [];
+            const maxLen = Math.max(newsPosts.length, userPosts.length);
+            for (let i = 0; i < maxLen; i++) {
+                if (i < newsPosts.length) combined.push(newsPosts[i]);
+                if (i < userPosts.length) combined.push(userPosts[i]);
+            }
+
+            // 3. Fallback to DEFAULT_POSTS if absolutely empty on page 1
+            if (p === 1 && combined.length === 0) {
+                combined = DEFAULT_POSTS;
+            }
+
+            if (p === 1) setPosts(combined);
+            else setPosts(prev => [...prev, ...combined]);
         } catch (err) {
-            console.error('Error fetching news feed:', err);
-            if (p === 1) setPosts([]);
+            console.error('Error fetching feed:', err);
+            if (p === 1) setPosts(DEFAULT_POSTS);
         }
         setLoading(false);
     }, []);
@@ -1229,6 +1328,9 @@ const FeedPage = () => {
         const shareUrl = `${window.location.origin}/posts/${post.id}`;
         const shareText = `Check out this post on HAPPYY TALK!`;
 
+        // Always copy link first for better UX
+        copyToClipboard(shareUrl);
+
         if (navigator.share) {
             try {
                 await navigator.share({
@@ -1237,12 +1339,8 @@ const FeedPage = () => {
                     url: shareUrl,
                 });
             } catch (err) {
-                if (err.name !== 'AbortError') {
-                    copyToClipboard(shareUrl);
-                }
+                // Already copied, no need for alert here if user cancels
             }
-        } else {
-            copyToClipboard(shareUrl);
         }
     };
 
@@ -1304,8 +1402,12 @@ const FeedPage = () => {
                                         {post.user.isActive && <div style={{ position: 'absolute', bottom: 0, right: 0, width: 10, height: 10, background: '#22c55e', borderRadius: '50%', border: '2px solid var(--ig-bg)' }} />}
                                     </div>
                                     <div style={{ marginLeft: '10px' }}>
-                                        <p className="post-username-insta" style={{ fontWeight: 'bold', color: 'var(--ig-font)', margin: 0 }}>{post.user.username}</p>
-                                        {post.user.isActive && <small style={{ color: '#22c55e', fontSize: '11px', display: 'block' }}>Active now</small>}
+                                        <p className="post-username-insta" style={{ fontWeight: 'bold', color: 'var(--ig-font)', margin: 0 }}>
+                                            {post.user.username}
+                                        </p>
+                                        <small style={{ color: 'var(--ig-sec-font)', fontSize: '11px' }}>
+                                            {post.user.location}
+                                        </small>
                                     </div>
                                 </div>
                                 <MoreHorizontal size={20} color="var(--ig-font)" />
@@ -1323,12 +1425,7 @@ const FeedPage = () => {
                                         style={{ cursor: 'pointer' }}
                                     />
                                     <MessageCircle size={26} color="var(--ig-font)" style={{ cursor: 'pointer' }} />
-                                    <Send size={26} color="var(--ig-font)" style={{ cursor: 'pointer' }} onClick={() => handleShare(post)} title="Share / Copy link" />
-                                    <span
-                                        style={{ cursor: 'pointer', fontSize: '12px', color: 'var(--ig-font)', marginLeft: '4px' }}
-                                        onClick={(e) => { e.stopPropagation(); copyToClipboard((post.user.username ? `@${post.user.username}: ` : '') + (post.caption || ''), false); }}
-                                        title="Copy post text"
-                                    >Copy</span>
+                                    <Send size={26} color="var(--ig-font)" style={{ cursor: 'pointer' }} onClick={() => handleShare(post)} title="Share & Copy link" />
                                 </div>
                                 <Bookmark
                                     size={26}

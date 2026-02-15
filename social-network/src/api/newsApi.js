@@ -287,7 +287,38 @@ const fetchRSS = async (topic = '') => {
 
 // Mock Data removed as per user request
 const generateMockNews = (count = 10, category = 'General') => {
-    return []; // No more mock stories
+    const images = [
+        "https://images.unsplash.com/photo-1504711434969?auto=format&fit=crop&q=80&w=800",
+        "https://images.unsplash.com/photo-1495020689067-958852a7765e?auto=format&fit=crop&q=80&w=800",
+        "https://images.unsplash.com/photo-1476242906366-d8eb64c2f661?auto=format&fit=crop&q=80&w=800",
+        "https://images.unsplash.com/photo-1585829365234-781fcdb4c40b?auto=format&fit=crop&q=80&w=800",
+        "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=800",
+        "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&q=80&w=800"
+    ];
+
+    const titles = [
+        `Global Tech Summit 2025: What to Expect`,
+        `Sustainable Living: The Future of Urban Design`,
+        `New Discoveries in Space Exploration This Month`,
+        `Health & Wellness Trends Taking Over in ${new Date().getFullYear()}`,
+        `Artificial Intelligence in Creative Arts: A New Era`,
+        `The Rise of Remote Work: Long-term Impact on Cities`
+    ];
+
+    const sources = ["Wired", "TechCrunch", "BBC News", "The Verge", "National Geographic", "Reuters"];
+
+    return Array.from({ length: count }).map((_, i) => ({
+        uuid: `mock-${i}-${Date.now()}`,
+        title: titles[i % titles.length],
+        description: `Everything you need to know about ${category.toLowerCase()} and its impact on the modern world. Experts weigh in on the latest trends and future predictions.`,
+        snippet: `Latest updates on ${category}...`,
+        url: "#",
+        image_url: images[i % images.length],
+        published_at: new Date(Date.now() - i * 3600000).toISOString(),
+        source: sources[i % sources.length],
+        categories: [category],
+        provider: 'mock'
+    }));
 };
 
 // Aggregator

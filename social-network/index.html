@@ -9,22 +9,30 @@
   <!-- Global Error Handler for Debugging -->
   <script>
     window.onerror = function (message, source, lineno, colno, error) {
-      // Ignore non-fatal third-party script errors
-      if (message === 'Script error.' || !source) {
-        console.warn('Silent Script Error caught (likely CORS):', message);
+      // Ignore non-fatal third-party script errors or AbortErrors
+      if (message === 'Script error.' || !source || (message && message.includes('AbortError'))) {
+        console.warn('Silent/Abort Error caught:', message);
         return;
       }
       const errorContainer = document.getElementById('global-error-display') || document.createElement('div');
       errorContainer.id = 'global-error-display';
-      errorContainer.style.cssText = 'position:fixed;top:0;left:0;width:100%;background:rgba(255,0,0,0.9);color:white;padding:20px;z-index:99999;font-family:monospace;white-space:pre-wrap;';
+      errorContainer.style.cssText = 'position:fixed;top:0;left:0;width:100%;background:rgba(255,0,0,0.9);color:white;padding:20px;z-index:99999;font-family:monospace;white-space:pre-wrap;cursor:pointer;';
+      errorContainer.onclick = () => errorContainer.remove();
       errorContainer.innerText += `Global Error: ${message}\nAt: ${source}:${lineno}:${colno}\n\n`;
       document.body.appendChild(errorContainer);
       console.error('Global Error caught:', message, error);
     };
     window.onunhandledrejection = function (event) {
+      const reason = String(event.reason);
+      // Ignore AbortError - usually harmless (fetch abort, navigator.share cancel, etc.)
+      if (reason.includes('AbortError')) {
+        console.warn('Unhandled Rejection (AbortError) ignored:', reason);
+        return;
+      }
       const errorContainer = document.getElementById('global-error-display') || document.createElement('div');
       errorContainer.id = 'global-error-display';
-      errorContainer.style.cssText = 'position:fixed;top:0;left:0;width:100%;background:rgba(255,0,0,0.9);color:white;padding:20px;z-index:99999;font-family:monospace;white-space:pre-wrap;';
+      errorContainer.style.cssText = 'position:fixed;top:0;left:0;width:100%;background:rgba(255,0,0,0.9);color:white;padding:20px;z-index:99999;font-family:monospace;white-space:pre-wrap;cursor:pointer;';
+      errorContainer.onclick = () => errorContainer.remove();
       errorContainer.innerText += `Unhandled Rejection: ${event.reason}\n\n`;
       document.body.appendChild(errorContainer);
       console.error('Unhandled Rejection caught:', event.reason);

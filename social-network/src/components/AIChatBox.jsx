@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { fetchAIReply } from '../api/aiApi';
 import './AIChatBox.css';
 
 const AIChatBox = ({ isOpen, onClose, language = 'en' }) => {
@@ -159,46 +160,23 @@ const AIChatBox = ({ isOpen, onClose, language = 'en' }) => {
     }
   }, [isOpen, messages.length, config.welcome]);
 
-  const callGitHubAPI = async (prompt) => {
+  const callAI = async (prompt) => {
     try {
-      const GITHUB_TOKEN = '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';
-      
-      // Use GitHub Models API for actual AI responses
-      // GitHub Models API endpoint for Claude or other models
-      const response = await fetch('https://models.inference.ai.azure.com/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${GITHUB_TOKEN}`
+      const messages = [
+        {
+          role: 'system',
+          content: `You are a helpful AI language learning assistant. Provide clear, concise answers in the same language as the user's question. Help with vocabulary, grammar, pronunciation, and cultural context related to language learning.`
         },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini', // or use 'claude-3.5-sonnet' if available
-          messages: [
-            {
-              role: 'system',
-              content: `You are a helpful AI language learning assistant. Provide clear, concise answers in the same language as the user's question. Help with vocabulary, grammar, pronunciation, and cultural context related to language learning.`
-            },
-            {
-              role: 'user',
-              content: prompt
-            }
-          ],
-          temperature: 0.7,
-          max_tokens: 500,
-          top_p: 1
-        })
-      });
+        {
+          role: 'user',
+          content: prompt
+        }
+      ];
 
-      if (!response.ok) {
-        throw new Error(`API request failed with status ${response.status}`);
-      }
-
-      const data = await response.json();
-      return data.choices?.[0]?.message?.content || 'Sorry, I could not process your request.';
+      return await fetchAIReply(messages);
     } catch (error) {
-      console.error('GitHub API Error:', error);
-      // Return error message
-      return 'I apologize, but I encountered an error processing your request. Please try again.';
+      console.error('AI Error:', error);
+      return 'I apologize, but I encountered an error processing your request. Please check your API key or try again later.';
     }
   };
 
@@ -217,8 +195,8 @@ const AIChatBox = ({ isOpen, onClose, language = 'en' }) => {
     setIsLoading(true);
 
     try {
-      const aiResponse = await callGitHubAPI(inputValue);
-      
+      const aiResponse = await callAI(inputValue);
+
       const aiMessage = {
         id: Date.now() + 1,
         text: aiResponse,
@@ -226,10 +204,8 @@ const AIChatBox = ({ isOpen, onClose, language = 'en' }) => {
         timestamp: new Date()
       };
 
-      setTimeout(() => {
-        setMessages(prev => [...prev, aiMessage]);
-        setIsLoading(false);
-      }, 1000);
+      setMessages(prev => [...prev, aiMessage]);
+      setIsLoading(false);
     } catch (error) {
       console.error('Error:', error);
       setIsLoading(false);
@@ -253,20 +229,20 @@ const AIChatBox = ({ isOpen, onClose, language = 'en' }) => {
           <button className="ai-chat-close" onClick={onClose}>×</button>
         </div>
         <div className="ai-chat-language-switch">
-          <button 
-            className={`lang-btn ${language === 'en' ? 'active' : ''}`} 
-            onClick={() => {/* TODO: Implement language switching */}}
+          <button
+            className={`lang-btn ${language === 'en' ? 'active' : ''}`}
+            onClick={() => {/* TODO: Implement language switching */ }}
           >
             EN
           </button>
-          <button 
-            className={`lang-btn ${language === language ? 'active' : ''}`} 
-            onClick={() => {/* TODO: Implement language switching */}}
+          <button
+            className={`lang-btn ${language === language ? 'active' : ''}`}
+            onClick={() => {/* TODO: Implement language switching */ }}
           >
             {language.toUpperCase()}
           </button>
         </div>
-        
+
         <div className="ai-chat-messages">
           {messages.map((message) => (
             <div
@@ -281,7 +257,7 @@ const AIChatBox = ({ isOpen, onClose, language = 'en' }) => {
               </div>
             </div>
           ))}
-          
+
           {isLoading && (
             <div className="ai-chat-message ai">
               <div className="message-content thinking">
@@ -294,10 +270,10 @@ const AIChatBox = ({ isOpen, onClose, language = 'en' }) => {
               </div>
             </div>
           )}
-          
+
           <div ref={messagesEndRef} />
         </div>
-        
+
         <div className="ai-chat-input">
           <input
             type="text"

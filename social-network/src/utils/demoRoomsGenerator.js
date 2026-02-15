@@ -89,8 +89,8 @@ export const generateDemoRooms = () => {
             title: roomTitle,
             category: category,
             topic: topicLang,
-            meeting_url: `https://meet.jit.si/${roomId}`,
-            jitsi_room_name: `HAPPYY TALK_room_${roomId}`,
+            meeting_url: `http://localhost:3000/join/room-${roomId}`,
+            mirotalk_room_name: `HAPPYY-TALK-ROOM-${roomId}`,
             profile: {
               id: `user_${roomId}`,
               username: `Host_${roomId}`,
