@@ -3524,6 +3524,16 @@
     margin-bottom: 20px;
     background: var(--ig-bg);
     overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.feed-page-root .post-section-insta,
+.feed-page-root .middle-section-insta {
+    border: none;
+}
+
+.feed-page-root.dark-mode .post-main-insta {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 .post-header-insta {

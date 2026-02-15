@@ -1,6 +1,17 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getYouTubeApiKey } from '../api/youtubeApi';
 import './YouTubeClone.css';
+
+// Fallback videos when API fails or returns empty (so the page always shows something)
+const FALLBACK_VIDEOS = [
+    { id: { videoId: 'dQw4w9WgXcQ' }, snippet: { title: 'Sample Music Video', channelTitle: 'Music Channel', publishedAt: new Date().toISOString(), thumbnails: { high: { url: 'https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg' }, medium: { url: 'https://img.youtube.com/vi/dQw4w9WgXcQ/mqdefault.jpg' } } } },
+    { id: { videoId: 'jNQXAC9IVRw' }, snippet: { title: 'First YouTube Video', channelTitle: 'YouTube', publishedAt: new Date().toISOString(), thumbnails: { high: { url: 'https://img.youtube.com/vi/jNQXAC9IVRw/hqdefault.jpg' }, medium: { url: 'https://img.youtube.com/vi/jNQXAC9IVRw/mqdefault.jpg' } } } },
+    { id: { videoId: '9bZkp7q19f0' }, snippet: { title: 'Popular Music', channelTitle: 'Music', publishedAt: new Date().toISOString(), thumbnails: { high: { url: 'https://img.youtube.com/vi/9bZkp7q19f0/hqdefault.jpg' }, medium: { url: 'https://img.youtube.com/vi/9bZkp7q19f0/mqdefault.jpg' } } } },
+    { id: { videoId: 'kJQP7kiw5Fk' }, snippet: { title: 'Latin Pop', channelTitle: 'Pop', publishedAt: new Date().toISOString(), thumbnails: { high: { url: 'https://img.youtube.com/vi/kJQP7kiw5Fk/hqdefault.jpg' }, medium: { url: 'https://img.youtube.com/vi/kJQP7kiw5Fk/mqdefault.jpg' } } } },
+    { id: { videoId: 'RgKAFK5djSk' }, snippet: { title: 'Hip Hop', channelTitle: 'Hip Hop', publishedAt: new Date().toISOString(), thumbnails: { high: { url: 'https://img.youtube.com/vi/RgKAFK5djSk/hqdefault.jpg' }, medium: { url: 'https://img.youtube.com/vi/RgKAFK5djSk/mqdefault.jpg' } } } },
+    { id: { videoId: 'OPf0YbXqDm0' }, snippet: { title: 'Ed Sheeran', channelTitle: 'Ed Sheeran', publishedAt: new Date().toISOString(), thumbnails: { high: { url: 'https://img.youtube.com/vi/OPf0YbXqDm0/hqdefault.jpg' }, medium: { url: 'https://img.youtube.com/vi/OPf0YbXqDm0/mqdefault.jpg' } } } },
+];
 
 const YouTube = () => {
     const [videos, setVideos] = useState([]);
@@ -14,7 +25,7 @@ const YouTube = () => {
     const scrollSentinelRef = useRef(null);
     const navigate = useNavigate();
 
-    const YT_KEY = 'AIzaSyDtLX6171RySOtqd-U2Pgcjy_9o2rWDNrc';
+    const YT_KEY = getYouTubeApiKey();
 
     const categories = [
         'All', 'Music', 'Mixes', 'Malayalam cinema', 'Tamil Cinema',
@@ -40,21 +51,34 @@ const YouTube = () => {
             const response = await fetch(apiUrl);
             const data = await response.json();
 
-            if (data.items) {
+            if (data.error) {
+                console.warn('YouTube API error:', data.error.message || data.error);
+                if (!append) setVideos(FALLBACK_VIDEOS);
+                setNextPageToken('');
+                return;
+            }
+
+            const items = (data.items || []).filter(item => item.id && item.id.videoId);
+            if (items.length > 0) {
                 if (append) {
-                    setVideos(prev => [...prev, ...data.items]);
+                    setVideos(prev => [...prev, ...items]);
                 } else {
-                    setVideos(data.items);
+                    setVideos(items);
                 }
                 setNextPageToken(data.nextPageToken || '');
+            } else if (!append) {
+                setVideos(FALLBACK_VIDEOS);
+                setNextPageToken('');
             }
         } catch (error) {
             console.error('YouTube API Error:', error);
+            if (!append) setVideos(FALLBACK_VIDEOS);
+            setNextPageToken('');
         } finally {
             setLoading(false);
             setLoadingMore(false);
         }
-    }, [selectedCategory, contentType]);
+    }, [selectedCategory, contentType, YT_KEY]);
 
     useEffect(() => {
         setNextPageToken('');

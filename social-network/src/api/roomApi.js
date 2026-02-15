@@ -30,7 +30,7 @@ export const createRoomApi = async (roomData) => {
         ...roomData,
         id: `custom-${Date.now()}`,
         mirotalk_room_name: roomName,
-        meeting_url: `https://p2p.mirotalk.com/join/${roomName}`,
+        meeting_url: `http://localhost:3000/join/${roomName}`,
         people: [],
         profile: { username: "Me", avatar_url: "/profiles/Adem Lane.webp" },
         createdAt: Date.now()

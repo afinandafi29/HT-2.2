@@ -3,6 +3,8 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
 import { newsApi } from '../api/newsApi';
+import { getPostsApi, createPostApi } from '../api/postApi';
+import { useAuth } from '../contexts/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Home, Search, PlusSquare, User, RefreshCw, Camera, Heart, MessageCircle, Send, Bookmark, MoreHorizontal, Moon, Sun, Menu, X, Compass, Radio, Youtube, ChevronLeft } from 'lucide-react';
 import YouTubeUI from '../components/YouTubeUI';
@@ -27,10 +29,12 @@ const getRandomUser = () => {
     const name = nameList[Math.floor(Math.random() * nameList.length)];
     const country = COUNTRIES[Math.floor(Math.random() * COUNTRIES.length)];
     const userId = `user_${Math.random().toString(36).substr(2, 9)}`;
+    const username = name.toLowerCase().replace(/\s+/g, '_') + Math.floor(Math.random() * 1000);
     return {
         id: userId,
         name,
-        username: name.toLowerCase().replace(/\s+/g, '_') + Math.floor(Math.random() * 1000),
+        username,
+        pic: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&color=fff`,
         location: country,
         bio: `${name} | ${country} 🌍 | Living my best life ✨`,
         isActive: Math.random() > 0.7
@@ -1032,7 +1036,40 @@ const LiveSection = () => {
     );
 };
 
-const PostCreationModal = ({ isOpen, onClose }) => {
+const PostCreationModal = ({ isOpen, onClose, onPostCreated }) => {
+    const { currentUser } = useAuth();
+    const [content, setContent] = useState('');
+    const [dbPosts, setDbPosts] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
+
+    useEffect(() => {
+        if (isOpen) {
+            setContent('');
+            setLoading(true);
+            getPostsApi(currentUser?.id || null)
+                .then((data) => setDbPosts(Array.isArray(data) ? data : (data?.posts || data?.data || [])))
+                .catch(() => setDbPosts([]))
+                .finally(() => setLoading(false));
+        }
+    }, [isOpen, currentUser?.id]);
+
+    const handleSubmit = async (e) => {
+        e?.preventDefault();
+        if (!content.trim() || submitting) return;
+        setSubmitting(true);
+        try {
+            await createPostApi({ content: content.trim(), title: null });
+            onPostCreated?.();
+            onClose();
+        } catch (err) {
+            console.error('Create post failed:', err);
+            window.dispatchEvent(new CustomEvent('SHOW_ALERT', { detail: { title: 'Error', message: err?.message || 'Failed to create post.' } }));
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
     if (!isOpen) return null;
     return (
         <div className="post-detail-overlay" style={{ zIndex: 5000 }} onClick={onClose}>
@@ -1041,18 +1078,25 @@ const PostCreationModal = ({ isOpen, onClose }) => {
                     <X size={24} />
                 </button>
                 <h3 style={{ marginBottom: '20px', fontSize: '20px', fontWeight: 'bold', color: 'var(--primary-color)' }}>Create New Post</h3>
+                {loading ? (
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Loading from database...</p>
+                ) : dbPosts.length > 0 ? (
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '12px', marginBottom: '12px' }}>You have {dbPosts.length} post(s) in the database.</p>
+                ) : null}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                    <button className="creation-option-btn" style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px', borderRadius: '12px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontWeight: '600' }}><Camera size={20} /> Image</button>
-                    <button className="creation-option-btn" style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px', borderRadius: '12px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontWeight: '600' }}><ReelIcon /> Video</button>
-                    <button className="creation-option-btn" style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px', borderRadius: '12px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontWeight: '600' }}><MessageCircle size={20} /> Text</button>
-                    <button className="creation-option-btn" style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px', borderRadius: '12px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontWeight: '600' }}><RefreshCw size={20} /> Go Live</button>
-                    <button className="creation-option-btn" style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px', borderRadius: '12px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontWeight: '600' }} onClick={() => { window.location.href = '/create-room' }}><Home size={20} /> Create Room</button>
-                    <button className="creation-option-btn" style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px', borderRadius: '12px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontWeight: '600' }}><i className="fas fa-poll"></i> Poll</button>
-                    <button className="creation-option-btn" style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px', borderRadius: '12px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontWeight: '600' }}><i className="fas fa-music"></i> Music</button>
-                    <button className="creation-option-btn" style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px', borderRadius: '12px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontWeight: '600' }}><i className="fas fa-map-marker-alt"></i> Location</button>
+                    <button type="button" className="creation-option-btn" style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px', borderRadius: '12px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontWeight: '600' }}><Camera size={20} /> Image</button>
+                    <button type="button" className="creation-option-btn" style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px', borderRadius: '12px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontWeight: '600' }}><ReelIcon /> Video</button>
+                    <button type="button" className="creation-option-btn" style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px', borderRadius: '12px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontWeight: '600' }}><MessageCircle size={20} /> Text</button>
+                    <button type="button" className="creation-option-btn" style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px', borderRadius: '12px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontWeight: '600' }}><RefreshCw size={20} /> Go Live</button>
+                    <button type="button" className="creation-option-btn" style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px', borderRadius: '12px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontWeight: '600' }} onClick={() => { window.location.href = '/create-room' }}><Home size={20} /> Create Room</button>
+                    <button type="button" className="creation-option-btn" style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px', borderRadius: '12px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontWeight: '600' }}><i className="fas fa-poll"></i> Poll</button>
+                    <button type="button" className="creation-option-btn" style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px', borderRadius: '12px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontWeight: '600' }}><i className="fas fa-music"></i> Music</button>
+                    <button type="button" className="creation-option-btn" style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px', borderRadius: '12px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontWeight: '600' }}><i className="fas fa-map-marker-alt"></i> Location</button>
                 </div>
-                <textarea placeholder="What's on your mind?" style={{ width: '100%', marginTop: '20px', padding: '15px', borderRadius: '12px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', minHeight: '100px' }}></textarea>
-                <button className="post-submit-btn" style={{ width: '100%', marginTop: '20px', padding: '12px', borderRadius: '12px', background: 'var(--primary-color)', color: 'white', fontWeight: 'bold', border: 'none' }}>Post Now</button>
+                <form onSubmit={handleSubmit}>
+                    <textarea placeholder="What's on your mind?" value={content} onChange={(e) => setContent(e.target.value)} style={{ width: '100%', marginTop: '20px', padding: '15px', borderRadius: '12px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', minHeight: '100px' }} />
+                    <button type="submit" className="post-submit-btn" disabled={submitting || !content.trim()} style={{ width: '100%', marginTop: '20px', padding: '12px', borderRadius: '12px', background: 'var(--primary-color)', color: 'white', fontWeight: 'bold', border: 'none', opacity: submitting || !content.trim() ? 0.7 : 1 }}>{submitting ? 'Posting...' : 'Post Now'}</button>
+                </form>
             </div>
         </div>
     );
@@ -1202,13 +1246,12 @@ const FeedPage = () => {
         }
     };
 
-    const copyToClipboard = (text) => {
+    const copyToClipboard = (text, isLink = true) => {
         navigator.clipboard.writeText(text).then(() => {
             window.dispatchEvent(new CustomEvent('SHOW_ALERT', {
-                detail: {
-                    title: 'Link Copied!',
-                    message: 'Post link has been copied to clipboard.'
-                }
+                detail: isLink
+                    ? { title: 'Link Copied!', message: 'Post link has been copied to clipboard.' }
+                    : { title: 'Copied!', message: 'Post text has been copied to clipboard.' }
             }));
         }).catch(err => {
             console.error('Failed to copy: ', err);
@@ -1257,7 +1300,7 @@ const FeedPage = () => {
                             <div className="post-header-insta">
                                 <div className="post-left-header-insta" onClick={() => openProfile(post.user)} style={{ cursor: 'pointer' }}>
                                     <div className="post-img-insta" style={{ position: 'relative' }}>
-                                        <img src={post.user.pic} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                        <img src={post.user.pic || `https://ui-avatars.com/api/?name=${encodeURIComponent(post.user.name || post.user.username || 'U')}&background=random&color=fff`} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                         {post.user.isActive && <div style={{ position: 'absolute', bottom: 0, right: 0, width: 10, height: 10, background: '#22c55e', borderRadius: '50%', border: '2px solid var(--ig-bg)' }} />}
                                     </div>
                                     <div style={{ marginLeft: '10px' }}>
@@ -1280,7 +1323,12 @@ const FeedPage = () => {
                                         style={{ cursor: 'pointer' }}
                                     />
                                     <MessageCircle size={26} color="var(--ig-font)" style={{ cursor: 'pointer' }} />
-                                    <Send size={26} color="var(--ig-font)" style={{ cursor: 'pointer' }} onClick={() => handleShare(post)} title="Share/Copy" />
+                                    <Send size={26} color="var(--ig-font)" style={{ cursor: 'pointer' }} onClick={() => handleShare(post)} title="Share / Copy link" />
+                                    <span
+                                        style={{ cursor: 'pointer', fontSize: '12px', color: 'var(--ig-font)', marginLeft: '4px' }}
+                                        onClick={(e) => { e.stopPropagation(); copyToClipboard((post.user.username ? `@${post.user.username}: ` : '') + (post.caption || ''), false); }}
+                                        title="Copy post text"
+                                    >Copy</span>
                                 </div>
                                 <Bookmark
                                     size={26}
@@ -1358,6 +1406,7 @@ const FeedPage = () => {
             <PostCreationModal
                 isOpen={isCreationModalOpen}
                 onClose={() => setIsCreationModalOpen(false)}
+                onPostCreated={() => { setPage(1); fetchHomePosts(1); }}
             />
 
             <div className="insta-container">

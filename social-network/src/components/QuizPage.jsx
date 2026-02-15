@@ -460,87 +460,22 @@ const QuizPage = ({
     }
   `;
 
-  if (showResults) {
-    return (
-      <div className="quiz-container">
-        <style>{voiceCss}</style>
-        <div className="external-controls">
-          <button className="back-button" onClick={() => navigate('/learning-languages')}>
-            ← Back
+  const renderContent = () => {
+    if (showResults) {
+      return (
+        <div className="result-screen">
+          <h2 className="result-title">{resultTitle}</h2>
+          <div className="score-display">{score}/{questions.length}</div>
+          <p className="result-message">{resultMessage}</p>
+          <button type="button" onClick={restart} className="try-again">
+            {retryLabel}
           </button>
-          <div className="control-group right">
-            <div className="theme-buttons">
-              <button className={`theme-btn ${!isDarkMode ? 'active' : ''}`} onClick={() => setIsDarkMode(false)}>
-                ☀️ Light
-              </button>
-              <button className={`theme-btn ${isDarkMode ? 'active' : ''}`} onClick={() => setIsDarkMode(true)}>
-                🌙 Dark
-              </button>
-            </div>
-          </div>
         </div>
-        <div className="container">
-          <button className="mute-btn" onClick={() => setIsMuted(!isMuted)}>
-            {isMuted ? '🔇' : '🔊'}
-          </button>
-          <div className="result-screen">
-            <h2 className="result-title">{resultTitle}</h2>
-            <div className="score-display">{score}/{questions.length}</div>
-            <p className="result-message">{resultMessage}</p>
-            <button type="button" onClick={restart} className="try-again">
-              {retryLabel}
-            </button>
-          </div>
-        </div>
-        <button
-          type="button"
-          onClick={() => setIsAIChatOpen(true)}
-          style={{
-            position: 'fixed',
-            bottom: '20px',
-            right: '20px',
-            width: '60px',
-            height: '60px',
-            borderRadius: '50%',
-            background: `linear-gradient(135deg, ${primaryColor} 0%, ${primaryHover} 100%)`,
-            color: 'white',
-            border: 'none',
-            cursor: 'pointer',
-            fontSize: '24px',
-            boxShadow: '0 4px 20px rgba(59, 130, 246, 0.4)',
-            zIndex: 1000,
-          }}
-          aria-label="Open AI Chat"
-        >
-          🤖
-        </button>
-        <AIChatBox isOpen={isAIChatOpen} onClose={() => setIsAIChatOpen(false)} language={languageCode} />
-      </div>
-    );
-  }
+      );
+    }
 
-  return (
-    <div className="quiz-container">
-      <style>{voiceCss}</style>
-      <div className="external-controls">
-        <button className="back-button" onClick={() => navigate('/learning-languages')}>
-          ← Back
-        </button>
-        <div className="control-group right">
-          <div className="theme-buttons">
-            <button className={`theme-btn ${!isDarkMode ? 'active' : ''}`} onClick={() => setIsDarkMode(false)}>
-              ☀️ Light
-            </button>
-            <button className={`theme-btn ${isDarkMode ? 'active' : ''}`} onClick={() => setIsDarkMode(true)}>
-              🌙 Dark
-            </button>
-          </div>
-        </div>
-      </div>
-      <div className="container">
-        <button className="mute-btn" onClick={() => setIsMuted(!isMuted)}>
-          {isMuted ? '🔇' : '🔊'}
-        </button>
+    return (
+      <>
         <div className="quiz-header">
           {pageTitle}
         </div>
@@ -567,6 +502,33 @@ const QuizPage = ({
         <button className="next-btn" type="button" disabled={!canGoNext} onClick={next}>
           {isRtl ? 'السؤال التالي ←' : 'Next →'}
         </button>
+      </>
+    );
+  };
+
+  return (
+    <div className="quiz-container">
+      <style>{voiceCss}</style>
+      <div className="external-controls">
+        <button className="back-button" onClick={() => navigate('/learning-languages')}>
+          ← Back
+        </button>
+        <div className="control-group right">
+          <div className="theme-buttons">
+            <button className={`theme-btn ${!isDarkMode ? 'active' : ''}`} onClick={() => setIsDarkMode(false)}>
+              ☀️ Light
+            </button>
+            <button className={`theme-btn ${isDarkMode ? 'active' : ''}`} onClick={() => setIsDarkMode(true)}>
+              🌙 Dark
+            </button>
+          </div>
+        </div>
+      </div>
+      <div className="container">
+        <button className="mute-btn" onClick={() => setIsMuted(!isMuted)}>
+          {isMuted ? '🔇' : '🔊'}
+        </button>
+        {renderContent()}
       </div>
       <button
         type="button"

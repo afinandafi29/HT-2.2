@@ -5,80 +5,7 @@ import { getCurrentUserProfileApi } from '../../api/userApi';
 import ChatInterface from '../Chat/ChatInterface';
 import NotificationList from '../Notifications/NotificationList';
 
-const PWAInstallButton = () => {
-    const [deferredPrompt, setDeferredPrompt] = useState(null);
-    const [showInstallButton, setShowInstallButton] = useState(false);
-    const [isIOS, setIsIOS] = useState(false);
-    const [showIOSInstructions, setShowIOSInstructions] = useState(false);
-
-    useEffect(() => {
-        const isIosDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-        setIsIOS(isIosDevice);
-
-        const handleBeforeInstallPrompt = (e) => {
-            e.preventDefault();
-            setDeferredPrompt(e);
-            setShowInstallButton(true);
-        };
-
-        window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-
-        if (isStandalone) {
-            setShowInstallButton(false);
-        } else if (isIosDevice) {
-            setShowInstallButton(true);
-        }
-
-        return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    }, []);
-
-    const handleInstallClick = async () => {
-        if (isIOS) {
-            setShowIOSInstructions(true);
-            return;
-        }
-        if (!deferredPrompt) return;
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === 'accepted') setShowInstallButton(false);
-        setDeferredPrompt(null);
-    };
-
-    if (!showInstallButton) return null;
-
-    return (
-        <>
-            <button onClick={handleInstallClick} className="menu-item-small border-[#38bdf8]/30 bg-[#38bdf8]/10 group">
-                <i className="fas fa-download text-[#38bdf8] text-lg transition-transform group-hover:scale-110"></i>
-                <span className="text-[#38bdf8] font-bold">INSTALL</span>
-            </button>
-
-            {showIOSInstructions && (
-                <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/80 backdrop-blur-sm p-6" onClick={() => setShowIOSInstructions(false)}>
-                    <div className="w-full max-w-sm rounded-[32px] bg-[#0f172a] p-8 text-center shadow-2xl border border-white/10" onClick={e => e.stopPropagation()}>
-                        <div className="mb-6 flex justify-center text-[#38bdf8]">
-                            <i className="fas fa-download text-5xl"></i>
-                        </div>
-                        <h3 className="mb-3 text-2xl font-black text-white uppercase tracking-tight">Install HAPPYY TALK</h3>
-                        <p className="mb-8 text-gray-400 font-medium">Add to your Home Screen for the best experience.</p>
-                        <div className="space-y-4 text-left">
-                            <div className="flex items-center gap-4 rounded-2xl bg-white/5 p-4 border border-white/5">
-                                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#38bdf8]/20 font-black text-[#38bdf8]">1</span>
-                                <span className="text-gray-300 font-medium text-sm">Tap <span className="text-white font-bold">Share</span> in Safari</span>
-                            </div>
-                            <div className="flex items-center gap-4 rounded-2xl bg-white/5 p-4 border border-white/5">
-                                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#38bdf8]/20 font-black text-[#38bdf8]">2</span>
-                                <span className="text-gray-300 font-medium text-sm">Tap <span className="text-white font-bold">Add to Home Screen</span></span>
-                            </div>
-                        </div>
-                        <button onClick={() => setShowIOSInstructions(false)} className="mt-10 w-full rounded-2xl bg-gradient-to-r from-[#0ea5e9] to-[#6366f1] py-4 font-black uppercase tracking-widest text-white shadow-lg shadow-blue-500/20">Got it</button>
-                    </div>
-                </div>
-            )}
-        </>
-    );
-};
+import PWAInstallButton from '../PWAInstallButton';
 
 const RightSidebar = ({ isOpen, onClose, onCreateRoomClick }) => {
     const navigate = useNavigate();
@@ -234,7 +161,12 @@ const RightSidebar = ({ isOpen, onClose, onCreateRoomClick }) => {
                                     <button onClick={() => handleFeatureClick('/youtube')} className="menu-item-small">
                                         <span className="font-black text-[10px]">YOUTUBE</span>
                                     </button>
-                                    <PWAInstallButton />
+                                    <PWAInstallButton renderButton={({ onClick }) => (
+                                        <button onClick={onClick} className="menu-item-small border-[#38bdf8]/30 bg-[#38bdf8]/10 group">
+                                            <i className="fas fa-download text-[#38bdf8] text-lg transition-transform group-hover:scale-110"></i>
+                                            <span className="text-[#38bdf8] font-bold">INSTALL</span>
+                                        </button>
+                                    )} />
                                 </div>
 
                                 <div className="mt-4 flex flex-col gap-2 pb-10">

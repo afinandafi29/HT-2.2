@@ -93,7 +93,6 @@ function App() {
         <Route path="/terms" element={<TermsAndConditions />} />
         <Route path="/faq" element={<FAQ />} />
         <Route path="/admin" element={<Admin />} />
-        <Route path="/ai-chat" element={<AIChat />} />
 
         {/* Routes with Layout */}
         <Route element={<Layout />}>
@@ -146,6 +145,7 @@ function App() {
 
           {/* Apps Route */}
           <Route path="/apps" element={<Apps />} />
+          <Route path="/ai-chat" element={<AIChat />} />
 
           {/* Learning Route */}
           <Route path="/learning" element={<Learning />} />

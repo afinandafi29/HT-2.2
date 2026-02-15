@@ -43,7 +43,7 @@ const allowedSocials = [
 
 
 const ProfileCard = () => {
-  const { currentUser, updateUserProfile: updateUserAuthContext } = useAuth(); // updateUserProfile from AuthContext if needed for user_metadata sync
+  const { currentUser } = useAuth(); // updateUserProfile from AuthContext if needed for user_metadata sync
   const navigate = useNavigate();
   const { userId } = useParams(); // If you implement viewing other profiles via /profile/:userId
 

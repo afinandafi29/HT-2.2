@@ -37,9 +37,9 @@ const RoomCard = ({ room, currentUser, onTopicUpdated, onRoomDeleted }) => {
 
         // Room name from data or fallback to ID
         const roomName = (mirotalk_room_name || `room-${id}`).trim();
-        const baseUrl = 'https://p2p.mirotalk.com';
+        const baseUrl = 'http://localhost:3000';
 
-        // Open official MiroTalk P2P
+        // Open local Meet.happytalk
         const finalUrl = `${baseUrl}/join/${encodeURIComponent(roomName)}?name=${encodeURIComponent(userName)}`;
         window.open(finalUrl, '_blank');
     };

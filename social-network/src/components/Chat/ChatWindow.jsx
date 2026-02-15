@@ -2,6 +2,36 @@ import React, { useState, useEffect, useRef } from 'react';
 import { sendMessageApi, getMessagesApi, deleteMessageApi } from '../../api/chatApi';
 import { blockUserApi, getUserProfileApi } from '../../api/userApi';
 import { unfriendUserApi, acceptFriendRequestApi, rejectFriendRequestApi } from '../../api/friendApi';
+import { fetchAIReply, hasAIKey } from '../../api/aiApi';
+
+function getDemoAIReply(userMessage) {
+    const lower = (userMessage || '').toLowerCase().trim();
+    if (/hi|hello|hey|hola|yo/.test(lower)) return "Hi! I'm your HAPPYY TALK AI assistant. How can I help you today?";
+    if (/how are you|how r u|what'?s up|sup/.test(lower)) return "I'm doing great, thanks for asking! What's on your mind?";
+    if (/help|what can you do/.test(lower)) return "I can chat with you here. Add VITE_OPENAI_API_KEY or VITE_GITHUB_AI_TOKEN to .env for full AI. Otherwise, just keep chatting!";
+    if (/thanks|thank you|ty/.test(lower)) return "You're welcome! Anything else?";
+    if (lower.length < 3) return "Got it! Tell me more—I'm listening.";
+    return "That's interesting! Add VITE_OPENAI_API_KEY to .env for ChatGPT-powered replies. Until then, I'm here to chat!";
+}
+
+async function getAIReply(userMessage, conversationHistory = [], myId = 'me') {
+    if (!hasAIKey()) return getDemoAIReply(userMessage);
+    try {
+        const history = conversationHistory.slice(-10).map(m => ({
+            role: (m.sender_id === myId || m.sender_id === 'me') ? 'user' : 'assistant',
+            content: m.content
+        }));
+        const messages = [
+            { role: 'system', content: 'You are a friendly, helpful assistant on HAPPYY TALK. Keep replies conversational and concise (1-3 sentences).' },
+            ...history,
+            { role: 'user', content: userMessage }
+        ];
+        return await fetchAIReply(messages);
+    } catch (err) {
+        console.error('AI error:', err);
+        return getDemoAIReply(userMessage);
+    }
+}
 
 const ChatWindow = ({ activeChat, currentUser, onBack, socket }) => {
     const [messages, setMessages] = useState([]);
@@ -108,47 +138,21 @@ const ChatWindow = ({ activeChat, currentUser, onBack, socket }) => {
             setNewMessage('');
             setTimeout(scrollToBottom, 50);
 
-            // NEW: Set AI typing status
-            setTimeout(() => {
-                const aiResponses = [
-                    "That's interesting! Tell me more about it.",
-                    "I totally agree with you on that one! HappyTalk is amazing.",
-                    "Wow, I didn't know that! You always have the best info.",
-                    "HappyTalk is such a cool platform for connecting people, don't you think?",
-                    "I'm just a virtual friend, but I'm always here to listen and chat!",
-                    "Have you checked out the new Reels section yet? It's really fun.",
-                    "The UI here is really sleek! I love how fast everything is.",
-                    "I love chatting with new people like you. What are you up to today?",
-                    "That's a great point! I never thought of it that way.",
-                    "You're very kind! I enjoy our conversations.",
-                    "Is there anything else you'd like to talk about or any help you need?",
-                    "I'm learning so much from our chats! You're quite the expert."
-                ];
-
-                // Better AI response matching
-                let responseText = aiResponses[Math.floor(Math.random() * aiResponses.length)];
-                const lowerText = text.toLowerCase();
-
-                if (lowerText.includes("hello") || lowerText.includes("hi")) {
-                    responseText = `Hi there ${currentUser?.username || 'friend'}! How can I help you today?`;
-                } else if (lowerText.includes("how are you")) {
-                    responseText = "I'm doing great, thank you for asking! How about yourself?";
-                } else if (lowerText.includes("who are you")) {
-                    responseText = "I'm your HappyTalk virtual friend! I'm here to chat, help, and keep you company.";
-                } else if (lowerText.includes("help")) {
-                    responseText = "I'd be happy to help! You can explore the Feed, watch Reels, or join a Room to meet more people.";
-                }
-
+            // AI reply (OpenAI / GitHub AI)
+            (async () => {
+                const myId = currentUser?.id || 'me';
+                const historyWithUser = [...messages, userMsg];
+                const responseText = await getAIReply(text, historyWithUser, myId);
                 const responseMsg = {
                     id: 'ai-res-' + (Date.now() + 1),
                     sender_id: activeChat.id,
-                    receiver_id: currentUser?.id || 'me',
+                    receiver_id: myId,
                     content: responseText,
                     created_at: new Date().toISOString()
                 };
                 setMessages((prev) => [...prev, responseMsg]);
                 setTimeout(scrollToBottom, 50);
-            }, 1500 + Math.random() * 1000); // 1.5s - 2.5s delay for natural feel
+            })();
             return;
         }
 
@@ -199,7 +203,7 @@ const ChatWindow = ({ activeChat, currentUser, onBack, socket }) => {
                         className="w-10 h-10 rounded-full border border-white/5 object-cover"
                     />
                     <div className="flex-1 min-w-0">
-                        <h3 className="font-bold text-sm truncate uppercase tracking-tight" style={{ color: colors.textPrimary }}>{activeChat.username}</h3>
+                        <h3 className="font-bold text-sm truncate uppercase tracking-tight" style={{ color: colors.textPrimary }}>{activeChat.displayName || (activeChat.username && activeChat.username.replace(/_\d+$/, '')) || activeChat.username}</h3>
                         <div className="flex items-center gap-1.5">
                             <span className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]"></span>
                             <span className="text-[9px] font-black uppercase tracking-widest" style={{ color: colors.green }}>online</span>

@@ -1,24 +1,26 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { fetchAIReply, hasAIKey } from '../api/aiApi';
 import './AIChat.css';
-
-// Using Google-like font (Poppins) via a style tag injected in component or global CSS
-// But for React best practice, we'll keep the logic in React while adopting the styles provided.
 
 const AIChat = () => {
     const navigate = useNavigate();
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState('');
     const [isGenerating, setIsGenerating] = useState(false);
-    const [theme, setTheme] = useState('dark_mode'); // Default to dark as per user's typical UI
+    const [theme, setTheme] = useState('dark_mode');
     const [isMuted, setIsMuted] = useState(true);
     const chatContainerRef = useRef(null);
 
-    // GitHub AI Integration Constants
-    const TOKEN = import.meta.env.VITE_GITHUB_AI_TOKEN || ''; // Use environment variable for GitHub AI Token
-    // Ensure VITE_GITHUB_AI_TOKEN is set in your .env file
-    const API_BASE = 'https://models.github.ai';
-    const MODEL = 'openai/gpt-4o'; // Updated to a reliable model from GitHub marketplace
+    const getDemoAIReply = (userMessage) => {
+        const lower = (userMessage || '').toLowerCase().trim();
+        if (/hi|hello|hey|hola|yo/.test(lower)) return "Hi! I'm Happytalk AI. How can I help you today?";
+        if (/how are you|how r u|what'?s up|sup/.test(lower)) return "I'm doing great, thanks! What would you like to know?";
+        if (/help|what can you do/.test(lower)) return "I can answer questions and chat. Add VITE_OPENAI_API_KEY to .env for ChatGPT. Otherwise, keep chatting!";
+        if (/thanks|thank you|ty/.test(lower)) return "You're welcome! Anything else?";
+        if (lower.length < 3) return "Got it! Tell me more.";
+        return "That's interesting! Add VITE_OPENAI_API_KEY to .env for full AI. Until then, ask me anything!";
+    };
 
     useEffect(() => {
         // Load theme from localStorage
@@ -104,55 +106,32 @@ const AIChat = () => {
         setIsGenerating(true);
         scrollToBottom();
 
+        if (!hasAIKey()) {
+            const demoReply = getDemoAIReply(text);
+            typeText(demoReply, botMsgId);
+            return;
+        }
+
         try {
-            // Prepare messages context
             const contextMessages = messages
                 .filter(m => !m.loading)
                 .map(m => ({
                     role: m.role === 'outgoing' ? 'user' : 'assistant',
                     content: m.text
                 }));
-
-            // Add current user message
             contextMessages.push({ role: 'user', content: text });
 
-            // System prompt
-            const systemPrompt = {
-                role: 'system',
-                content: 'You are Happytalk AI, a helpful and friendly assistant. Answer all queries to the best of your ability.'
-            };
+            const apiMessages = [
+                { role: 'system', content: 'You are Happytalk AI, a helpful and friendly assistant. Answer all queries to the best of your ability.' },
+                ...contextMessages
+            ];
 
-            const response = await fetch(`${API_BASE}/inference/chat/completions`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${TOKEN}`,
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/vnd.github+json',
-                    'X-GitHub-Api-Version': '2022-11-28'
-                },
-                body: JSON.stringify({
-                    model: MODEL,
-                    messages: [systemPrompt, ...contextMessages],
-                    temperature: 0.7,
-                    max_tokens: 1000
-                })
-            });
-
-            if (!response.ok) throw new Error('Network error');
-
-            const data = await response.json();
-            const fullText = data.choices[0].message.content;
-
+            const fullText = await fetchAIReply(apiMessages);
             typeText(fullText, botMsgId);
-
         } catch (error) {
             console.error("AI Error:", error);
-            setMessages(prev => prev.map(msg =>
-                msg.id === botMsgId
-                    ? { ...msg, text: "I'm having trouble connecting right now. Please try again.", loading: false }
-                    : msg
-            ));
-            setIsGenerating(false);
+            const fallbackReply = getDemoAIReply(text);
+            typeText(fallbackReply, botMsgId);
         }
     };
 

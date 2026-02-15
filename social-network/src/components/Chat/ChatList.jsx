@@ -34,15 +34,15 @@ const ChatList = ({ onSelectChat, currentUser }) => {
                     "Jackson", "Aria", "Michael", "Scarlett", "Mason", "Victoria", "Sebastian", "Madison"
                 ];
 
-                // Generate 100 AI users
+                // Generate 100 AI users - display name only (no numbers)
                 const aiUsers = Array.from({ length: 100 }, (_, i) => {
                     const name = randomNameList[i % randomNameList.length];
-                    const randomId = Math.floor(Math.random() * 9999);
                     return {
                         id: `ai-${i}`,
-                        username: `${name}_${randomId}`,
+                        username: `${name}_${i}`,
+                        displayName: name,
                         avatar_url: `https://i.pravatar.cc/150?u=ai-${i}`,
-                        last_message: 'Hi! I am here to help you. Feel free to chat with me.',
+                        last_message: 'Hi! Feel free to chat with me.',
                         isAI: true
                     };
                 });
@@ -60,6 +60,7 @@ const ChatList = ({ onSelectChat, currentUser }) => {
                     return {
                         id: `ai-${i}`,
                         username: `${name}_${i}`,
+                        displayName: name,
                         avatar_url: `https://i.pravatar.cc/150?u=ai-${i}`,
                         last_message: 'Hi! Feel free to chat with me.',
                         isAI: true
@@ -82,7 +83,11 @@ const ChatList = ({ onSelectChat, currentUser }) => {
     const getFilteredList = () => {
         let list = [...conversations.friends, ...conversations.requests, ...conversations.following, ...conversations.others];
         if (searchQuery) {
-            list = list.filter(u => u.username.toLowerCase().includes(searchQuery.toLowerCase()));
+            const q = searchQuery.toLowerCase();
+            list = list.filter(u =>
+                (u.username && u.username.toLowerCase().includes(q)) ||
+                (u.displayName && u.displayName.toLowerCase().includes(q))
+            );
         }
         return Array.from(new Map(list.map(item => [item.id, item])).values());
     };
@@ -141,7 +146,7 @@ const ChatList = ({ onSelectChat, currentUser }) => {
 
                                 <div className="flex-1 min-w-0 flex flex-col justify-center">
                                     <div className="flex justify-between items-baseline mb-0.5">
-                                        <h4 className="font-medium text-sm truncate" style={{ color: colors.textPrimary }}>{chat.username}</h4>
+                                        <h4 className="font-medium text-sm truncate" style={{ color: colors.textPrimary }}>{chat.displayName || chat.username?.replace(/_\d+$/, '') || chat.username}</h4>
                                         <span className="text-[10px]" style={{ color: colors.textSecondary }}>10:45 AM</span>
                                     </div>
                                     <div className="flex justify-between items-center group">

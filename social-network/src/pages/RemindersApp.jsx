@@ -25,7 +25,7 @@ const RemindersApp = () => {
     useEffect(() => {
         const current = lists.find(l => l.id === selectedList?.id);
         if (current) setSelectedList(current);
-    }, [lists]);
+    }, [lists, selectedList?.id]);
 
     const addTask = () => {
         const task = {

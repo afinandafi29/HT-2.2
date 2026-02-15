@@ -195,7 +195,7 @@ function Home() {
         const autoJoin = async () => {
           try {
             const userName = currentUser?.username || currentUser?.email?.split('@')[0] || 'User';
-            const baseUrl = `https://p2p.mirotalk.com/join/${roomToJoin.mirotalk_room_name || roomToJoin.id}`;
+            const baseUrl = `http://localhost:3000/join/${roomToJoin.mirotalk_room_name || roomToJoin.id}`;
             const finalUrl = `${baseUrl}${baseUrl.includes('?') ? '&' : '?'}name=${encodeURIComponent(userName)}`;
             window.open(finalUrl, '_blank');
             navigate('/', { replace: true });

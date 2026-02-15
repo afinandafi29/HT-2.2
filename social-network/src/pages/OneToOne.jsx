@@ -17,7 +17,7 @@ const OneToOne = () => {
     const [onlineCount, setOnlineCount] = useState(1236);
 
     // Filter State (Internal use mainly for search params)
-    const [genderPreference, setGenderPreference] = useState('any');
+    const [genderPreference] = useState('any');
     const [myInterests, setMyInterests] = useState([]);
     const [interestInputValue, setInterestInputValue] = useState('');
 
@@ -41,7 +41,7 @@ const OneToOne = () => {
     const isInitiatorRef = useRef(false);
     const messagesEndRef = useRef(null);
     const typingTimeoutRef = useRef(null);
-    const starsRef = useRef(null);
+
 
     // ICE servers
     const iceServers = {
@@ -68,7 +68,7 @@ const OneToOne = () => {
         if (location.state?.reset) {
             stopChat();
         }
-    }, [location.state]);
+    }, [location.state, stopChat]);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });

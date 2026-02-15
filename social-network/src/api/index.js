@@ -8,4 +8,6 @@ export * from './newsApi';
 export * from './notificationApi';
 export * from './friendApi';
 export * from './commentApi';
+export * from './aiApi';
+export * from './youtubeApi';
 export * from './apiSetup';
