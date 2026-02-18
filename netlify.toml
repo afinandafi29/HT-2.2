@@ -1,7 +1,7 @@
 [build]
   base = "social-network"
-  command = "npm install && npm run build"
-  publish = "social-network/dist"
+  command = "npm ci && npm rebuild lightningcss || true && npm run build"
+  publish = "dist"
 
 [[redirects]]
   from = "/*"
