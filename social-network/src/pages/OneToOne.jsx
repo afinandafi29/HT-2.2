@@ -1,15 +1,14 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
-import { Search, Moon, Sun, Video, Phone, MessageSquare, Menu, X, Mic, MicOff, Camera, CameraOff, Flag, PhoneOff } from 'lucide-react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Search, Moon, Sun, Video, Phone, MessageSquare, Menu, X, Mic, MicOff, Camera, CameraOff, Flag, PhoneOff, ArrowLeft, Home } from 'lucide-react';
 import io from 'socket.io-client';
 
-const SIGNALING_SERVER = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-    ? 'http://localhost:3001'
-    : 'https://meet.happyytalk.in';
+const SIGNALING_SERVER = (import.meta.env.VITE_API_URL?.replace('/api', '') || window.location.origin || 'http://localhost:5001');
 
 const OneToOne = () => {
     // UI State
     const location = useLocation();
+    const navigate = useNavigate();
     const [mode, setMode] = useState(null);
     const [isSearching, setIsSearching] = useState(false);
     const [isConnected, setIsConnected] = useState(false);
@@ -37,6 +36,8 @@ const OneToOne = () => {
     const peerConnectionRef = useRef(null);
     const localVideoRef = useRef(null);
     const remoteVideoRef = useRef(null);
+    const remoteAudioRef = useRef(null);
+    const modeRef = useRef(null);
     const partnerIdRef = useRef(null);
     const isInitiatorRef = useRef(false);
     const messagesEndRef = useRef(null);
@@ -52,6 +53,38 @@ const OneToOne = () => {
     };
 
     // Initialize Online Count & Handle Navigation Reset
+    const cleanup = useCallback(() => {
+        if (localStreamRef.current) {
+            localStreamRef.current.getTracks().forEach(track => {
+                track.stop();
+                track.enabled = false;
+            });
+            localStreamRef.current = null;
+        }
+        if (peerConnectionRef.current) {
+            peerConnectionRef.current.close();
+            peerConnectionRef.current = null;
+        }
+        if (socketRef.current) {
+            socketRef.current.disconnect();
+            socketRef.current = null;
+        }
+        if (localVideoRef.current) localVideoRef.current.srcObject = null;
+        if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null;
+        if (remoteAudioRef.current) document.getElementById('oto-remote-audio')?.remove();
+    }, []);
+
+    const stopChat = useCallback(() => {
+        cleanup();
+        setIsConnected(false);
+        setIsSearching(false);
+        setMode(null);
+        modeRef.current = null;
+        setMessages([]);
+        partnerIdRef.current = null;
+    }, [cleanup]);
+
+
     useEffect(() => {
         const interval = setInterval(() => {
             setOnlineCount(prev => Math.max(300, Math.min(2500, prev + Math.floor(Math.random() * 80) - 40)));
@@ -61,9 +94,8 @@ const OneToOne = () => {
             clearInterval(interval);
             cleanup();
         };
-    }, []);
+    }, [cleanup]);
 
-    // Reset when navigating to page via menu (location.state.reset)
     useEffect(() => {
         if (location.state?.reset) {
             stopChat();
@@ -74,30 +106,30 @@ const OneToOne = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
 
-    const cleanup = () => {
-        localStreamRef.current?.getTracks().forEach(track => track.stop());
-        peerConnectionRef.current?.close();
-        socketRef.current?.disconnect();
-    };
+
 
     // Search & Chat Logic
     const startSearch = async (selectedMode) => {
         const activeInterests = myInterests.map(i => i.text.toLowerCase());
         setMode(selectedMode);
+        modeRef.current = selectedMode;
         setIsSearching(true);
         setMessages([]);
+        setVideoEnabled(true);
+        setAudioEnabled(true);
 
         socketRef.current = io(SIGNALING_SERVER);
         setupSocketListeners();
 
-        if (selectedMode === 'audio' || selectedMode === 'video') {
+        if (selectedMode === 'video') {
+            // VIDEO: request camera + mic
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({
-                    video: selectedMode === 'video',
-                    audio: true
+                    video: { facingMode: 'user' },
+                    audio: { echoCancellation: true, noiseSuppression: true }
                 });
                 localStreamRef.current = stream;
-                if (localVideoRef.current && selectedMode === 'video') {
+                if (localVideoRef.current) {
                     localVideoRef.current.srcObject = stream;
                 }
             } catch (error) {
@@ -106,10 +138,25 @@ const OneToOne = () => {
                 stopChat();
                 return;
             }
+        } else if (selectedMode === 'audio') {
+            // AUDIO: request mic only — NO camera
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: false,
+                    audio: { echoCancellation: true, noiseSuppression: true }
+                });
+                localStreamRef.current = stream;
+            } catch (error) {
+                console.error('Error accessing microphone:', error);
+                alert('Please allow microphone access!');
+                stopChat();
+                return;
+            }
         }
+        // TEXT: no permissions needed at all
 
         socketRef.current.emit('find-match', {
-            interests: activeInterests,
+            interests: activeInterests.length > 0 ? activeInterests : ['general'],
             mode: selectedMode,
             gender: genderPreference
         });
@@ -123,7 +170,7 @@ const OneToOne = () => {
             setIsConnected(true);
             setMessages([]);
 
-            if (mode === 'audio' || mode === 'video') {
+            if (modeRef.current === 'audio' || modeRef.current === 'video') {
                 await setupWebRTC(isInitiator);
             }
         });
@@ -135,12 +182,18 @@ const OneToOne = () => {
             await handleAnswer(answer);
         });
         socketRef.current.on('webrtc-ice-candidate', async ({ candidate }) => {
-            if (peerConnectionRef.current) await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(candidate));
+            if (peerConnectionRef.current) {
+                try {
+                    await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(candidate));
+                } catch (e) {
+                    console.warn('ICE candidate error:', e);
+                }
+            }
         });
         socketRef.current.on('chat-message', ({ message }) => {
             setMessages(prev => [...prev, { type: 'stranger', text: message }]);
         });
-        socketRef.current.on('typing', () => setStrangerTyping(false)); // Should be true, but following existing patterns
+        socketRef.current.on('typing', () => setStrangerTyping(true));
         socketRef.current.on('stop-typing', () => setStrangerTyping(false));
         socketRef.current.on('partner-disconnected', () => {
             setMessages(prev => [...prev, { type: 'system', text: 'Stranger has disconnected.' }]);
@@ -156,15 +209,35 @@ const OneToOne = () => {
             });
         }
         peerConnectionRef.current.ontrack = (event) => {
-            if (remoteVideoRef.current) {
-                remoteVideoRef.current.srcObject = event.streams[0];
-                remoteStreamRef.current = event.streams[0];
+            console.log('Remote track received:', event.track.kind);
+            remoteStreamRef.current = event.streams[0];
+
+            if (modeRef.current === 'video') {
+                if (remoteVideoRef.current) {
+                    remoteVideoRef.current.srcObject = event.streams[0];
+                }
+            } else if (modeRef.current === 'audio') {
+                // Play audio through hidden audio element
+                if (remoteAudioRef.current) {
+                    remoteAudioRef.current.srcObject = event.streams[0];
+                }
+                let audioEl = document.getElementById('oto-remote-audio');
+                if (!audioEl) {
+                    audioEl = document.createElement('audio');
+                    audioEl.id = 'oto-remote-audio';
+                    audioEl.autoplay = true;
+                    document.body.appendChild(audioEl);
+                }
+                audioEl.srcObject = event.streams[0];
             }
         };
         peerConnectionRef.current.onicecandidate = (event) => {
             if (event.candidate && socketRef.current) {
                 socketRef.current.emit('webrtc-ice-candidate', { candidate: event.candidate, to: partnerIdRef.current });
             }
+        };
+        peerConnectionRef.current.oniceconnectionstatechange = () => {
+            console.log('ICE state:', peerConnectionRef.current?.iceConnectionState);
         };
         if (isInitiator) {
             const offer = await peerConnectionRef.current.createOffer();
@@ -182,7 +255,9 @@ const OneToOne = () => {
     };
 
     const handleAnswer = async (answer) => {
-        await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(answer));
+        if (peerConnectionRef.current) {
+            await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(answer));
+        }
     };
 
     const sendMessage = (e) => {
@@ -211,21 +286,14 @@ const OneToOne = () => {
         setIsConnected(false);
         setIsSearching(true);
         setMessages([]);
-        if (mode) {
-            setTimeout(() => startSearch(mode), 300);
+        if (modeRef.current) {
+            setTimeout(() => startSearch(modeRef.current), 300);
         } else {
             setIsSearching(false);
         }
     };
 
-    const stopChat = () => {
-        cleanup();
-        setIsConnected(false);
-        setIsSearching(false);
-        setMode(null);
-        setMessages([]);
-        partnerIdRef.current = null;
-    };
+
 
 
     const toggleMic = () => {
@@ -268,7 +336,7 @@ const OneToOne = () => {
     };
 
     // ----------------------------------------------------
-    // RENDER (Strict HTML/CSS Match + User Requests)
+    // RENDER (Original UI/UX restored + fixed logic)
     // ----------------------------------------------------
     return (
         <div className="oto-page-container flex flex-col h-screen">
@@ -276,7 +344,7 @@ const OneToOne = () => {
                 :root {
                     --bg-primary: #ffffff;
                     --bg-secondary: #f8f9fa;
-                    --text-primary: #000000; /* Pure Black for Light Mode */
+                    --text-primary: #000000;
                     --text-secondary: #333333;
                     --border-color: #dddddd;
                     --video-bg: #6c757d;
@@ -305,7 +373,7 @@ const OneToOne = () => {
                     font-family: Arial, sans-serif;
                     background-color: var(--bg-primary);
                     color: var(--text-primary);
-                    height: calc(100vh - 80px); /* Adjust for site header */
+                    height: calc(100vh - 80px);
                     display: flex;
                     flex-direction: column;
                     width: 100%;
@@ -324,13 +392,29 @@ const OneToOne = () => {
                     background: var(--bg-primary);
                     flex-shrink: 0;
                 }
+                
+                .oto-header-btn {
+                    background: none;
+                    border: none;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: var(--text-primary);
+                    padding: 8px;
+                    border-radius: 50%;
+                    transition: background 0.2s;
+                }
+                .oto-header-btn:hover { background: var(--bg-secondary); }
 
                 .oto-logo {
-                    font-size: 28px;
+                    font-size: 24px;
                     font-weight: bold;
                     color: #ff8c00;
+                    display: flex;
+                    align-items: center;
+                    margin: 0 10px;
                 }
-                .oto-logo span { color: #004a99; }
 
                 .oto-online-count {
                     color: var(--primary-blue);
@@ -398,7 +482,7 @@ const OneToOne = () => {
                 .oto-report-btn {
                     position: absolute;
                     top: 10px;
-                    left: 10px; /* Changed to left to avoid conflict with potential other overlays */
+                    left: 10px;
                     background: rgba(220, 53, 69, 0.8);
                     color: white;
                     border: none;
@@ -545,7 +629,7 @@ const OneToOne = () => {
                     outline: none;
                     background: var(--input-bg);
                     color: var(--text-primary);
-                    font-size: 16px; /* Prevents iOS zoom */
+                    font-size: 16px;
                 }
                 .oto-message-input:focus { border-color: var(--primary-blue); }
 
@@ -589,15 +673,29 @@ const OneToOne = () => {
                 }
             `}</style>
 
+            {/* Hidden audio element for remote audio playback in audio mode */}
+            <audio ref={remoteAudioRef} autoPlay style={{ display: 'none' }} />
+
             <div className={`oto-app ${isDarkMode ? 'oto-dark' : ''} flex-grow`}>
                 <header className="oto-header">
+                    <div className="flex items-center gap-2">
+                        <button className="oto-header-btn" onClick={() => navigate('/')} title="Back to Home">
+                            <ArrowLeft size={24} />
+                        </button>
+                        <div
+                            className="oto-logo"
+                            onClick={() => navigate('/')}
+                            style={{ color: '#007bff', cursor: 'pointer' }}
+                        >
+                            Happyytalk.in
+                        </div>
+                    </div>
                     <div className="flex items-center gap-4">
-                        <div className="oto-logo">Happy<span>talk.in</span></div>
+                        <div className="oto-online-count">{onlineCount.toLocaleString()} online now</div>
                         <button className="oto-theme-toggle" onClick={() => setIsDarkMode(!isDarkMode)}>
-                            {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+                            {isDarkMode ? <Sun size={24} /> : <Moon size={24} />}
                         </button>
                     </div>
-                    <div className="oto-online-count">{onlineCount.toLocaleString()} online now</div>
                 </header>
 
                 <main className="oto-main">
@@ -606,6 +704,12 @@ const OneToOne = () => {
                         <div className="oto-video-box">
                             {isConnected && mode === 'video' ? (
                                 <video ref={remoteVideoRef} autoPlay playsInline className="oto-video-element" />
+                            ) : isConnected && mode === 'audio' ? (
+                                <div style={{ color: 'white', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                    <Mic size={48} style={{ marginBottom: '10px', opacity: 0.8 }} />
+                                    <span>Audio Connected</span>
+                                    <span style={{ fontSize: '12px', opacity: 0.6, marginTop: '5px' }}>Stranger is speaking...</span>
+                                </div>
                             ) : (
                                 <div style={{ color: 'white', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                                     {isSearching ? (
@@ -618,7 +722,7 @@ const OneToOne = () => {
                                     )}
                                 </div>
                             )}
-                            <div className="oto-watermark">HAPPYY TALK.in</div>
+                            <div className="oto-watermark">Happyytalk.in</div>
                             {(mode || isConnected) && (
                                 <button className="oto-report-btn" onClick={handleReport}>
                                     <Flag size={12} /> Report
@@ -628,7 +732,7 @@ const OneToOne = () => {
 
                         {/* You / Local Video */}
                         <div className="oto-video-box">
-                            {/* Always render video for persistent ref, toggle visibility */}
+                            {/* Video element — only visible in video mode with camera on */}
                             <video
                                 ref={localVideoRef}
                                 autoPlay
@@ -641,8 +745,8 @@ const OneToOne = () => {
                                 }}
                             />
 
-                            {/* Placeholder/Overlay when camera is off or in audio mode */}
-                            {(!videoEnabled || mode !== 'video') && (
+                            {/* Placeholder when not in video mode or camera is off */}
+                            {(mode !== 'video' || !videoEnabled) && (
                                 <div style={{
                                     color: 'white',
                                     opacity: 0.7,
@@ -654,13 +758,21 @@ const OneToOne = () => {
                                     left: '50%',
                                     transform: 'translate(-50%, -50%)'
                                 }}>
-                                    {mode === 'video' ? 'Camera Off' : 'You'}
+                                    {mode === 'video' ? (
+                                        <><CameraOff size={36} style={{ marginBottom: '8px' }} /><span>Camera Off</span></>
+                                    ) : mode === 'audio' ? (
+                                        <>{audioEnabled ? <Mic size={36} style={{ marginBottom: '8px' }} /> : <MicOff size={36} style={{ marginBottom: '8px' }} />}<span>{audioEnabled ? 'Mic On' : 'Mic Off'}</span></>
+                                    ) : mode === 'text' ? (
+                                        <><MessageSquare size={36} style={{ marginBottom: '8px' }} /><span>Text Mode</span></>
+                                    ) : (
+                                        <span>You</span>
+                                    )}
                                 </div>
                             )}
 
                             <div className="oto-watermark">You</div>
 
-                            {/* Controls Overlay */}
+                            {/* Controls Overlay — only for video and audio modes */}
                             {(mode === 'video' || mode === 'audio') && (
                                 <div style={{ position: 'absolute', bottom: '10px', right: '10px', display: 'flex', gap: '5px', zIndex: 20 }}>
                                     <button onClick={toggleMic} style={{ padding: '5px', borderRadius: '50%', border: 'none', background: audioEnabled ? 'rgba(0,0,0,0.5)' : '#dc3545', color: 'white', cursor: 'pointer' }}>

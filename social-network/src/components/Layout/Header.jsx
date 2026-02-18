@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { getCurrentUserProfileApi } from '../../api/userApi';
+import { CircleUser } from 'lucide-react';
 
-const Header = ({ onMenuClick, onProfileClick }) => {
+const Header = ({ onMenuClick, onProfileClick, onTitleClick }) => {
   const { currentUser } = useAuth();
   const [profileData, setProfileData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -36,7 +37,7 @@ const Header = ({ onMenuClick, onProfileClick }) => {
   const profilePic = profileData?.avatar_url || currentUser?.avatar_url || defaultAvatar;
 
   // Debug logging
-  console.log('Header - currentUser:', currentUser ? 'Logged in' : 'Not logged in');
+
 
   const location = useLocation();
   const isHomePage = location.pathname === '/' || location.pathname === '/jitsi';
@@ -52,7 +53,7 @@ const Header = ({ onMenuClick, onProfileClick }) => {
           >
             <i className="fas fa-bars text-2xl transition-all duration-300 group-hover:scale-110"></i>
           </button>
-          <Link to="/" className='flex items-center gap-3 no-underline group'>
+          <Link to="/" className='flex items-center gap-3 no-underline group' onClick={onTitleClick}>
             <h1 className="text-xl md:text-2xl font-black tracking-tighter" style={{ color: '#ffffff', transition: 'all 0.3s ease' }} onMouseEnter={(e) => e.target.style.color = '#ffffff'} onMouseLeave={(e) => e.target.style.color = '#ffffff'}>HAPPYY TALK</h1>
             <div className="loader" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '40px' }}>
               <svg id="wave" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 42.5 48" style={{ height: '30px', width: '25px', fill: '#ffffff', transition: 'fill 0.3s ease' }}>
@@ -69,7 +70,7 @@ const Header = ({ onMenuClick, onProfileClick }) => {
         </div>
 
         <div className="profile-section flex items-center">
-          {(currentUser && !isHomePage) ? (
+          {currentUser ? (
             <div
               onClick={onProfileClick}
               className="flex items-center gap-3 no-underline group px-3 py-1.5 rounded-2xl hover:bg-white/5 transition-all border border-transparent hover:border-white/10 cursor-pointer"
@@ -92,7 +93,16 @@ const Header = ({ onMenuClick, onProfileClick }) => {
                 <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-[#0f172a] rounded-full sm:hidden"></div>
               </div>
             </div>
-          ) : null}
+          ) : (
+            <Link
+              to="/in"
+              className="flex items-center justify-center w-10 h-10 bg-transparent text-white hover:bg-white/10 rounded-full transition-all no-underline"
+              style={{ border: 'none' }}
+              title="Login"
+            >
+              <CircleUser size={28} />
+            </Link>
+          )}
         </div>
       </div>
 

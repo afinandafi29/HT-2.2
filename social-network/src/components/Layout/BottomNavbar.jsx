@@ -1,18 +1,30 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { LayoutContext } from './Layout';
 
 const BottomNavbar = ({ activeButton, onCreateClick }) => {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
+  const { setActiveHomeView, activeHomeView } = useContext(LayoutContext);
 
   const handleNav = (action) => {
-    if (action === 'home') navigate('/');
-    else if (action === 'feed') navigate('/feed');
-    else if (action === 'reels') navigate('/youtube');
+    if (action === 'home') {
+      setActiveHomeView('rooms');
+      navigate('/');
+    }
+    else if (action === 'feed') {
+      navigate('/feed');
+    }
+    else if (action === 'reels') {
+      setActiveHomeView('shorts');
+      navigate('/');
+    }
     else if (action === 'back') window.history.back();
     else if (action === 'create') {
-      onCreateClick();
+      if (onCreateClick) {
+        onCreateClick();
+      }
     }
   };
 
@@ -20,7 +32,7 @@ const BottomNavbar = ({ activeButton, onCreateClick }) => {
     <div className="bottom-navbar-wrapper">
       <div className="bottom-navbar">
         <button
-          className={activeButton === '/' ? 'active' : ''}
+          className={(activeButton === '/' && activeHomeView === 'rooms') ? 'active' : ''}
           onClick={() => handleNav('home')}
         >
           <i className="fas fa-home"></i>
@@ -46,11 +58,11 @@ const BottomNavbar = ({ activeButton, onCreateClick }) => {
         </button>
 
         <button
-          className={activeButton === '/youtube' ? 'active' : ''}
+          className={(activeButton === '/' && activeHomeView === 'shorts') ? 'active' : ''}
           onClick={() => handleNav('reels')}
         >
           <i className="fas fa-camera-retro"></i>
-          <span>Shots</span>
+          <span>Shorts</span>
         </button>
 
         <button

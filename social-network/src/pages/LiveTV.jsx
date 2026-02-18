@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Search, Play, Pause, Volume2, Volume1, VolumeX, RotateCw, Maximize, Minimize, PictureInPicture2, Tv, ExternalLink } from 'lucide-react';
 import Hls from 'hls.js';
 import '../styles/LiveTV.css';
@@ -27,21 +27,7 @@ const LiveTV = () => {
     const playerContainerRef = useRef(null);
     const controlsTimeoutRef = useRef(null);
 
-    useEffect(() => {
-        // Fetch Countries and Languages
-        Promise.all([
-            fetch('https://iptv-org.github.io/api/countries.json').then(r => r.json()),
-            fetch('https://iptv-org.github.io/api/languages.json').then(r => r.json())
-        ]).then(([countriesData, languagesData]) => {
-            setCountries(countriesData.sort((a, b) => a.name.localeCompare(b.name)));
-            setLanguages(languagesData.sort((a, b) => a.name.localeCompare(b.name)));
-        }).catch(err => console.error('Error fetching metadata:', err));
-
-        // Initial fetch - all channels from index
-        fetchPlaylist('https://iptv-org.github.io/iptv/index.m3u');
-    }, []);
-
-    const fetchPlaylist = (url) => {
+    const fetchPlaylist = useCallback((url) => {
         setLoading(true);
         fetch(url)
             .then(response => response.text())
@@ -95,7 +81,24 @@ const LiveTV = () => {
                 console.error('Error fetching IPTV playlist:', err);
                 setLoading(false);
             });
-    };
+    }, [selectedChannel]);
+
+
+
+
+    useEffect(() => {
+        // Fetch Countries and Languages
+        Promise.all([
+            fetch('https://iptv-org.github.io/api/countries.json').then(r => r.json()),
+            fetch('https://iptv-org.github.io/api/languages.json').then(r => r.json())
+        ]).then(([countriesData, languagesData]) => {
+            setCountries(countriesData.sort((a, b) => a.name.localeCompare(b.name)));
+            setLanguages(languagesData.sort((a, b) => a.name.localeCompare(b.name)));
+        }).catch(err => console.error('Error fetching metadata:', err));
+
+        // Initial fetch - all channels from index
+        fetchPlaylist('https://iptv-org.github.io/iptv/index.m3u');
+    }, [fetchPlaylist]);
 
     // Filter Logic
     useEffect(() => {

@@ -42,7 +42,7 @@ const Navigation = ({
               All
             </button>
             <button
-              className={activeCategory === 'feed' ? 'active' : ''}
+              className={`desktop-only ${activeCategory === 'feed' ? 'active' : ''}`}
               onClick={() => {
                 handleButtonClick('feed');
                 navigate('/feed');

@@ -7,7 +7,7 @@ const getYTKey = () => {
       const keys = JSON.parse(saved);
       return keys.youtube || import.meta.env.VITE_YT_API_KEY || 'AIzaSyDtLX6171RySOtqd-U2Pgcjy_9o2rWDNrc';
     }
-  } catch (e) { }
+  } catch (e) { /* ignore */ }
   return import.meta.env.VITE_YT_API_KEY || 'AIzaSyDtLX6171RySOtqd-U2Pgcjy_9o2rWDNrc';
 };
 
@@ -65,9 +65,7 @@ const YouTubeContainer = () => {
             fetchSuccess = true;
           }
         }
-      } catch (apiError) {
-        console.log('YouTube API call failed, using fallback data...');
-      }
+      } catch (apiError) { /* ignore */ }
 
       if (!fetchSuccess) {
         const mockVideos = generateMockVideos(query || 'trending', 10);

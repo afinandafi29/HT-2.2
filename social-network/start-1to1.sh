@@ -4,7 +4,7 @@ echo "🚀 Starting 1-to-1 Chat Services..."
 echo ""
 
 # Start signaling server in background
-echo "📡 Starting signaling server on port 3001..."
+echo "📡 Starting signaling server on port 5001..."
 cd signaling-server
 node server.js &
 SIGNALING_PID=$!

@@ -7,7 +7,7 @@ const MovieScreen = () => {
   const [error, setError] = useState(null);
 
   // Watchmode API Key
-  const WATCHMODE_API_KEY = 'ILzoVazWtCJJw4wWR00Kf4DUxvK6apIinbJ8FSGh';
+  const WATCHMODE_API_KEY = import.meta.env.VITE_WATCHMODE_API_KEY;
 
   useEffect(() => {
     fetchMovies();

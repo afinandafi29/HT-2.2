@@ -5,12 +5,13 @@ const Chat = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [isConnected, setIsConnected] = useState(false);
     const [error, setError] = useState(null);
+    const ROCKET_CHAT_URL = import.meta.env.VITE_ROCKET_CHAT_URL || 'http://localhost:3000';
 
     useEffect(() => {
         // Check if Rocket.Chat is accessible
         const checkRocketChat = async () => {
             try {
-                const response = await fetch('http://localhost:3000', {
+                const response = await fetch(ROCKET_CHAT_URL, {
                     method: 'HEAD',
                     mode: 'no-cors' // This will succeed if server is up
                 });
@@ -33,7 +34,7 @@ const Chat = () => {
         }, 5000);
 
         return () => clearInterval(interval);
-    }, [isConnected]);
+    }, [isConnected, ROCKET_CHAT_URL]);
 
     if (isLoading) {
         return (
@@ -75,7 +76,7 @@ const Chat = () => {
         <div className="chat-page-container">
             <div className="chat-iframe-wrapper">
                 <iframe
-                    src="http://localhost:3000"
+                    src={ROCKET_CHAT_URL}
                     title="HAPPYY TALK Chat"
                     className="chat-iframe"
                     allow="camera;microphone;fullscreen;display-capture;clipboard-read;clipboard-write"

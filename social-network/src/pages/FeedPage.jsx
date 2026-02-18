@@ -1,1596 +1,754 @@
-// v2 - Triggering Vite refresh
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useTheme } from '../contexts/ThemeContext';
+import {
+    Zap, Home, TrendingUp, PlaySquare, Bell, Mail,
+    Moon, Sun, Search, Plus, User, Flame, MessageCircle,
+    Repeat, Share2, Bookmark, Menu, ArrowLeft, Image, Video, Music, Type, BarChart2, Radio, Users,
+    ChevronDown, ChevronUp, Globe, Star, Settings, LogOut, Activity, UserCircle, Heart, X, LayoutGrid
+} from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { newsApi } from '../api/newsApi';
-import { getPostsApi, createPostApi } from '../api/postApi';
-import { useAuth } from '../contexts/AuthContext';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Home, Search, PlusSquare, User, RefreshCw, Camera, Heart, MessageCircle, Send, Bookmark, MoreHorizontal, Moon, Sun, Menu, X, Compass, Radio, Youtube, ChevronLeft, CheckCircle } from 'lucide-react';
-import YouTubeUI from '../components/YouTubeUI';
-import '../styles/feed-page.css';
+import ShortsSection from '../components/ShortsSection';
+import StoryModal from '../components/Feed/StoryModal';
+import '../styles/NewFeed.css';
 
-const NAME_REGISTRY = {
-    English: { m: ["James", "John", "Robert", "Michael", "William", "David", "Richard"], f: ["Mary", "Patricia", "Jennifer", "Linda", "Elizabeth", "Barbara"] },
-    Spanish: { m: ["Antonio", "Manuel", "José", "Francisco", "Juan", "Carlos"], f: ["María", "Carmen", "Ana", "Isabel", "Dolores"] },
-    Arabic: { m: ["Ahmed", "Mohamed", "Omar", "Khaled", "Tariq"], f: ["Fatima", "Aisha", "Layla", "Zainab", "Nora"] },
-    Japanese: { m: ["Hiroshi", "Kenji", "Takashi", "Haruto"], f: ["Sakura", "Yui", "Aoi", "Hana"] },
-    Hindi: { m: ["Aarav", "Vihaan", "Arjun", "Sai"], f: ["Aanya", "Diya", "Anika", "Priya"] },
-    Russian: { m: ["Alexander", "Dmitry", "Mikhail", "Ivan"], f: ["Anastasia", "Maria", "Sofia", "Anna"] }
-};
+// Helper for truncated text
+const PostContent = ({ content }) => {
+    const [isExpanded, setIsExpanded] = useState(false);
+    const limit = 150;
 
-const COUNTRIES = ["USA", "UK", "Canada", "Australia", "Germany", "France", "Spain", "Italy", "Japan", "South Korea", "Brazil", "Mexico", "India", "UAE", "Singapore"];
+    if (content.length <= limit) return <div className="post-content">{content}</div>;
 
-const getRandomUser = () => {
-    const cultures = Object.keys(NAME_REGISTRY);
-    const culture = cultures[Math.floor(Math.random() * cultures.length)];
-    const isMale = Math.random() > 0.5;
-    const nameList = isMale ? NAME_REGISTRY[culture].m : NAME_REGISTRY[culture].f;
-    const name = nameList[Math.floor(Math.random() * nameList.length)];
-    const country = COUNTRIES[Math.floor(Math.random() * COUNTRIES.length)];
-    const userId = `user_${Math.random().toString(36).substr(2, 9)}`;
-    const username = name.toLowerCase().replace(/\s+/g, '_') + Math.floor(Math.random() * 1000);
-    return {
-        id: userId,
-        name,
-        username,
-        pic: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&color=fff`,
-        location: country,
-        bio: `${name} | ${country} 🌍 | Living my best life ✨`,
-        isActive: Math.random() > 0.7
-    };
-};
-
-const SELF_USER_ID = `user_${Math.random().toString(36).substr(2, 9)}`;
-const SELF_USER_BIO = "Living life one post at a time ✨ | Explorer 🌍 | Coffee lover ☕";
-
-const STATIC_STORY_USERS = [
-    { id: 1, name: "Tatiana Pavlova", username: "tatiana_pavlova", isUpdate: true, image_url: "https://images.unsplash.com/photo-1626071466175-79ab723e9fdd?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=759&q=80" },
-    { id: 2, name: "Aiony Haust", username: "aiony_haust", isUpdate: true, image_url: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=764&q=80" },
-    { id: 3, name: "Joel Mott", username: "joel_mott", isUpdate: true, image_url: "https://images.unsplash.com/photo-1548142813-c348350df52b?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=689&q=80" },
-    { id: 4, name: "Caique Silva", username: "caique_silva", isUpdate: true, image_url: "https://images.unsplash.com/photo-1504363081893-c8226db66926?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80" },
-    { id: 5, name: "Jemima Wood", username: "jemima_wood", isUpdate: true, image_url: "https://images.unsplash.com/photo-1644456070980-a6be4db8910a?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80" },
-    { id: 6, name: "Leio McLaren", username: "leio_mclaren", isUpdate: true, image_url: "https://images.unsplash.com/photo-1628157588553-5eeea00af15c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=880&q=80" },
-    { id: 7, name: "Alex Suprun", username: "alex_suprun", isUpdate: false, image_url: "https://images.unsplash.com/photo-1640951613773-54706e06851d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=880&q=80" },
-    { id: 8, name: "Charles Deluvio", username: "charles_deluvio", isUpdate: false, image_url: "https://images.unsplash.com/photo-1543610892-0b1f7e6d8ac1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80" },
-    { id: 9, name: "Luis Villasmil", username: "luis_villasmil", isUpdate: false, image_url: "https://images.unsplash.com/photo-1624561172888-ac93c696e10c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8NDN8fGF2YXRhcnxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=600&q=60" },
-    { id: 10, name: "Jabari Timothy", username: "jabari_timothy", isUpdate: false, image_url: "https://images.unsplash.com/photo-1656473040206-53753fbbc767?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80" },
-    { id: 11, name: "Ben Parker", username: "ben_parker", isUpdate: false, image_url: "https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80" },
-    { id: 12, name: "Ayo Ogunseinde", username: "ayo_ogunseinde", isUpdate: false, image_url: "https://images.unsplash.com/photo-1463453091185-61582044d556?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80" },
-    { id: 13, name: "Vince Fleming", username: "vince_fleming", isUpdate: false, image_url: "https://images.unsplash.com/photo-1522556189639-b150ed9c4330?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80" },
-    { id: 14, name: "Huston Wilson", username: "huston_wilson", isUpdate: false, image_url: "https://images.unsplash.com/photo-1507114845806-0347f6150324?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80" },
-    { id: 15, name: "Leon Ell'", username: "leon_ell", isUpdate: false, image_url: "https://images.unsplash.com/photo-1523824921871-d6f1a15151f1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80" },
-];
-
-const ReelIcon = () => (
-    <svg aria-label="Reels" color="currentColor" fill="currentColor" height="24" role="img" viewBox="0 0 24 24" width="24">
-        <line fill="none" stroke="currentColor" strokeLinejoin="round" strokeWidth="2" x1="2.049" x2="21.95" y1="7.002" y2="7.002"></line>
-        <line fill="none" stroke="currentColor" strokeLinejoin="round" strokeWidth="2" x1="13.504" x2="16.362" y1="2.001" y2="7.002"></line>
-        <line fill="none" stroke="currentColor" strokeLinejoin="round" strokeWidth="2" x1="7.207" x2="10.002" y1="2.11" y2="7.002"></line>
-        <path d="M2 12.001v3.449c0 2.849.698 4.006 1.606 4.945.94.908 2.098 1.607 4.946 1.607h6.896c2.848 0 4.006-.699 4.946-1.607.908-.939 1.606-2.096 1.606-4.945V8.552c0-2.848-.698-4.006-1.606-4.945C19.454 2.699 18.296 2 15.448 2H8.552c-2.848 0-4.006.699-4.946 1.607C2.698 4.546 2 5.704 2 8.552z" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"></path>
-        <path d="M9.763 17.664a.908.908 0 01-.454-.787V11.63a.909.909 0 011.364-.788l4.545 2.624a.909.909 0 010 1.575l-4.545 2.624a.91.91 0 01-.51.012z"></path>
-    </svg>
-);
-
-// Custom Feed Sidebar
-const FeedSidebarInsta = ({ activeView, setActiveView, onGoHome, onOpenProfile, isDarkMode, toggleTheme, isCollapsed, setIsCollapsed, isOpen, setIsOpen, navigate, setIsCreationModalOpen }) => {
     return (
-        <>
-            {isOpen && (
-                <div
-                    className="feed-sidebar-overlay"
-                    onClick={() => setIsOpen(false)}
-                    style={{
-                        position: 'fixed',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        background: 'rgba(0,0,0,0.5)',
-                        backdropFilter: 'blur(4px)',
-                        zIndex: 9998,
-                        display: window.innerWidth <= 768 ? 'block' : 'none'
-                    }}
-                />
-            )}
-            <nav className={`navbar-insta ${isCollapsed ? 'collapsed' : ''} ${isOpen ? 'active' : ''}`}>
-                <div className="instagram-text-logo" onClick={onGoHome} style={{ cursor: 'pointer', marginBottom: '30px' }}>
-                    <span style={{ fontFamily: 'Outfit', fontWeight: 900, fontSize: '24px', color: '#3b82f6' }}>{isCollapsed ? 'HT.' : 'HAPPYY TALK.'}</span>
-                </div>
-                <div className={`sub-section ${activeView === 'home' ? 'clicked' : ''}`} onClick={() => { setActiveView('home'); setIsOpen(false); }}>
-                    <Home size={24} color="var(--ig-font)" />
-                    <a href="#" onClick={(e) => e.preventDefault()}>Home</a>
-                </div>
-                <div className={`sub-section ${activeView === 'search' ? 'clicked' : ''}`} onClick={() => { setActiveView('search'); setIsOpen(false); }}>
-                    <Search size={24} color="var(--ig-font)" />
-                    <a href="#" onClick={(e) => e.preventDefault()}>Search</a>
-                </div>
-                <div className={`sub-section ${activeView === 'explore' ? 'clicked' : ''}`} onClick={() => { setActiveView('explore'); setIsOpen(false); }}>
-                    <Compass size={24} color="var(--ig-font)" />
-                    <a href="#" onClick={(e) => e.preventDefault()}>Explore</a>
-                </div>
-                <div className={`sub-section ${activeView === 'reels' ? 'clicked' : ''}`} onClick={() => { setActiveView('reels'); setIsOpen(false); }}>
-                    <ReelIcon />
-                    <a href="#" onClick={(e) => e.preventDefault()}>Reels</a>
-                </div>
-                <div className={`sub-section ${activeView === 'live' ? 'clicked' : ''}`} onClick={() => { setActiveView('live'); setIsOpen(false); }}>
-                    <Radio size={24} color="#ef4444" />
-                    <a href="#" onClick={(e) => e.preventDefault()}>Live</a>
-                </div>
-                <div className={`sub-section ${activeView === 'youtube' ? 'clicked' : ''}`} onClick={() => { setActiveView('youtube'); setIsOpen(false); }}>
-                    <Youtube size={24} color="#ff0000" />
-                    <a href="#" onClick={(e) => e.preventDefault()}>YouTube</a>
-                </div>
-                <div className="sub-section" onClick={() => { window.dispatchEvent(new CustomEvent('OPEN_CHAT_PANEL')); setIsOpen(false); }}>
-                    <MessageCircle size={24} color="var(--ig-font)" />
-                    <a href="#" onClick={(e) => e.preventDefault()}>Messages</a>
-                </div>
-                <div className="sub-section">
-                    <Heart size={24} color="var(--ig-font)" />
-                    <a href="#" onClick={(e) => e.preventDefault()}>Notifications</a>
-                </div>
-                <div className="sub-section" onClick={() => setIsCreationModalOpen(true)}>
-                    <PlusSquare size={24} color="var(--ig-font)" />
-                    <a href="#" onClick={(e) => e.preventDefault()}>Create</a>
-                </div>
-                <div className="sub-section" onClick={toggleTheme}>
-                    {isDarkMode ? <Sun size={24} color="var(--ig-font)" /> : <Moon size={24} color="var(--ig-font)" />}
-                    <a href="#" onClick={(e) => e.preventDefault()}>{isDarkMode ? 'Light-mode' : 'Dark-mode'}</a>
-                </div>
-                <div className="sub-section" onClick={() => onOpenProfile(null, true)}>
-                    <div className="profile-img" style={{ width: '24px', height: '24px', borderRadius: '50%', overflow: 'hidden' }}>
-                        <img src="https://cdn-icons-png.flaticon.com/511/149/149071.png" alt="" style={{ width: '100%', height: '100%' }} />
-                    </div>
-                    <a href="#" onClick={(e) => e.preventDefault()}>Profile</a>
-                </div>
-                <div className="menu-section" style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '10px', padding: '10px' }}>
-                    <div className="sub-section" onClick={() => setIsCollapsed(!isCollapsed)} style={{ background: 'var(--ig-hover)', borderRadius: '12px' }}>
-                        <Menu size={24} color="var(--ig-font)" />
-                        <a href="#" onClick={(e) => e.preventDefault()} style={{ textDecoration: 'none', color: 'var(--ig-font)', fontWeight: 700 }}>{isCollapsed ? '' : 'Collapse'}</a>
-                    </div>
-                </div>
-            </nav>
-        </>
-    );
-};
-
-// Mobile Header Component
-const FeedMobileHeader = ({ navigate, isDarkMode, toggleTheme, onMenuOpen }) => {
-    return (
-        <div className="feed-mobile-header">
-            <button className="mobile-sidebar-toggle" onClick={onMenuOpen}>
-                <Menu size={26} />
-            </button>
-            <h1 className="mobile-header-title" onClick={() => navigate('/')}>HAPPYY TALK</h1>
-            <button className="mobile-theme-toggle" onClick={toggleTheme}>
-                {isDarkMode ? <Sun size={24} /> : <Moon size={24} />}
+        <div className="post-content">
+            {isExpanded ? content : `${content.substring(0, limit)}...`}
+            <button className="read-more-btn" onClick={() => setIsExpanded(!isExpanded)}>
+                {isExpanded ? 'Show Less' : 'Read More'}
             </button>
         </div>
     );
 };
 
-// New Mobile Sidebar Drawer Component
-const MobileSidebarDrawer = ({ isOpen, onClose, activeView, setActiveView, onOpenProfile, toggleTheme, isDarkMode, navigate, setIsCreationModalOpen }) => {
-    return (
-        <>
-            <div className={`mobile-sidebar-overlay ${isOpen ? 'open' : ''}`} onClick={onClose} />
-            <div className={`mobile-sidebar-drawer ${isOpen ? 'open' : ''}`}>
-                <div className="mobile-sidebar-header">
-                    <span className="mobile-sidebar-logo">HAPPYY TALK.</span>
-                    <button className="mobile-sidebar-close" onClick={onClose}>
-                        <X size={28} />
-                    </button>
-                </div>
-
-
-
-                <div className="mobile-sidebar-menu">
-                    <div className={`mobile-menu-item ${activeView === 'home' ? 'active' : ''}`} onClick={() => { setActiveView('home'); onClose(); }}>
-                        <Home size={24} />
-                        <span>Home</span>
-                    </div>
-                    <div className={`mobile-menu-item ${activeView === 'search' ? 'active' : ''}`} onClick={() => { setActiveView('search'); onClose(); }}>
-                        <Search size={24} />
-                        <span>Search</span>
-                    </div>
-                    <div className={`mobile-menu-item ${activeView === 'explore' ? 'active' : ''}`} onClick={() => { setActiveView('explore'); onClose(); }}>
-                        <Compass size={24} />
-                        <span>Explore</span>
-                    </div>
-                    <div className={`mobile-menu-item ${activeView === 'reels' ? 'active' : ''}`} onClick={() => { setActiveView('reels'); onClose(); }}>
-                        <ReelIcon />
-                        <span>Reels</span>
-                    </div>
-                    <div className={`mobile-menu-item ${activeView === 'youtube' ? 'active' : ''}`} onClick={() => { setActiveView('youtube'); onClose(); }}>
-                        <Youtube size={24} color="#ff0000" />
-                        <span>YouTube</span>
-                    </div>
-                    <div className={`mobile-menu-item ${activeView === 'live' ? 'active' : ''}`} onClick={() => { setActiveView('live'); onClose(); }}>
-                        <Radio size={24} color="#ef4444" />
-                        <span>Live TV</span>
-                    </div>
-                    <div className="mobile-menu-item" onClick={() => { window.dispatchEvent(new CustomEvent('OPEN_CHAT_PANEL')); onClose(); }}>
-                        <MessageCircle size={24} />
-                        <span>Messages</span>
-                    </div>
-                    <div className="mobile-menu-item" onClick={() => { setIsCreationModalOpen(true); onClose(); }}>
-                        <PlusSquare size={24} />
-                        <span>Create Post</span>
-                    </div>
-                    <div className="mobile-menu-item" onClick={() => { toggleTheme(); onClose(); }}>
-                        {isDarkMode ? <Sun size={24} /> : <Moon size={24} />}
-                        <span>{isDarkMode ? 'Light Mode' : 'Dark Mode'}</span>
-                    </div>
-                    <div className="mobile-menu-item" onClick={() => { onOpenProfile(null, true); onClose(); }}>
-                        <User size={24} />
-                        <span>Profile</span>
-                    </div>
-                </div>
-
-
-            </div>
-        </>
-    );
-};
-
-// Custom Feed Bottom Nav
-const FeedBottomNav = ({ activeView, setActiveView, onOpenProfile, setIsCreationModalOpen, onGoHome }) => {
-    return (
-        <div className="feed-custom-bottom-nav">
-            <button className={activeView === 'home' ? 'active' : ''} onClick={() => { setActiveView('home'); window.scrollTo(0, 0); }}>
-                <Home size={24} />
-            </button>
-            <button className={activeView === 'search' ? 'active' : ''} onClick={() => setActiveView('search')}>
-                <Search size={24} />
-            </button>
-            <button className="plus-nav-btn" onClick={() => setIsCreationModalOpen(true)}>
-                <PlusSquare size={24} />
-            </button>
-            <button className={activeView === 'reels' ? 'active' : ''} onClick={() => setActiveView('reels')}>
-                <ReelIcon />
-            </button>
-            <button onClick={() => window.history.back()}>
-                <ChevronLeft size={24} />
-            </button>
-        </div>
-    );
-};
-
-// Story Modal
-const StoryModal = ({ isOpen, stories, activeIndex, onClose, onNext, onPrev }) => {
-    const [progress, setProgress] = useState(0);
-    const [liked, setLiked] = useState(false);
-    const timerRef = useRef();
-
-    useEffect(() => {
-        if (!isOpen) { setProgress(0); return; }
-        setProgress(0);
-        setLiked(false);
-        timerRef.current = setInterval(() => {
-            setProgress(prev => {
-                if (prev >= 100) {
-                    clearInterval(timerRef.current);
-                    onNext();
-                    return 100;
-                }
-                return prev + 1;
-            });
-        }, 50);
-        return () => clearInterval(timerRef.current);
-    }, [isOpen, activeIndex, onNext]);
-
-    if (!isOpen) return null;
-    const currentStory = stories[activeIndex];
-
-    return (
-        <AnimatePresence>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="story-modal" onClick={onClose}>
-                <motion.div className="story-modal-content" onClick={(e) => e.stopPropagation()} drag="x" dragConstraints={{ left: 0, right: 0 }}
-                    onDragEnd={(e, { offset }) => { if (offset.x > 100) onPrev(); else if (offset.x < -100) onNext(); }}>
-                    <div className="story-progress-container">
-                        {stories.map((_, i) => (
-                            <div key={i} className="story-progress-bar">
-                                <div className="story-progress-fill" style={{ width: i < activeIndex ? '100%' : i === activeIndex ? `${progress}%` : '0%', transition: i === activeIndex ? 'none' : '0.3s' }} />
-                            </div>
-                        ))}
-                    </div>
-                    <div className="story-header">
-                        <div className="usrProfile">
-                            <div className="uplogo"><img src={currentStory.user.pic} alt="" /></div>
-                            <p style={{ color: '#fff' }}>{currentStory.user.username} <small>Just now</small></p>
-                        </div>
-                        <button className="story-close" onClick={onClose}><i className="fas fa-times"></i></button>
-                    </div>
-                    <img src={currentStory.image} alt="Story" className="story-image" />
-                    <div className="story-nav story-nav-prev" onClick={onPrev}></div>
-                    <div className="story-nav story-nav-next" onClick={onNext}></div>
-                    <div className="story-footer">
-                        <input type="text" placeholder="Send message..." className="story-input" />
-                        <i className={`${liked ? 'fas' : 'far'} fa-heart`} style={{ color: liked ? '#ed4956' : '#fff' }} onClick={() => setLiked(!liked)}></i>
-                        <i className="far fa-paper-plane"></i>
-                    </div>
-                </motion.div>
-            </motion.div>
-        </AnimatePresence>
-    );
-};
-
-const PostDetailModal = ({ isOpen, post, onClose, onShare }) => {
-    const [liked, setLiked] = useState(false);
-    const [saved, setSaved] = useState(false);
-
-    if (!isOpen || !post) return null;
-
-    return (
-        <div className="post-detail-overlay-alien" onClick={onClose}>
-            <div className="alien-wrapper">
-                <div className="alien-card" onClick={e => e.stopPropagation()}>
-                    <div className="alien-top">
-                        <div className="alien-userDetails">
-                            <div className="alien-profile_img">
-                                <img src={post.user.pic} className="alien-cover" alt="" />
-                            </div>
-                            <h3>{post.user.username}<br /><span>{post.user.location || "Earth, Solar System"}</span></h3>
-                        </div>
-                        <div className="alien-dot">
-                            <MoreHorizontal size={20} />
-                        </div>
-                    </div>
-                    <div className="alien-imgBx">
-                        <img src={post.image} className="alien-cover" alt="" />
-                    </div>
-                    <div className="alien-actionBtns">
-                        <div className="left">
-                            <Heart
-                                size={24}
-                                className={`alien-icon ${liked ? 'liked' : ''}`}
-                                color={liked ? '#ef4444' : 'currentColor'}
-                                fill={liked ? '#ef4444' : 'none'}
-                                onClick={() => setLiked(!liked)}
-                            />
-                            <MessageCircle size={24} className="alien-icon" />
-                            <Send size={24} className="alien-icon" onClick={() => onShare && onShare(post)} style={{ cursor: 'pointer' }} />
-                        </div>
-                        <div className="right">
-                            <Bookmark
-                                size={24}
-                                className={`alien-icon ${saved ? 'saved' : ''}`}
-                                color={saved ? '#3b82f6' : 'currentColor'}
-                                fill={saved ? '#3b82f6' : 'none'}
-                                onClick={() => setSaved(!saved)}
-                            />
-                        </div>
-                    </div>
-                    <h4 className="alien-likes">{(post.likes + (liked ? 1 : 0)).toLocaleString()} likes</h4>
-                    <h4 className="alien-message"><b>{post.user.username}</b> {post.caption} <span>#AlienUI</span> <span>#Future</span> <span>#HappyTalk</span></h4>
-                    <h4 className="alien-comments">View all {post.comments || 0} comments</h4>
-                    <div className="alien-addComments">
-                        <div className="alien-userImg">
-                            <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" className="alien-cover" alt="" />
-                        </div>
-                        <input type="text" className="alien-text" placeholder="Add a comment..." />
-                    </div>
-                    <h5 className="alien-postTime">{post.time || "4 hours ago"}</h5>
-                    <button className="alien-close-btn" onClick={onClose}><X size={20} /></button>
-                </div>
-            </div>
-        </div>
-    );
-};
-
-// ProfileView Component
-const ProfileView = ({ user, isSelf }) => {
-    const [activeTab, setActiveTab] = useState('grid');
-    const [profileImages, setProfileImages] = useState([]);
-
-    useEffect(() => {
-        const fetchProfileImages = async () => {
-            try {
-                const res = await newsApi.getAllNews({ search: 'nature lifestyle', limit: 15 });
-                setProfileImages((res.data || []).map(n => ({ id: n.uuid, url: n.image_url })));
-            } catch (err) { console.error(err); }
-        };
-        fetchProfileImages();
-    }, [user]);
-
-    const displayName = isSelf ? "User" : user?.name || "User";
-    const displayBio = isSelf ? SELF_USER_BIO : user?.bio || "";
-    const displayId = isSelf ? SELF_USER_ID : user?.id || "";
-    const stats = isSelf ? { p: 0, f1: 0, f2: 0 } : { p: profileImages.length, f1: Math.floor(Math.random() * 1000), f2: Math.floor(Math.random() * 800) };
-    const pic = isSelf ? "https://cdn-icons-png.flaticon.com/512/149/149071.png" : user?.pic || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
-
-    return (
-        <div className="user-profile-view">
-            <div className="profile-header-top">
-                <p>{isSelf ? "user" : user?.username || "user"} <span><img src="https://img.icons8.com/ios/30/000000/expand-arrow--v3.png" style={{ width: 10 }} alt="" /></span></p>
-                <div style={{ display: 'flex', gap: 10 }}>
-                    <img src="https://img.icons8.com/ios/50/000000/plus-2-math.png" style={{ width: 30 }} alt="" />
-                    <img src="https://img.icons8.com/ios-filled/50/000000/menu--v2.png" style={{ width: 30 }} alt="" />
-                </div>
-            </div>
-
-            <div className="profile-bio-section">
-                <div className="bio-top">
-                    <div className="profile-main-pic-wrapper">
-                        <div className="profile-main-pic" style={{ backgroundImage: `url(${pic})`, backgroundSize: 'cover' }}></div>
-                    </div>
-                    <div className="stats-flex">
-                        <div className="stat-item"><span className="num">{stats.p}</span><span className="label">Posts</span></div>
-                        <div className="stat-item"><span className="num">{stats.f1}</span><span className="label">Followers</span></div>
-                        <div className="stat-item"><span className="num">{stats.f2}</span><span className="label">Following</span></div>
-                    </div>
-                </div>
-                <div className="bio-content">
-                    <p className="profile-name">{displayName}</p>
-                    <p className="profile-bio-text">{displayBio}</p>
-                    <p className="profile-user-id">ID: {displayId}</p>
-                </div>
-
-                <div className="edit-profile-row">
-                    <button className="edit-btn">Edit Profile</button>
-                    <button className="share-btn">Share Profile</button>
-                </div>
-            </div>
-
-            <div className="highlights-section">
-                <p className="highlights-title">Story Highlights</p>
-                <div className="highlights-list">
-                    <div className="highlight-item" style={{ backgroundImage: 'url(https://img.icons8.com/bubbles/50/000000/airport.png)' }}></div>
-                    <div className="highlight-item" style={{ backgroundImage: 'url(https://img.icons8.com/bubbles/50/000000/new-delhi.png)' }}></div>
-                    <div className="highlight-item" style={{ backgroundImage: 'url(https://img.icons8.com/bubbles/50/000000/hamburger.png)' }}></div>
-                    <div className="highlight-item highlight-plus">
-                        <img src="https://img.icons8.com/android/24/000000/plus.png" style={{ width: 20 }} alt="" />
-                    </div>
-                </div>
-            </div>
-
-            <div className="profile-tabs">
-                <div className={`profile-tab-item ${activeTab === 'grid' ? 'active' : ''}`} onClick={() => setActiveTab('grid')}>
-                    <img src="https://img.icons8.com/small/16/000000/grid.png" alt="" />
-                </div>
-                <div className={`profile-tab-item ${activeTab === 'tagged' ? 'active' : ''}`} onClick={() => setActiveTab('tagged')}>
-                    <img src="https://cdn0.iconfinder.com/data/icons/instagram-ui-1/24/Instagram-UI_tagged-512.png" style={{ width: 20 }} alt="" />
-                </div>
-            </div>
-
-            <div className="profile-post-grid">
-                {profileImages.map(post => (
-                    <div key={post.id} className="profile-post-item">
-                        <img src={post.url} alt="" />
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
-};
-
-// Cache-bust image URL so search always shows fresh images
-const freshImageUrl = (url) => {
-    if (!url) return url;
-    const sep = url.includes('?') ? '&' : '?';
-    return `${url}${sep}t=${Date.now()}`;
-};
-
-// SearchGrid Component - ONLY Images (Pexels + SourceSplash)
-const SearchGrid = ({ onOpenPost }) => {
-    const PEXELS_KEY = 'XkN36hK2S0z876lWSlI5YoB9ZscPAq4cZbcL6SXABt9CyZmqBwwjov1P';
-    const SOURCESPLASH_KEY = '102|Mk05XlXKntW2r3BoeOpYtX9B3OSxPPtiAd8VRpPi7e4fcc79';
-    const [items, setItems] = useState([]);
-    const [page, setPage] = useState(1);
-    const [loading, setLoading] = useState(false);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [searchRunId, setSearchRunId] = useState(0); // force new images per search
-    const observer = useRef();
-
-    const fetchSearchItems = useCallback(async (p, query = '') => {
-        setLoading(true);
-        try {
-            const q = query || 'lifestyle decoration';
-
-            // Fetch Images from Pexels
-            const pexelsPromise = fetch(`https://api.pexels.com/v1/search?query=${encodeURIComponent(q)}&page=${p}&per_page=18`, {
-                headers: { Authorization: PEXELS_KEY }
-            }).then(res => res.json())
-                .then(data => (data.photos || []).map(photo => ({
-                    id: `pexels-${photo.id}`,
-                    url: photo.src.large || photo.src.medium,
-                    type: 'image',
-                    alt: photo.alt || 'Pexels Image',
-                    author: photo.photographer
-                })))
-                .catch(err => {
-                    console.error("Pexels Error:", err);
-                    return [];
-                });
-
-            // Fetch Images from SourceSplash
-            // Assuming endpoint structure based on common Laravel setups with Sanctum
-            const sourceSplashPromise = fetch(`https://www.sourcesplash.com/api/search?q=${encodeURIComponent(q)}&page=${p}`, {
-                headers: {
-                    'Authorization': `Bearer ${SOURCESPLASH_KEY}`,
-                    'Accept': 'application/json'
-                }
-            }).then(res => res.json())
-                .then(data => {
-                    // Adjust parsing based on actual response structure. 
-                    // Assuming data.data or data is the area array
-                    const images = data.data || data || [];
-                    return images.map(img => ({
-                        id: `ss-${img.id}`,
-                        url: img.url || img.path || (img.image ? img.image.url : null), // Fallbacks
-                        type: 'image',
-                        alt: img.title || 'SourceSplash Image',
-                        author: img.user ? img.user.name : 'Unknown'
-                    })).filter(img => img.url);
-                })
-                .catch(err => {
-                    console.error("SourceSplash Error:", err);
-                    return [];
-                });
-
-            const [pexelsItems, sourceSplashItems] = await Promise.all([pexelsPromise, sourceSplashPromise]);
-
-            // Interleave items
-            const newItems = [];
-            const maxLength = Math.max(pexelsItems.length, sourceSplashItems.length);
-            for (let i = 0; i < maxLength; i++) {
-                if (i < pexelsItems.length) newItems.push(pexelsItems[i]);
-                if (i < sourceSplashItems.length) newItems.push(sourceSplashItems[i]);
-            }
-
-            if (p === 1) setItems(newItems);
-            else setItems(prev => [...prev, ...newItems]);
-        } catch (err) { console.error(err); }
-        setLoading(false);
-    }, []);
-
-    useEffect(() => {
-        setSearchRunId(prev => prev + 1);
-        fetchSearchItems(1, searchQuery);
-        setPage(1);
-    }, [searchQuery, fetchSearchItems]);
-
-    useEffect(() => {
-        if (page > 1) fetchSearchItems(page, searchQuery);
-    }, [page, fetchSearchItems, searchQuery]);
-
-    const lastRef = useCallback(node => {
-        if (loading) return;
-        if (observer.current) observer.current.disconnect();
-        observer.current = new IntersectionObserver(entries => {
-            if (entries[0].isIntersecting) setPage(p => p + 1);
-        });
-        if (node) observer.current.observe(node);
-    }, [loading]);
-
-    return (
-        <div className="discovery-container">
-            <div className="discover-search-bar feed-search-bar-sticky" style={{ padding: '10px 15px', background: 'var(--card-bg)', borderBottom: '1px solid var(--border-color)' }}>
-                <div style={{ position: 'relative' }}>
-                    <Search size={18} style={{ position: 'absolute', left: 15, top: '50%', transform: 'translateY(-50%)', color: '#888' }} />
-                    <input
-                        type="text"
-                        placeholder="Search images..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        style={{ width: '100%', padding: '10px 10px 10px 40px', borderRadius: '10px', border: 'none', background: 'var(--bg-secondary)', outline: 'none', color: 'var(--ig-font)' }}
-                    />
-                </div>
-            </div>
-
-            <div className="img-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)', gap: '4px' }}>
-                {items.map((item, i) => (
-                    <div key={`${item.id}-${searchRunId}-${i}`} className="grid-item" ref={i === items.length - 1 ? lastRef : null}
-                        onClick={() => onOpenPost({
-                            id: item.id,
-                            image: item.url,
-                            caption: item.alt,
-                            user: {
-                                username: (item.author || (item.type === 'news' ? item.source : 'User')).toLowerCase().replace(/\s+/g, '_'),
-                                pic: `https://ui-avatars.com/api/?name=${encodeURIComponent(item.author || item.source || 'U')}&background=random&color=fff`
-                            },
-                            likes: Math.floor(Math.random() * 5000),
-                            comments: Math.floor(Math.random() * 200),
-                            source: item.id.startsWith('ss-') ? 'SourceSplash' : (item.type === 'news' ? 'News' : 'Pexels')
-                        })}
-                        style={{ aspectRatio: '1/1', background: '#000', cursor: 'pointer', position: 'relative', overflow: 'hidden' }}>
-                        <img src={freshImageUrl(item.url)} alt={item.alt} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        {item.id.startsWith('ss-') && (
-                            <div style={{ position: 'absolute', bottom: 5, right: 5, background: 'rgba(0,0,0,0.5)', color: 'white', padding: '2px 4px', borderRadius: '4px', fontSize: '10px' }}>SS</div>
-                        )}
-                    </div>
-                ))}
-                {/* Loader removed */}
-            </div>
-        </div>
-    );
-};
-
-// ExploreGrid Component - Mixed Images, News, and YouTube Videos
-const ExploreGrid = ({ onOpenPost }) => {
-    const PEXELS_KEY = 'XkN36hK2S0z876lWSlI5YoB9ZscPAq4cZbcL6SXABt9CyZmqBwwjov1P';
-    const YT_KEY = 'AIzaSyDtLX6171RySOtqd-U2Pgcjy_9o2rWDNrc';
-    const [items, setItems] = useState([]);
-    const [page, setPage] = useState(1);
-    const [loading, setLoading] = useState(false);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [activeVideoId, setActiveVideoId] = useState(null);
-    const observer = useRef();
-
-    const fetchExploreItems = useCallback(async (p, query = '') => {
-        setLoading(true);
-        try {
-            const q = query || 'trending technology adventure';
-
-            // Fetch YouTube Videos
-            const ytRes = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=6&q=${encodeURIComponent(q)}&type=video&key=${YT_KEY}&pageToken=${p > 1 ? p : ''}`);
-            const ytData = await ytRes.json();
-            const ytItems = (ytData.items || []).map(v => ({
-                id: `yt-${v.id.videoId}`,
-                videoId: v.id.videoId,
-                url: v.snippet.thumbnails.high?.url || v.snippet.thumbnails.medium?.url,
-                type: 'video',
-                alt: v.snippet.title,
-                author: v.snippet.channelTitle
-            }));
-
-            // Fetch Images from Pexels
-            const pexelsRes = await fetch(`https://api.pexels.com/v1/search?query=${encodeURIComponent(q)}&page=${p}&per_page=6`, {
-                headers: { Authorization: PEXELS_KEY }
-            });
-            const pexelsData = await pexelsRes.json();
-            const pexelsItems = (pexelsData.photos || []).map(photo => ({
-                id: `pexels-${photo.id}`,
-                url: photo.src.large || photo.src.medium,
-                type: 'image',
-                alt: photo.alt || 'Pexels Image',
-                author: photo.photographer
-            }));
-
-            // Fetch News (using existing logic)
-            const newsRes = await newsApi.getAllNews({ search: q, page: p, limit: 6 });
-            const newsItems = (newsRes.data || []).map(n => ({
-                id: `news-${n.uuid}`,
-                url: n.image_url,
-                type: 'news',
-                alt: n.title,
-                author: n.source
-            })).filter(n => n.url);
-
-            // Mix them
-            const mixed = [];
-            let i = 0, j = 0, k = 0;
-            while (i < ytItems.length || j < pexelsItems.length || k < newsItems.length) {
-                if (i < ytItems.length) mixed.push(ytItems[i++]);
-                if (j < pexelsItems.length) mixed.push(pexelsItems[j++]);
-                if (k < newsItems.length) mixed.push(newsItems[k++]);
-            }
-
-            if (p === 1) setItems(mixed);
-            else setItems(prev => [...prev, ...mixed]);
-        } catch (err) { console.error(err); }
-        setLoading(false);
-    }, []);
-
-    useEffect(() => {
-        fetchExploreItems(1, searchQuery);
-        setPage(1);
-    }, [searchQuery, fetchExploreItems]);
-
-    useEffect(() => {
-        if (page > 1) fetchExploreItems(page, searchQuery);
-    }, [page, fetchExploreItems, searchQuery]);
-
-    const lastRef = useCallback(node => {
-        if (loading) return;
-        if (observer.current) observer.current.disconnect();
-        observer.current = new IntersectionObserver(entries => {
-            if (entries[0].isIntersecting) setPage(p => p + 1);
-        });
-        if (node) observer.current.observe(node);
-    }, [loading]);
-
-    return (
-        <div className="discovery-container">
-            <div className="discover-search-bar" style={{ padding: '10px 15px', background: 'var(--card-bg)', borderBottom: 'none', position: 'sticky', top: 0, zIndex: 10 }}>
-                <div style={{ position: 'relative' }}>
-                    <Search size={18} style={{ position: 'absolute', left: 15, top: '50%', transform: 'translateY(-50%)', color: '#888' }} />
-                    <input
-                        type="text"
-                        placeholder="Search..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        style={{ width: '100%', padding: '10px 10px 10px 40px', borderRadius: '10px', border: 'none', background: 'var(--bg-secondary)', outline: 'none', color: 'var(--ig-font)' }}
-                    />
-                </div>
-            </div>
-
-            <div className="img-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)', gap: '4px' }}>
-                {items.map((item, i) => (
-                    <div key={`${item.id}-${i}`} className="grid-item" ref={i === items.length - 1 ? lastRef : null}
-                        onClick={() => {
-                            if (item.type === 'video') {
-                                setActiveVideoId(item.videoId);
-                            } else {
-                                onOpenPost({
-                                    id: item.id,
-                                    image: item.url,
-                                    caption: item.alt,
-                                    user: {
-                                        username: item.author.toLowerCase().replace(/\s+/g, '_'),
-                                        pic: `https://ui-avatars.com/api/?name=${encodeURIComponent(item.author)}&background=random&color=fff`
-                                    },
-                                    likes: Math.floor(Math.random() * 10000),
-                                    comments: Math.floor(Math.random() * 500),
-                                    source: item.type === 'news' ? 'News' : 'Pexels'
-                                });
-                            }
-                        }}
-                        style={{ aspectRatio: '1/1', background: '#000', cursor: 'pointer', position: 'relative', overflow: 'hidden' }}>
-
-                        {activeVideoId === item.videoId ? (
-                            <iframe
-                                style={{ width: '100%', height: '100%', border: 'none' }}
-                                src={`https://www.youtube.com/embed/${item.videoId}?autoplay=1&mute=0`}
-                                allow="autoplay; encrypted-media"
-                                title={item.alt}
-                            />
-                        ) : (
-                            <>
-                                <img src={item.url} alt={item.alt} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                {item.type === 'video' && (
-                                    <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', background: 'rgba(0,0,0,0.5)', borderRadius: '50%', padding: '8px', pointerEvents: 'none' }}>
-                                        <ReelIcon />
-                                    </div>
-                                )}
-                                {item.type === 'news' && (
-                                    <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '5px', background: 'rgba(0,0,0,0.6)', color: '#fff', fontSize: '10px', fontWeight: 'bold' }}>
-                                        NEWS
-                                    </div>
-                                )}
-                            </>
-                        )}
-                    </div>
-                ))}
-                {/* Loader removed */}
-            </div>
-        </div>
-    );
-};
-
-// ReelSection Component - Shows actual short videos/reels
-const ReelSection = () => {
-    const [videos, setVideos] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [nextPageToken, setNextPageToken] = useState('');
-    const [interactions, setInteractions] = useState({});
-    const [activeIdx, setActiveIdx] = useState(0);
-    const observer = useRef();
-
-    const fetchReels = async (pageToken = '') => {
-        try {
-            setLoading(true);
-            const YT_KEY = 'AIzaSyDtLX6171RySOtqd-U2Pgcjy_9o2rWDNrc';
-            // Fetch recent trending videos
-            const queries = ['trending now', 'viral videos', 'popular today', 'latest videos'];
-            const query = queries[Math.floor(Math.random() * queries.length)];
-
-            const response = await fetch(
-                `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=15&q=${encodeURIComponent(query)}&type=video&order=date&key=${YT_KEY}&pageToken=${pageToken}`
-            );
-            const data = await response.json();
-            if (data.items) {
-                const newVideos = data.items.map(item => ({
-                    id: item.id.videoId,
-                    username: item.snippet.channelTitle,
-                    desc: item.snippet.title,
-                    pic: `https://i.pravatar.cc/150?u=${item.id.videoId}`
-                }));
-                setVideos(prev => [...prev, ...newVideos]);
-                setNextPageToken(data.nextPageToken || '');
-            }
-        } catch (error) {
-            console.error('Reels Fetch Error:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchReels();
-    }, []);
-
-    const lastReelRef = useCallback(node => {
-        if (loading) return;
-        if (observer.current) observer.current.disconnect();
-        observer.current = new IntersectionObserver(entries => {
-            if (entries[0].isIntersecting && nextPageToken) {
-                fetchReels(nextPageToken);
-            }
-        });
-        if (node) observer.current.observe(node);
-    }, [loading, nextPageToken]);
-
-    const handleScroll = (e) => {
-        const container = e.target;
-        const index = Math.round(container.scrollTop / container.clientHeight);
-        if (index !== activeIdx) setActiveIdx(index);
-    };
-
-    const toggle = (id, field) => {
-        setInteractions(prev => ({
-            ...prev,
-            [id]: { ...prev[id], [field]: !prev[id]?.[field] }
-        }));
-    };
-
-    if (loading && videos.length === 0) return null;
-
-    return (
-        <div className="reels-scroll-container" onScroll={handleScroll} style={{ height: 'calc(100vh - 70px)', scrollSnapType: 'y mandatory', overflowY: 'scroll' }}>
-            {videos.map((video, idx) => (
-                <div key={`${video.id}-${idx}`} className="reel-container" ref={idx === videos.length - 1 ? lastReelRef : null} style={{ height: '100%', scrollSnapAlign: 'start' }}>
-                    <div className="reel-section">
-                        <div className="phone-mic"></div>
-                        <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 0, background: '#000' }}>
-                            {activeIdx === idx ? (
-                                <iframe
-                                    className="iframe-reel"
-                                    width="100%" height="100%"
-                                    src={`https://www.youtube.com/embed/${video.id}?autoplay=1&mute=0&loop=1&playlist=${video.id}&controls=0&modestbranding=1&rel=0`}
-                                    frameBorder="0" allow="autoplay; encrypted-media" title="Video"
-                                />
-                            ) : (
-                                <div style={{ width: '100%', height: '100%', position: 'relative' }}>
-                                    <img src={`https://img.youtube.com/vi/${video.id}/maxresdefault.jpg`} alt=""
-                                        style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.6)' }} />
-                                    <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', opacity: 0.8 }}>
-                                        <ReelIcon />
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-
-                        <div className="post-section">
-                            <div className="pshead">
-                                <h4 style={{ color: '#fff', fontSize: '24px', fontWeight: '900', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>REELS</h4>
-                                <button className="iconbtn"><Camera size={24} color="white" /></button>
-                            </div>
-                            <div className="psfooter">
-                                <div className="usrProfile">
-                                    <div className="uplogo"><img src={video.pic} alt="" /></div>
-                                    <p style={{ color: '#fff', fontWeight: '700' }}>{video.username} <i className="fas fa-check-circle" style={{ color: '#38bdf8', fontSize: '12px' }}></i></p>
-                                </div>
-                                <p style={{ color: '#fff', fontSize: '14px', marginTop: '10px', textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}>{video.desc}</p>
-                            </div>
-                            <div className="action-btn">
-                                <ul style={{ listStyle: 'none' }}>
-                                    <li style={{ marginBottom: '20px' }}>
-                                        <button className="iconbtn" onClick={() => toggle(video.id, 'liked')} style={{ background: 'rgba(255,255,255,0.1)', padding: '12px', borderRadius: '50%' }}>
-                                            <Heart size={24} fill={interactions[video.id]?.liked ? '#ef4444' : 'none'} color={interactions[video.id]?.liked ? '#ef4444' : 'white'} />
-                                        </button>
-                                        <p style={{ color: '#fff', fontSize: '12px', textAlign: 'center', marginTop: '5px' }}>{interactions[video.id]?.liked ? '1.3M' : '1.2M'}</p>
-                                    </li>
-                                    <li style={{ marginBottom: '20px' }}>
-                                        <button className="iconbtn" style={{ background: 'rgba(255,255,255,0.1)', padding: '12px', borderRadius: '50%' }}>
-                                            <MessageCircle size={24} color="white" />
-                                        </button>
-                                        <p style={{ color: '#fff', fontSize: '12px', textAlign: 'center', marginTop: '5px' }}>42K</p>
-                                    </li>
-                                    <li style={{ marginBottom: '20px' }}>
-                                        <button className="iconbtn" onClick={() => toggle(video.id, 'shared')} style={{ background: 'rgba(255,255,255,0.1)', padding: '12px', borderRadius: '50%' }}>
-                                            <Send size={24} color="white" />
-                                        </button>
-                                        <p style={{ color: '#fff', fontSize: '12px', textAlign: 'center', marginTop: '5px' }}>Share</p>
-                                    </li>
-                                    <li>
-                                        <button className="iconbtn" onClick={() => toggle(video.id, 'saved')} style={{ background: 'rgba(255,255,255,0.1)', padding: '12px', borderRadius: '50%' }}>
-                                            <Bookmark size={24} fill={interactions[video.id]?.saved ? '#3b82f6' : 'none'} color={interactions[video.id]?.saved ? '#3b82f6' : 'white'} />
-                                        </button>
-                                        <p style={{ color: '#fff', fontSize: '12px', textAlign: 'center', marginTop: '5px' }}>Save</p>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            ))}
-        </div>
-    );
-};
-
-// LiveSection Component - Shows live TV streams
-const LiveSection = () => {
-    const [videos, setVideos] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [nextPageToken, setNextPageToken] = useState('');
-    const [interactions, setInteractions] = useState({});
-    const [activeIdx, setActiveIdx] = useState(0);
-    const observer = useRef();
-
-    const fetchLive = async (pageToken = '') => {
-        try {
-            setLoading(true);
-            const YT_KEY = 'AIzaSyDtLX6171RySOtqd-U2Pgcjy_9o2rWDNrc';
-            const queries = ['breaking news live', 'crypto live', 'gaming live', 'lofi hip hop live'];
-            const query = queries[Math.floor(Math.random() * queries.length)];
-
-            const response = await fetch(
-                `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=10&q=${encodeURIComponent(query)}&type=video&eventType=live&key=${YT_KEY}&pageToken=${pageToken}`
-            );
-            const data = await response.json();
-            if (data.items) {
-                const newVideos = data.items.map(item => ({
-                    id: item.id.videoId,
-                    username: item.snippet.channelTitle,
-                    desc: item.snippet.title,
-                    pic: `https://i.pravatar.cc/150?u=${item.id.videoId}`
-                }));
-                setVideos(prev => [...prev, ...newVideos]);
-                setNextPageToken(data.nextPageToken || '');
-            }
-        } catch (error) {
-            console.error('Live Fetch Error:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchLive();
-    }, []);
-
-    const lastReelRef = useCallback(node => {
-        if (loading) return;
-        if (observer.current) observer.current.disconnect();
-        observer.current = new IntersectionObserver(entries => {
-            if (entries[0].isIntersecting && nextPageToken) {
-                fetchLive(nextPageToken);
-            }
-        });
-        if (node) observer.current.observe(node);
-    }, [loading, nextPageToken]);
-
-    const handleScroll = (e) => {
-        const container = e.target;
-        const index = Math.round(container.scrollTop / container.clientHeight);
-        if (index !== activeIdx) setActiveIdx(index);
-    };
-
-    const toggle = (id, field) => {
-        setInteractions(prev => ({
-            ...prev,
-            [id]: { ...prev[id], [field]: !prev[id]?.[field] }
-        }));
-    };
-
-    if (loading && videos.length === 0) return null;
-
-    return (
-        <div className="reels-scroll-container" onScroll={handleScroll} style={{ height: 'calc(100vh - 70px)', scrollSnapType: 'y mandatory', overflowY: 'scroll' }}>
-            {videos.map((video, idx) => (
-                <div key={`${video.id}-${idx}`} className="reel-container" ref={idx === videos.length - 1 ? lastReelRef : null} style={{ height: '100%', scrollSnapAlign: 'start' }}>
-                    <div className="reel-section">
-                        <div className="phone-mic"></div>
-                        <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 0, background: '#000' }}>
-                            {activeIdx === idx ? (
-                                <iframe
-                                    className="iframe-reel"
-                                    width="100%" height="100%"
-                                    src={`https://www.youtube.com/embed/${video.id}?autoplay=1&mute=0&modestbranding=1&rel=0`}
-                                    frameBorder="0" allow="autoplay; encrypted-media" title="Video"
-                                />
-                            ) : (
-                                <div style={{ width: '100%', height: '100%', position: 'relative' }}>
-                                    <img src={`https://img.youtube.com/vi/${video.id}/maxresdefault.jpg`} alt=""
-                                        style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.6)' }} />
-                                    <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', opacity: 0.8 }}>
-                                        <Radio size={48} color="#ef4444" />
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-
-                        <div className="post-section">
-                            <div className="pshead">
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                    <div style={{ width: '12px', height: '12px', background: '#ef4444', borderRadius: '50%', animation: 'pulse 1.5s infinite' }}></div>
-                                    <h4 style={{ color: '#fff', fontSize: '24px', fontWeight: '900', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>LIVE</h4>
-                                </div>
-                                <button className="iconbtn"><Camera size={24} color="white" /></button>
-                            </div>
-                            <div className="psfooter">
-                                <div className="usrProfile">
-                                    <div className="uplogo"><img src={video.pic} alt="" /></div>
-                                    <p style={{ color: '#fff', fontWeight: '700' }}>{video.username} <i className="fas fa-check-circle" style={{ color: '#38bdf8', fontSize: '12px' }}></i></p>
-                                </div>
-                                <p style={{ color: '#fff', fontSize: '14px', marginTop: '10px', textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}>{video.desc}</p>
-                            </div>
-                            <div className="action-btn">
-                                <ul style={{ listStyle: 'none' }}>
-                                    <li style={{ marginBottom: '20px' }}>
-                                        <button className="iconbtn" onClick={() => toggle(video.id, 'liked')} style={{ background: 'rgba(255,255,255,0.1)', padding: '12px', borderRadius: '50%' }}>
-                                            <Heart size={24} fill={interactions[video.id]?.liked ? '#ef4444' : 'none'} color={interactions[video.id]?.liked ? '#ef4444' : 'white'} />
-                                        </button>
-                                        <p style={{ color: '#fff', fontSize: '12px', textAlign: 'center', marginTop: '5px' }}>LIVE</p>
-                                    </li>
-                                    <li style={{ marginBottom: '20px' }}>
-                                        <button className="iconbtn" style={{ background: 'rgba(255,255,255,0.1)', padding: '12px', borderRadius: '50%' }}>
-                                            <MessageCircle size={24} color="white" />
-                                        </button>
-                                        <p style={{ color: '#fff', fontSize: '12px', textAlign: 'center', marginTop: '5px' }}>Chat</p>
-                                    </li>
-                                    <li style={{ marginBottom: '20px' }}>
-                                        <button className="iconbtn" onClick={() => toggle(video.id, 'shared')} style={{ background: 'rgba(255,255,255,0.1)', padding: '12px', borderRadius: '50%' }}>
-                                            <Send size={24} color="white" />
-                                        </button>
-                                        <p style={{ color: '#fff', fontSize: '12px', textAlign: 'center', marginTop: '5px' }}>Share</p>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            ))}
-        </div>
-    );
-};
-
-const PostCreationModal = ({ isOpen, onClose, onPostCreated }) => {
-    const { currentUser } = useAuth();
-    const [content, setContent] = useState('');
-    const [dbPosts, setDbPosts] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [submitting, setSubmitting] = useState(false);
-
-    useEffect(() => {
-        if (isOpen) {
-            setContent('');
-            setLoading(true);
-            getPostsApi(currentUser?.id || null)
-                .then((data) => setDbPosts(Array.isArray(data) ? data : (data?.posts || data?.data || [])))
-                .catch(() => setDbPosts([]))
-                .finally(() => setLoading(false));
-        }
-    }, [isOpen, currentUser?.id]);
-
-    const handleSubmit = async (e) => {
-        e?.preventDefault();
-        if (!content.trim() || submitting) return;
-        setSubmitting(true);
-        try {
-            await createPostApi({ content: content.trim(), title: null });
-            onPostCreated?.();
-            onClose();
-        } catch (err) {
-            console.error('Create post failed:', err);
-            window.dispatchEvent(new CustomEvent('SHOW_ALERT', { detail: { title: 'Error', message: err?.message || 'Failed to create post.' } }));
-        } finally {
-            setSubmitting(false);
-        }
-    };
-
-    if (!isOpen) return null;
-    return (
-        <div className="post-detail-overlay" style={{ zIndex: 5000 }} onClick={onClose}>
-            <div className="post-creation-card" onClick={e => e.stopPropagation()} style={{ background: 'var(--card-bg)', padding: '30px', borderRadius: '20px', width: '90%', maxWidth: '500px', position: 'relative' }}>
-                <button onClick={onClose} style={{ position: 'absolute', top: '15px', right: '15px', background: 'none', border: 'none', color: 'var(--text-primary)', cursor: 'pointer' }}>
-                    <X size={24} />
-                </button>
-                <h3 style={{ marginBottom: '20px', fontSize: '20px', fontWeight: 'bold', color: 'var(--primary-color)' }}>Create New Post</h3>
-                {loading ? (
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Loading from database...</p>
-                ) : dbPosts.length > 0 ? (
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '12px', marginBottom: '12px' }}>You have {dbPosts.length} post(s) in the database.</p>
-                ) : null}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                    <button type="button" className="creation-option-btn" style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px', borderRadius: '12px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontWeight: '600' }}><Camera size={20} /> Image</button>
-                    <button type="button" className="creation-option-btn" style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px', borderRadius: '12px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontWeight: '600' }}><ReelIcon /> Video</button>
-                    <button type="button" className="creation-option-btn" style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px', borderRadius: '12px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontWeight: '600' }}><MessageCircle size={20} /> Text</button>
-                    <button type="button" className="creation-option-btn" style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px', borderRadius: '12px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontWeight: '600' }}><RefreshCw size={20} /> Go Live</button>
-                    <button type="button" className="creation-option-btn" style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px', borderRadius: '12px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontWeight: '600' }} onClick={() => { window.location.href = '/create-room' }}><Home size={20} /> Create Room</button>
-                    <button type="button" className="creation-option-btn" style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px', borderRadius: '12px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontWeight: '600' }}><i className="fas fa-poll"></i> Poll</button>
-                    <button type="button" className="creation-option-btn" style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px', borderRadius: '12px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontWeight: '600' }}><i className="fas fa-music"></i> Music</button>
-                    <button type="button" className="creation-option-btn" style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px', borderRadius: '12px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontWeight: '600' }}><i className="fas fa-map-marker-alt"></i> Location</button>
-                </div>
-                <form onSubmit={handleSubmit}>
-                    <textarea placeholder="What's on your mind?" value={content} onChange={(e) => setContent(e.target.value)} style={{ width: '100%', marginTop: '20px', padding: '15px', borderRadius: '12px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', minHeight: '100px' }} />
-                    <button type="submit" className="post-submit-btn" disabled={submitting || !content.trim()} style={{ width: '100%', marginTop: '20px', padding: '12px', borderRadius: '12px', background: 'var(--primary-color)', color: 'white', fontWeight: 'bold', border: 'none', opacity: submitting || !content.trim() ? 0.7 : 1 }}>{submitting ? 'Posting...' : 'Post Now'}</button>
-                </form>
-            </div>
-        </div>
-    );
-};
-
-// Main FeedPage Component
 const FeedPage = () => {
     const navigate = useNavigate();
-    const [posts, setPosts] = useState([]);
-    const [page, setPage] = useState(1);
-    const [loading, setLoading] = useState(false);
-    const [activeView, setActiveView] = useState('home');
-    const [likedPosts, setLikedPosts] = useState({});
-    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-    const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
-    const [storyModal, setStoryModal] = useState({ isOpen: false, index: 0 });
+    const location = useLocation();
+    const [theme, setTheme] = useState('light');
+    const [activeTab, setActiveTab] = useState('Home');
     const [stories, setStories] = useState([]);
-    const [selectedUser, setSelectedUser] = useState(null);
-    const [isSelfProfile, setIsSelfProfile] = useState(false);
-    const [detailModal, setDetailModal] = useState({ isOpen: false, post: null });
-    const [isCreationModalOpen, setIsCreationModalOpen] = useState(false);
-    const [currentTheme, setCurrentTheme] = useState('light');
-    const [expandedCaptions, setExpandedCaptions] = useState({});
-    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+    const [page, setPage] = useState(1);
+    const [trendsPage, setTrendsPage] = useState(1);
+    const [posts, setPosts] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searchResults, setSearchResults] = useState([]);
+    const [isSearchActive, setIsSearchActive] = useState(false);
 
-    useEffect(() => {
-        const handleResize = () => setWindowWidth(window.innerWidth);
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
+    // Sidebar States
+    const [sidebarOpen, setSidebarOpen] = useState(false); // Mobile
+    const [sidebarExpanded, setSidebarExpanded] = useState(false); // Desktop/Mobile 'Show More'
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(window.innerWidth <= 1200); // Desktop Collapsed Mode
+    const [moreMenuOpen, setMoreMenuOpen] = useState(false);
 
-    const [savedPosts, setSavedPosts] = useState({});
-    const [showSuggestions, setShowSuggestions] = useState(true);
-    const { theme, changeTheme } = useTheme();
+    const [createModalOpen, setCreateModalOpen] = useState(false);
+
+    // Story Modal State
+    const [isStoryOpen, setIsStoryOpen] = useState(false);
+    const [activeStoryIndex, setActiveStoryIndex] = useState(0);
+
+    // Pagination State
     const observer = useRef();
 
-    // Fetch unique stories on mount (Normal + News Mix)
+    // Toggle Theme
     useEffect(() => {
-        const fetchStories = async () => {
-            try {
-                // Fetch News for stories
-                const newsRes = await newsApi.getAllNews({ limit: 50 });
-                const newsStories = (newsRes.data || []).filter(n => n.image_url).map(n => ({
-                    user: {
-                        username: n.source.toLowerCase().replace(/\s+/g, '_'),
-                        pic: `https://ui-avatars.com/api/?name=${encodeURIComponent(n.source)}&background=random&color=fff`
-                    },
-                    image: n.image_url,
-                    id: `news-story-${n.uuid}`
-                }));
+        // document.body.setAttribute('data-theme', theme); // Configured to only affect FeedPage via container prop
+        const savedTheme = localStorage.getItem('feed_theme') || 'light';
+        setTheme(savedTheme);
+    }, []); // Run once on mount to get saved theme, or dependency [theme] if we want to sync
 
-                // Fetch Images for stories
-                const PEXELS_KEY = '563492ad6f91700001000001bc20b3327d6d4590bac811e51b69415c';
-                const pexelsRes = await fetch(`https://api.pexels.com/v1/curated?per_page=50`, {
-                    headers: { Authorization: PEXELS_KEY }
-                });
-                const pexelsData = await pexelsRes.json();
-                const imageStories = (pexelsData.photos || []).map(photo => ({
-                    user: {
-                        username: photo.photographer.toLowerCase().replace(/\s+/g, '_'),
-                        pic: `https://ui-avatars.com/api/?name=${encodeURIComponent(photo.photographer)}&background=random&color=fff`
-                    },
-                    image: photo.src.large,
-                    id: `img-story-${photo.id}`
-                }));
 
-                // Mix and shuffle
-                const mixed = [...newsStories, ...imageStories].sort(() => Math.random() - 0.5);
-                setStories(mixed);
-            } catch (err) { console.error(err); }
-        };
+    const toggleTheme = () => {
+        const newTheme = theme === 'light' ? 'dark' : 'light';
+        setTheme(newTheme);
+        setTheme(newTheme);
+        localStorage.setItem('feed_theme', newTheme);
+    };
+
+    // Initial Data Fetch
+    useEffect(() => {
         fetchStories();
     }, []);
 
-    const DEFAULT_POSTS = [
-        {
-            id: 'def-1',
-            type: 'social',
-            user: { name: "Adem Lane", username: "adem_lane", pic: "/profiles/Adem Lane.webp", location: "London, UK", isActive: true },
-            image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&q=80&w=1000",
-            likes: 1240,
-            caption: "Exploring the beautiful mountains today! 🏔️ #adventure #nature",
-            time: "2 hours ago",
-            comments: 45,
-            source: "HappyTalk"
-        },
-        {
-            id: 'def-2',
-            type: 'social',
-            user: { name: "Sophia", username: "sophia_sky", pic: "https://i.pravatar.cc/150?u=sophia", location: "Paris, France", isActive: true },
-            image: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&q=80&w=1000",
-            likes: 850,
-            caption: "Sunset in Paris is something else... 🌅 #paris #sunset #travel",
-            time: "5 hours ago",
-            comments: 12,
-            source: "HappyTalk"
-        },
-        {
-            id: 'def-3',
-            type: 'social',
-            user: { name: "Marcus", username: "marcus_official", pic: "https://i.pravatar.cc/150?u=marcus", location: "New York, USA", isActive: false },
-            image: "https://images.unsplash.com/photo-1449034446853-66c86144b0ad?auto=format&fit=crop&q=80&w=1000",
-            likes: 3200,
-            caption: "The city that never sleeps. 🗽 #NYC #urban #lifestyle",
-            time: "10 hours ago",
-            comments: 89,
-            source: "HappyTalk"
-        },
-        {
-            id: 'def-4',
-            type: 'social',
-            user: { name: "Yuki Tanaka", username: "yuki_camera", pic: "https://i.pravatar.cc/150?u=yuki", location: "Tokyo, Japan", isActive: true },
-            image: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&q=80&w=1000",
-            likes: 1500,
-            caption: "Cherry blossoms are in full bloom! 🌸 #tokyo #sakura #spring",
-            time: "1 hour ago",
-            comments: 67,
-            source: "HappyTalk"
-        }
-    ];
-
-    // Fetch posts with pagination - Real Posts + News
-    const fetchHomePosts = useCallback(async (p) => {
+    // Fetch News Feed with Pagination
+    const fetchNewsFeed = useCallback(async (pageNum) => {
+        if (loading) return;
         setLoading(true);
         try {
-            // 1. Fetch live news articles
-            let newsPosts = [];
-            try {
-                // Fetch top headlines which are generally "Live" news
-                const newsRes = await newsApi.getHeadlines({ page: p, limit: 30 });
-                newsPosts = (newsRes.data || []).map(ns => {
-                    const img = ns.image_url || ns.image || (ns.multimedia && ns.multimedia[0]?.url) || 'https://images.unsplash.com/photo-1504711434969?auto=format&fit=crop&q=80&w=800';
-                    const pubDate = ns.published_at ? new Date(ns.published_at) : new Date();
+            // Randomize page on first load if page is 1
+            const effectivePage = pageNum === 1 ? Math.floor(Math.random() * 5) + 1 : pageNum;
+            const res = await newsApi.getHeadlines({ limit: 10, page: effectivePage });
 
-                    return {
-                        id: `news-${ns.uuid || ns.id}-${Date.now()}`,
-                        type: 'news',
-                        user: {
-                            name: ns.source || 'Social Hub',
-                            username: (ns.source || 'user').toLowerCase().replace(/\s+/g, '_'),
-                            pic: `https://ui-avatars.com/api/?name=${encodeURIComponent(ns.source || 'N')}&background=random&color=fff`,
-                            location: 'Social Feed',
-                            isActive: true
-                        },
-                        image: img,
-                        likes: Math.floor(Math.random() * 8000) + 100,
-                        caption: ns.title + (ns.description ? "\n\n" + ns.description : ""),
-                        time: pubDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                        comments: Math.floor(Math.random() * 120),
-                        source: "Social"
-                    };
-                }).filter(p => p.image);
-            } catch (e) {
-                console.warn("News fetch failed", e);
-            }
-
-            // 2. Try to fetch user posts from database
-            let userPosts = [];
-            try {
-                const dbRes = await getPostsApi();
-                userPosts = (Array.isArray(dbRes) ? dbRes : (dbRes?.posts || dbRes?.data || [])).map(post => ({
-                    id: `db-${post.id}-${Date.now()}`,
-                    type: 'social',
+            if (res.data && res.data.length > 0) {
+                let mappedPosts = res.data.map(article => ({
+                    id: article.uuid || Math.random(),
                     user: {
-                        name: post.user?.full_name || post.username || 'User',
-                        username: post.username || 'user',
-                        pic: post.user?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(post.username || 'U')}&background=random&color=fff`,
-                        location: post.location || 'Somewhere',
-                        isActive: true,
-                        isVerified: false
+                        name: article.source || 'News Update',
+                        handle: '@' + (article.source || 'news').toLowerCase().replace(/\s/g, ''),
+                        pic: `https://ui-avatars.com/api/?name=${article.source}&background=random`
                     },
-                    image: post.image_url || post.image || 'https://images.unsplash.com/photo-1504711434969?auto=format&fit=crop&q=80&w=800',
-                    likes: post.likes_count || 0,
-                    caption: post.content || post.caption || '',
-                    time: "Just now",
-                    comments: post.comments_count || 0,
-                    source: "Community"
+                    content: article.title + (article.description ? `\n\n${article.description}` : '') + ' Check out the full story for more details on this developing situation.',
+                    image: article.image_url,
+                    time: new Date(article.published_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                    likes: Math.floor(Math.random() * 1000) + 100,
+                    comments: Math.floor(Math.random() * 100),
+                    isNews: true
                 }));
-            } catch (e) {
-                // Ignore DB failures
-            }
 
-            // Combine and interleave
-            let combined = [];
-            const maxLen = Math.max(newsPosts.length, userPosts.length);
-            for (let i = 0; i < maxLen; i++) {
-                if (i < newsPosts.length) combined.push(newsPosts[i]);
-                if (i < userPosts.length) combined.push(userPosts[i]);
-            }
+                // Randomly inject Room/Live card
+                if (Math.random() > 0.7) {
+                    const randomUser = ['Alex', 'Sarah', 'Justin'][Math.floor(Math.random() * 3)];
+                    const roomPost = {
+                        id: `room-${Math.random()}`,
+                        user: {
+                            name: randomUser,
+                            handle: `@${randomUser.toLowerCase()}`,
+                            pic: `https://i.pravatar.cc/150?u=${randomUser}`
+                        },
+                        content: 'Started a live room! Join in.',
+                        isRoom: true,
+                        time: 'Just now'
+                    };
+                    mappedPosts.splice(Math.floor(Math.random() * mappedPosts.length), 0, roomPost);
+                }
 
-            // 3. Fallback to DEFAULT_POSTS if absolutely empty on page 1
-            if (p === 1 && combined.length === 0) {
-                combined = DEFAULT_POSTS;
-            }
+                // Shuffle posts for freshness
+                mappedPosts = mappedPosts.sort(() => Math.random() - 0.5);
 
-            if (p === 1) setPosts(combined);
-            else setPosts(prev => [...prev, ...combined]);
-        } catch (err) {
-            console.error('Error fetching feed:', err);
-            if (p === 1) setPosts(DEFAULT_POSTS);
+                setPosts(prev => pageNum === 1 ? mappedPosts : [...prev, ...mappedPosts]);
+            }
+        } catch (error) {
+            console.error("Failed to fetch news", error);
         }
         setLoading(false);
-    }, []);
+    }, [loading]);
 
+    // Check for shared post ID in URL
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const postId = params.get('post');
+        if (postId && posts.length > 0) {
+            // Wait for render
+            setTimeout(() => {
+                const element = document.getElementById(`post-${postId}`);
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    element.style.border = '2px solid var(--primary-accent)';
+                    setTimeout(() => element.style.border = 'none', 3000);
+                }
+            }, 1000);
+        }
+    }, [posts, location.search]);
 
-    useEffect(() => { fetchHomePosts(page); }, [page, fetchHomePosts]);
-
-    const handleRefresh = () => {
-        setPage(1);
-        fetchHomePosts(1);
-    };
+    useEffect(() => {
+        if (activeTab === 'Home' && !isSearchActive) {
+            // Clear existing posts on tab switch to 'Home' to ensure freshness if desired, 
+            // or just rely on the randomizer in fetchNewsFeed(1)
+            fetchNewsFeed(page);
+        }
+    }, [page, activeTab, isSearchActive, fetchNewsFeed]);
 
     const lastPostRef = useCallback(node => {
         if (loading) return;
         if (observer.current) observer.current.disconnect();
         observer.current = new IntersectionObserver(entries => {
-            if (entries[0].isIntersecting) setPage(prev => prev + 1);
+            if (entries[0].isIntersecting) {
+                setPage(prev => prev + 1);
+            }
         });
         if (node) observer.current.observe(node);
     }, [loading]);
 
-    const openProfile = (user, isSelf = false) => {
-        setSelectedUser(user);
-        setIsSelfProfile(isSelf);
-        setActiveView('user');
+    const lastTrendRef = useCallback(node => {
+        if (loading) return;
+        if (activeTab !== 'Trends') return;
+        if (observer.current) observer.current.disconnect();
+        observer.current = new IntersectionObserver(entries => {
+            if (entries[0].isIntersecting) {
+                setTrendsPage(prev => prev + 1);
+            }
+        });
+        if (node) observer.current.observe(node);
+    }, [loading, activeTab]);
+
+    // Fetch Stories
+    const fetchStories = async () => {
+        const names = ['Alex', 'Emma', 'Sarah', 'Elena', 'Justin', 'Liam', 'Maria', 'Cody', 'Noah', 'Ava', 'Olivia'];
+        let storyImages = [];
+        let newsStories = [];
+
+        try {
+            // Fetch News for Stories
+            const newsRes = await newsApi.getTopStories({ limit: 5 });
+            if (newsRes.data) {
+                newsStories = newsRes.data.map((n, i) => ({
+                    id: `news-story-${i}`,
+                    user: { username: n.source || 'News', pic: `https://ui-avatars.com/api/?name=${n.source}&background=random` },
+                    image: n.image_url,
+                    isUser: false,
+                    isNews: true,
+                    title: n.title // Extra field for news headline overlay
+                }));
+            }
+
+            const PEXELS_KEY = import.meta.env.VITE_PEXELS_API_KEY;
+            if (PEXELS_KEY) {
+                // Use Date.now() to bust cache/ensure randomness
+                const res = await fetch(`https://api.pexels.com/v1/search?query=portrait&per_page=${names.length}&page=${Math.floor(Math.random() * 10) + 1}`, {
+                    headers: { Authorization: PEXELS_KEY }
+                });
+                const data = await res.json();
+                storyImages = data.photos.map(p => p.src.large);
+            }
+        } catch (e) { console.error("Story fetch error", e); }
+
+        const userStories = names.map((name, i) => ({
+            id: i,
+            user: { username: name, pic: `https://i.pravatar.cc/150?u=${name}${Math.random()}` },
+            image: storyImages[i] || `https://source.unsplash.com/random/400x800?sig=${i + 200 + Math.random()}`,
+            isUser: i === 0,
+            isNews: false
+        }));
+
+        // Merge User Stories and News Stories and Shuffle slightly (keep User first)
+        const combined = [...userStories, ...newsStories].sort(() => Math.random() - 0.5);
+
+        // Ensure "Your Story" is always index 0 visually, but in state usually handled by UI. 
+        // Here we just set the stories state.
+        setStories(combined);
     };
 
-    const handleShare = async (post) => {
-        const shareUrl = `${window.location.origin}/posts/${post.id}`;
-        const shareText = `Check out this post on HAPPYY TALK!`;
-
-        // Always copy link first for better UX
-        copyToClipboard(shareUrl);
-
-        if (navigator.share) {
-            try {
-                await navigator.share({
-                    title: 'HAPPYY TALK',
-                    text: shareText,
-                    url: shareUrl,
-                });
-            } catch (err) {
-                // Already copied, no need for alert here if user cancels
+    const openStory = (val) => {
+        if (typeof val === 'number') {
+            setActiveStoryIndex(val);
+        } else if (typeof val === 'string') {
+            const idx = stories.findIndex(s => s.user.username === val);
+            if (idx !== -1) {
+                setActiveStoryIndex(idx);
+            } else {
+                // Determine a consistent index based on username hash to show a "random" story
+                const hash = val.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+                setActiveStoryIndex(hash % stories.length);
             }
+        }
+        setIsStoryOpen(true);
+    };
+
+    const handleSearch = async (e) => {
+        if ((e.key === 'Enter' || e.type === 'click') && searchQuery.trim()) {
+            setIsSearchActive(true);
+            setTrendsPage(1); // Reset trends page for new search
+            // The actual fetch will be handled by the useEffect for activeTab === 'Trends'
         }
     };
 
-    const copyToClipboard = (text, isLink = true) => {
-        navigator.clipboard.writeText(text).then(() => {
-            window.dispatchEvent(new CustomEvent('SHOW_ALERT', {
-                detail: isLink
-                    ? { title: 'Link Copied!', message: 'Post link has been copied to clipboard.' }
-                    : { title: 'Copied!', message: 'Post text has been copied to clipboard.' }
-            }));
-        }).catch(err => {
-            console.error('Failed to copy: ', err);
-        });
+    const handleNavClick = (tab) => {
+        setActiveTab(tab);
+        setSidebarOpen(false);
+        if (tab === 'Trends') {
+            setIsSearchActive(true);
+            setSearchQuery('trending'); // Set default search query for trends
+            setTrendsPage(1); // Reset trends page when navigating to Trends tab
+        } else if (tab === 'Home') {
+            setIsSearchActive(false);
+            setSearchQuery(''); // Clear search query when going home
+            setSearchResults([]); // Clear search results
+            setPage(1); // Reset feed page
+        } else if (tab === 'Messages') {
+            window.dispatchEvent(new CustomEvent('OPEN_CHAT_PANEL'));
+        } else if (tab === 'Main Screen') {
+            navigate('/');
+        }
     };
 
-    const [feedDarkMode, setFeedDarkMode] = useState(false);
+    // Sidebar items
+    const primaryItems = [
+        { name: 'Home', icon: Home },
+        { name: 'Trends', icon: TrendingUp },
+        { name: 'Shots', icon: PlaySquare },
+        { name: 'Notifications', icon: Bell },
+        { name: 'Messages', icon: Mail },
+        { name: 'Main Screen', icon: LayoutGrid },
+    ];
 
-    const isDarkMode = feedDarkMode;
+    const secondaryItems = [
+        { name: 'Communities', icon: Globe },
+        { name: 'Premium', icon: Star },
+        { name: 'Bookmarked', icon: Bookmark },
+    ];
 
-    const toggleTheme = () => {
-        setFeedDarkMode(!feedDarkMode);
+    const onlineUsers = ['Brooklyn S.', 'Jerome Bell', 'Robert Fox', 'Jane Cooper', 'Floyd Miles', 'Ronald Richards'];
+
+
+
+    // Fetch Trends (Default or Search)
+    useEffect(() => {
+        if (activeTab === 'Trends') {
+            // If query empty, default to 'trending'
+            const query = searchQuery || 'trending';
+
+            const fetchTrends = async () => {
+                setLoading(true);
+                try {
+                    const PEXELS_KEY = import.meta.env.VITE_PEXELS_API_KEY;
+                    let newImages = [];
+
+                    if (PEXELS_KEY) {
+                        const res = await fetch(`https://api.pexels.com/v1/search?query=${query}&per_page=15&page=${trendsPage}`, {
+                            headers: { Authorization: PEXELS_KEY }
+                        });
+                        const data = await res.json();
+                        newImages = data.photos.map(p => p.src.large);
+                    } else {
+                        newImages = Array(15).fill(0).map((_, i) => `https://source.unsplash.com/random/800x600?${query}&sig=${trendsPage * 100 + i}`);
+                    }
+
+                    setSearchResults(prev => trendsPage === 1 ? newImages : [...prev, ...newImages]);
+                } catch (err) { console.error(err); }
+                setLoading(false);
+            };
+            fetchTrends();
+        }
+    }, [activeTab, trendsPage, searchQuery]);
+
+    // Reset trends page when query changes (but not on initial tab switch if handled above)
+    useEffect(() => {
+        if (activeTab === 'Trends' && searchQuery !== 'trending') { // Only reset if it's a user-initiated search, not default 'trending'
+            setTrendsPage(1);
+        }
+    }, [searchQuery, activeTab]);
+
+    const toggleAction = (e) => {
+        const target = e.currentTarget;
+        target.classList.toggle('liked'); // Toggles heart color
+        // Optional: Animate heart
+        target.style.transform = target.classList.contains('liked') ? 'scale(1.2)' : 'scale(1)';
+        setTimeout(() => target.style.transform = 'scale(1)', 200);
     };
 
-    const renderHome = () => {
-        return (
-            <div className="post-section-insta home-no-gap stories-top-fix">
-                <div className="story-section-insta">
-                    <div className="story-insta" onClick={() => openProfile(null, true)}>
-                        <div className="story-image-insta" style={{ background: 'none', padding: 0 }}>
-                            <div style={{ position: 'relative', width: '65px', height: '65px', borderRadius: '50%', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--ig-bg)' }}>
-                                <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'var(--hover-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    <User size={30} color="var(--ig-sec-font)" />
-                                </div>
-                                <svg width="20" height="20" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ position: 'absolute', bottom: '0', right: '0', border: '2px solid var(--ig-bg)', borderRadius: '50%' }}>
-                                    <path fillRule="evenodd" clipRule="evenodd" d="M8.125 16C12.4742 16 16 12.4742 16 8.125C16 3.77576 12.4742 0.25 8.125 0.25C3.77576 0.25 0.25 3.77576 0.25 8.125C0.25 12.4742 3.77576 16 8.125 16Z" fill="#0074cc" />
-                                    <path fillRule="evenodd" clipRule="evenodd" d="M8.61719 4.67969C8.61719 4.40786 8.39683 4.1875 8.125 4.1875C7.85317 4.1875 7.63281 4.40786 7.63281 4.67969V7.63281H4.67969C4.40786 7.63281 4.1875 7.85317 4.1875 8.125C4.1875 8.39683 4.40786 8.61719 4.67969 8.61719H7.63281V11.5703C7.63281 11.8421 7.85317 12.0625 8.125 12.0625C8.39683 12.0625 8.61719 11.8421 8.61719 11.5703V8.61719H11.5703C11.8421 8.61719 12.0625 8.39683 12.0625 8.125C12.0625 7.85317 11.8421 7.63281 11.5703 7.63281H8.61719V4.67969Z" fill="#FFFFFF" />
-                                </svg>
-                            </div>
-                        </div>
-                        <span>Your story</span>
-                    </div>
-                    {stories.map((s, i) => (
-                        <div key={s.id} className="story-insta" onClick={() => setStoryModal({ isOpen: true, index: i })}>
-                            <div className="story-image-insta" style={{ background: 'linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888)', padding: '2px' }}>
-                                <img src={s.user.pic} alt="" style={{ border: '2px solid var(--ig-bg)', borderRadius: '50%', width: '100%', height: '100%' }} />
-                            </div>
-                            <span style={{ fontSize: '11px' }}>{s.user.username}</span>
-                        </div>
-                    ))}
-                </div>
+    const handleDoubleTap = (e) => {
+        const card = e.currentTarget;
+        const fire = document.createElement('div');
+        fire.innerHTML = `<svg width="100" height="100" viewBox="0 0 24 24" fill="#ef4444" stroke="white" stroke-width="2" xmlns="http://www.w3.org/2000/svg"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`;
 
-                <div className="post-area-insta">
-                    {posts.map((post, i) => (
-                        <div key={post.id} className="post-main-insta" ref={i === posts.length - 1 ? lastPostRef : null}>
-                            <div className="post-header-insta">
-                                <div className="post-left-header-insta" onClick={() => openProfile(post.user)} style={{ cursor: 'pointer' }}>
-                                    <div className="post-img-insta" style={{ position: 'relative' }}>
-                                        <img src={post.user.pic || `https://ui-avatars.com/api/?name=${encodeURIComponent(post.user.name || post.user.username || 'U')}&background=random&color=fff`} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                        {post.user.isActive && <div style={{ position: 'absolute', bottom: 0, right: 0, width: 10, height: 10, background: '#22c55e', borderRadius: '50%', border: '2px solid var(--ig-bg)' }} />}
-                                    </div>
-                                    <div style={{ marginLeft: '10px' }}>
-                                        <p className="post-username-insta" style={{ fontWeight: 'bold', color: 'var(--ig-font)', margin: 0 }}>
-                                            {post.user.username}
-                                        </p>
-                                        <small style={{ color: 'var(--ig-sec-font)', fontSize: '11px' }}>
-                                            {post.user.location}
-                                        </small>
-                                    </div>
-                                </div>
-                                <MoreHorizontal size={20} color="var(--ig-font)" />
-                            </div>
-                            <div className="post-main-image-insta" onClick={() => setDetailModal({ isOpen: true, post })} style={{ cursor: 'pointer' }}>
-                                <img src={post.image} alt="" style={{ width: '100%', borderRadius: '4px', border: 'none' }} />
-                            </div>
-                            <div className="post-footer-insta" style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0' }}>
-                                <div style={{ display: 'flex', gap: '15px' }}>
-                                    <Heart
-                                        size={26}
-                                        color={likedPosts[post.id] ? '#ef4444' : 'var(--ig-font)'}
-                                        fill={likedPosts[post.id] ? '#ef4444' : 'none'}
-                                        onClick={() => setLikedPosts({ ...likedPosts, [post.id]: !likedPosts[post.id] })}
-                                        style={{ cursor: 'pointer' }}
-                                    />
-                                    <MessageCircle size={26} color="var(--ig-font)" style={{ cursor: 'pointer' }} />
-                                    <Send size={26} color="var(--ig-font)" style={{ cursor: 'pointer' }} onClick={() => handleShare(post)} title="Share & Copy link" />
-                                </div>
-                                <Bookmark
-                                    size={26}
-                                    color={savedPosts[post.id] ? '#3b82f6' : 'var(--ig-font)'}
-                                    fill={savedPosts[post.id] ? '#3b82f6' : 'none'}
-                                    onClick={() => setSavedPosts({ ...savedPosts, [post.id]: !savedPosts[post.id] })}
-                                    style={{ cursor: 'pointer' }}
-                                />
-                            </div>
-                            <div className="post-description-insta">
-                                <p style={{ fontWeight: 'bold', fontSize: '0.9rem', marginBottom: '5px', color: 'var(--ig-font)' }}>{(post.likes + (likedPosts[post.id] ? 1 : 0)).toLocaleString()} likes</p>
-                                <div style={{ fontSize: '0.9rem', color: 'var(--ig-font)', lineHeight: '1.4' }}>
-                                    <span style={{ fontWeight: 'bold', marginRight: '5px' }}>{post.user.username}</span>
-                                    <span style={{ fontWeight: '800', color: 'var(--primary-color)', marginRight: '5px' }}>[{post.source}]</span>
-                                    {post.caption}
-                                </div>
-                                <p style={{ color: 'var(--ig-sec-font)', fontSize: '0.8rem', marginTop: '8px', cursor: 'pointer' }}>View all {post.comments} comments</p>
-                            </div>
-                        </div>
-                    ))}
-                    {/* Loader removed */}
-                </div>
-            </div>
-        );
+        fire.style.position = 'absolute';
+        fire.style.top = '50%';
+        fire.style.left = '50%';
+        fire.style.transform = 'translate(-50%, -50%) scale(0)';
+        fire.style.animation = 'likeBounce 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+        fire.style.zIndex = 20;
+        fire.style.pointerEvents = 'none';
+
+        if (getComputedStyle(card).position === 'static') {
+            card.style.position = 'relative';
+        }
+
+        card.appendChild(fire);
+        setTimeout(() => fire.remove(), 800);
+
+        const btn = card.querySelector('.like-btn');
+        if (btn) {
+            btn.classList.add('liked');
+            btn.style.transform = 'scale(1.4)';
+            setTimeout(() => btn.style.transform = 'scale(1)', 300);
+        }
+    };
+
+
+
+    const handleShare = (post) => {
+        // Link to Feed page with post query param
+        const link = `${window.location.origin}/feed?post=${post.id}`;
+        navigator.clipboard.writeText(link);
+        // Silent copy - no alerts, no navigation
     };
 
     const renderContent = () => {
-        if (activeView === 'youtube') return <YouTubeUI onBack={() => setActiveView('home')} />;
-        if (activeView === 'search') return <SearchGrid onOpenPost={(p) => setDetailModal({ isOpen: true, post: p })} />;
-        if (activeView === 'explore') return <ExploreGrid onOpenPost={(p) => setDetailModal({ isOpen: true, post: p })} />;
-        if (activeView === 'reels') return <ReelSection />;
-        if (activeView === 'live') return <LiveSection />;
-        if (activeView === 'user') return <ProfileView user={selectedUser} isSelf={isSelfProfile} />;
+        if (activeTab === 'Shots') return <ShortsSection onBack={() => setActiveTab('Home')} onOpenStory={openStory} />;
 
-        return renderHome();
+        if (isSearchActive || activeTab === 'Trends') {
+            return (
+                <div style={{ marginTop: '0px' }}> {/* Container for search results */}
+                    {/* Search bar is already rendered in the main layout above renderContent */}
+                    <div className="image-grid" style={{ marginTop: '20px' }}> {/* Added margin to separate from top */}
+                        {searchResults.length > 0 ? searchResults.map((src, i) => (
+                            <div key={i} className="grid-item" ref={i === searchResults.length - 1 ? lastTrendRef : null}>
+                                <img src={src} alt="Result" />
+                            </div>
+                        )) : (
+                            <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
+                                {loading ? 'Loading Trends...' : 'Explore trending topics or search above.'}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        return (
+            <div className="feed" id="feed-posts">
+                {posts.map((post, index) => (
+                    <div
+                        key={`${post.id}-${index}`}
+                        id={`post-${post.id}`} /* Add ID for scrolling */
+                        className="post-card"
+                        ref={index === posts.length - 1 ? lastPostRef : null}
+                        onDoubleClick={handleDoubleTap}
+                        style={{ position: 'relative' }} /* Force relative for centering */
+                    >
+                        {post.isRoom ? (
+                            <div style={{ background: 'linear-gradient(45deg, #2563eb, #9333ea)', borderRadius: '12px', padding: '20px', color: 'white', textAlign: 'center' }}>
+                                <h3>🎵 Live Room Active</h3>
+                                <p>{post.content}</p>
+                                <button style={{ marginTop: '10px', padding: '8px 20px', background: 'white', color: '#2563eb', border: 'none', borderRadius: '20px', fontWeight: 'bold' }}>Join Room</button>
+                            </div>
+                        ) : (
+                            <>
+                                <div className="post-header">
+                                    <img src={post.user.pic} className="post-avatar" alt={post.user.name} />
+                                    <div className="post-info">
+                                        <h4>{post.user.name}</h4>
+                                        <span>{post.user.handle} • {post.time}</span>
+                                    </div>
+                                </div>
+                                <PostContent content={post.content} />
+                                {post.image && <img src={post.image} className="post-img" alt="Post" />}
+
+                                <div className="alien-actionBtns">
+                                    <div className="left">
+                                        <div className="flex items-center gap-1">
+                                            <Flame size={22} className="alien-icon like-btn" onClick={toggleAction} />
+                                            <span className="text-sm font-semibold text-[var(--text-muted)]">{post.likes}</span>
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                            <MessageCircle size={22} className="alien-icon" />
+                                            <span className="text-sm font-semibold text-[var(--text-muted)]">{post.comments}</span>
+                                        </div>
+                                        <div className="flex items-center">
+                                            <Repeat size={22} className="alien-icon" />
+                                        </div>
+                                        <div className="flex items-center" onClick={() => handleShare(post)}>
+                                            <Share2 size={22} className="alien-icon share-btn" />
+                                        </div>
+                                    </div>
+                                    <div className="right">
+                                        <Bookmark size={22} className="alien-icon" />
+                                    </div>
+                                </div>
+
+                            </>
+                        )}
+                    </div>
+                ))
+                }
+                {loading && <div style={{ textAlign: 'center', padding: '20px' }}>Loading...</div>}
+            </div >
+        );
     };
 
     return (
-        <div className={`feed-page-root ${isDarkMode ? 'dark-mode' : ''}`}>
-            {/* Mobile Header */}
-            <FeedMobileHeader
-                navigate={navigate}
-                isDarkMode={isDarkMode}
-                toggleTheme={toggleTheme}
-                onMenuOpen={() => setIsMobileSidebarOpen(true)}
-            />
+        <div className="new-feed-container" data-theme={theme}>
+            <div className={`app-container ${activeTab === 'Shots' ? 'full-height-mobile' : ''} ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
 
-            {/* Mobile Sidebar Drawer */}
-            <MobileSidebarDrawer
-                isOpen={isMobileSidebarOpen}
-                onClose={() => setIsMobileSidebarOpen(false)}
-                activeView={activeView}
-                setActiveView={setActiveView}
-                onOpenProfile={openProfile}
-                toggleTheme={toggleTheme}
-                isDarkMode={isDarkMode}
-                navigate={navigate}
-                setIsCreationModalOpen={setIsCreationModalOpen}
-            />
+                {/* SIDEBAR LEFT */}
+                <aside className={`sidebar-left ${sidebarOpen ? 'mobile-visible open' : ''} ${sidebarCollapsed ? 'collapsed' : ''}`} style={sidebarOpen ? {
+                    display: 'flex', position: 'fixed', top: 0, left: 0, height: '100%', zIndex: 1000, width: '240px', boxShadow: '2px 0 10px rgba(0,0,0,0.2)'
+                } : { width: sidebarCollapsed ? '80px' : '240px' }}>
 
-            <StoryModal
-                isOpen={storyModal.isOpen} stories={stories} activeIndex={storyModal.index}
-                onClose={() => setStoryModal({ ...storyModal, isOpen: false })}
-                onNext={() => setStoryModal(p => ({ ...p, index: (p.index + 1) % stories.length }))}
-                onPrev={() => setStoryModal(p => ({ ...p, index: (p.index - 1 + stories.length) % stories.length }))}
-            />
+                    <div className="brand" onClick={() => navigate('/')} style={{ cursor: 'pointer', justifyContent: sidebarCollapsed ? 'center' : 'flex-start' }}>
+                        <Zap size={24} /> <span style={{ display: sidebarCollapsed ? 'none' : 'block' }}>Happyytalk</span>
+                    </div>
 
-            <PostDetailModal
-                isOpen={detailModal.isOpen}
-                post={detailModal.post}
-                onClose={() => setDetailModal({ isOpen: false, post: null })}
-                onShare={handleShare}
-            />
+                    <nav className="side-nav">
+                        {/* Primary Items */}
+                        {primaryItems.map((item) => (
+                            <div
+                                key={item.name}
+                                className={`side-link ${activeTab === item.name ? 'active' : ''}`}
+                                onClick={() => handleNavClick(item.name)}
+                                title={sidebarCollapsed ? item.name : ''}
+                                style={{ justifyContent: sidebarCollapsed ? 'center' : 'flex-start' }}
+                            >
+                                <item.icon size={20} />
+                                <span style={{ display: sidebarCollapsed ? 'none' : 'block' }}>{item.name}</span>
+                            </div>
+                        ))}
 
-            <PostCreationModal
-                isOpen={isCreationModalOpen}
-                onClose={() => setIsCreationModalOpen(false)}
-                onPostCreated={() => { setPage(1); fetchHomePosts(1); }}
-            />
+                        {/* Expand/Collapse Button (Show More) */}
+                        <button
+                            className="side-link"
+                            style={{ width: '100%', border: 'none', background: 'none', justifyContent: sidebarCollapsed ? 'center' : 'flex-start' }}
+                            onClick={() => setSidebarExpanded(!sidebarExpanded)}
+                        >
+                            {sidebarExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                            <span style={{ display: sidebarCollapsed ? 'none' : 'block' }}>{sidebarExpanded ? 'Show Less' : 'Show More'}</span>
+                        </button>
 
-            <div className="insta-container">
-                {/* Sidebar only on desktop */}
-                {windowWidth > 768 && (
-                    <FeedSidebarInsta
-                        activeView={activeView}
-                        setActiveView={setActiveView}
-                        onGoHome={() => navigate('/')}
-                        onOpenProfile={openProfile}
-                        isDarkMode={theme === 'dark' || theme === 'space'}
-                        toggleTheme={toggleTheme}
-                        isCollapsed={isSidebarCollapsed}
-                        setIsCollapsed={setIsSidebarCollapsed}
-                        isOpen={isMobileSidebarOpen}
-                        setIsOpen={setIsMobileSidebarOpen}
-                        navigate={navigate}
-                        setIsCreationModalOpen={setIsCreationModalOpen}
-                    />
-                )}
-
-                <div className="middle-section-insta">
-                    {renderContent()}
-
-                    {activeView === 'home' && (
-                        <div className="follow-section-insta">
-                            <div className="profile-follow profile-foolow-hovering" onClick={() => openProfile(null, true)}>
-                                <div className="profile-follow-left">
-                                    <div className="profile-follow-image">
-                                        <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="" />
+                        {/* Secondary Items */}
+                        {sidebarExpanded && (
+                            <div className="animate-in slide-in-from-top-2 fade-in duration-200">
+                                {secondaryItems.map((item) => (
+                                    <div
+                                        key={item.name}
+                                        className={`side-link ${activeTab === item.name ? 'active' : ''}`}
+                                        onClick={() => handleNavClick(item.name)}
+                                        style={{ justifyContent: sidebarCollapsed ? 'center' : 'flex-start' }}
+                                    >
+                                        <item.icon size={20} />
+                                        <span style={{ display: sidebarCollapsed ? 'none' : 'block' }}>{item.name}</span>
                                     </div>
-                                    <div className="profile-follow-content">
-                                        <p className="profile-id">user_421</p>
-                                        <p className="profile-name">HAPPYY TALK User</p>
-                                    </div>
+                                ))}
+
+                                {/* Moved More Items */}
+                                <div className="side-link" onClick={() => handleNavClick('Settings')} style={{ justifyContent: sidebarCollapsed ? 'center' : 'flex-start' }}>
+                                    <Settings size={20} /> <span style={{ display: sidebarCollapsed ? 'none' : 'block' }}>Settings</span>
                                 </div>
-                                <a href="#" className="follow" onClick={(e) => e.preventDefault()}>switch</a>
+                                <div className="side-link" onClick={() => handleNavClick('Activity')} style={{ justifyContent: sidebarCollapsed ? 'center' : 'flex-start' }}>
+                                    <Activity size={20} /> <span style={{ display: sidebarCollapsed ? 'none' : 'block' }}>Your Activity</span>
+                                </div>
+                                <div className="side-link" onClick={() => handleNavClick('Switch')} style={{ justifyContent: sidebarCollapsed ? 'center' : 'flex-start' }}>
+                                    <UserCircle size={20} /> <span style={{ display: sidebarCollapsed ? 'none' : 'block' }}>Switch Accounts</span>
+                                </div>
+                                <div className="side-link" onClick={() => alert('Logged Out')} style={{ color: '#ef4444', justifyContent: sidebarCollapsed ? 'center' : 'flex-start' }}>
+                                    <LogOut size={20} /> <span style={{ display: sidebarCollapsed ? 'none' : 'block' }}>Log Out</span>
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="side-divider" style={{ height: '1px', background: 'var(--border-color)', margin: '15px 0' }}></div>
+
+                        {/* Create Post Action */}
+                        <div
+                            className="side-link"
+                            style={{ color: 'var(--primary-blue)', fontWeight: 'bold', justifyContent: sidebarCollapsed ? 'center' : 'flex-start' }}
+                            onClick={() => { setCreateModalOpen(true); setSidebarOpen(false); }}
+                        >
+                            <Plus size={20} />
+                            <span style={{ display: sidebarCollapsed ? 'none' : 'block' }}>Create Post</span>
+                        </div>
+
+                        {/* Profile Link */}
+                        <div
+                            className={`side-link ${activeTab === 'Profile' ? 'active' : ''}`}
+                            onClick={() => handleNavClick('Profile')}
+                            style={{ justifyContent: sidebarCollapsed ? 'center' : 'flex-start' }}
+                        >
+                            <User size={20} />
+                            <span style={{ display: sidebarCollapsed ? 'none' : 'block' }}>Profile</span>
+                        </div>
+
+                        {/* Desktop Sidebar Toggle (Collapse/Expand) */}
+                        <button
+                            className="side-link desktop-only"
+                            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                            style={{ marginTop: '10px', border: 'none', background: 'none', color: 'var(--text-muted)', justifyContent: sidebarCollapsed ? 'center' : 'flex-start' }}
+                        >
+                            {sidebarCollapsed ? <ArrowLeft size={20} style={{ transform: 'rotate(180deg)' }} /> : <ArrowLeft size={20} />}
+                            <span style={{ display: sidebarCollapsed ? 'none' : 'block' }}>Collapse</span>
+                        </button>
+                        <style>{`@media(max-width: 900px) { .desktop-only { display: none !important; } }`}</style>
+                    </nav>
+
+                    {/* Online Users Section below Nav */}
+                    {!sidebarCollapsed && (
+                        <div className="desktop-only" style={{ padding: '0 20px', marginTop: '10px', flex: 1, overflowY: 'auto' }}>
+                            <div style={{ fontSize: '11px', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 800, marginBottom: '10px' }}>
+                                Online People
+                            </div>
+                            <div className="flex -space-x-2 overflow-hidden mb-4 p-2">
+                                {onlineUsers.map((u, i) => (
+                                    <img key={i} className="inline-block h-8 w-8 rounded-full ring-2 ring-[var(--card-bg)]" src={`https://i.pravatar.cc/150?u=${u}`} alt={u} />
+                                ))}
+                                <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-xs text-gray-500 font-bold ring-2 ring-white">+5</div>
+                            </div>
+                        </div>
+                    )}
+
+
+                    {/* Close button removed as per request */}
+                </aside>
+
+                {sidebarOpen && <div className="fixed inset-0 bg-black/50 z-20 md:hidden" onClick={() => setSidebarOpen(false)}></div>}
+
+                {/* MAIN CONTENT */}
+                <main className="main-content" style={activeTab === 'Shots' ? { padding: 0, overflow: 'hidden' } : {}}>
+                    {activeTab !== 'Shots' && (
+                        <>
+                            <div className="top-navbar">
+                                <button className="mobile-menu-btn" onClick={() => setSidebarOpen(true)} style={{ background: 'none', border: 'none', marginRight: '10px', display: 'none' }}>
+                                    <Menu size={24} color="var(--text-main)" />
+                                </button>
+                                <style>{`@media(max-width: 600px) { .mobile-menu-btn { display: block !important; } }`}</style>
+
+                                <div className="mobile-brand"> <Zap size={24} /> Happyytalk </div>
+
+                                <div className={`search-bar desktop-only`}>
+                                    <Search size={18} color="#64748b" />
+                                    <input
+                                        type="text"
+                                        placeholder="Search..."
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        onKeyDown={handleSearch}
+                                    />
+                                </div>
+
+                                <button className="theme-btn-top" onClick={toggleTheme} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-main)' }}>
+                                    {theme === 'light' ? <Moon size={24} /> : <Sun size={24} />}
+                                </button>
                             </div>
 
-                            <div className="suggestion-follow">
-                                <p className="suggestion">Suggested for you</p>
-                                <a href="#" className="see-all" onClick={(e) => { e.preventDefault(); setShowSuggestions(!showSuggestions); }}>{showSuggestions ? 'hide' : 'see all'}</a>
+                            {/* Mobile Dedicated Search Bar */}
+                            <div className={`mobile-search-container ${isSearchActive ? 'visible' : ''}`}>
+                                <Search size={18} color="#64748b" />
+                                <input
+                                    type="text"
+                                    placeholder="Search trends, people..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    onKeyDown={handleSearch}
+                                    autoFocus
+                                />
+                                {searchQuery && (
+                                    <button onClick={() => setSearchQuery('')} className="clear-btn">
+                                        <div className="w-4 h-4 bg-gray-200 rounded-full flex items-center justify-center text-xs">x</div>
+                                    </button>
+                                )}
                             </div>
+                        </>
+                    )}
 
-                            {showSuggestions && [
-                                { name: "Marcus Rashford", username: "marcus_official", pic: "https://i.pravatar.cc/150?u=marcus", category: "Social Impact", isActive: true },
-                                { name: "Sofia Garcia", username: "sofia_design", pic: "https://i.pravatar.cc/150?u=sofia", category: "Digital Designer", isActive: false },
-                                { name: "Yuki Tanaka", username: "yuki_camera", pic: "https://i.pravatar.cc/150?u=yuki", category: "Photographer", isActive: true },
-                                { name: "Amara Okoro", username: "amara_tech", pic: "https://i.pravatar.cc/150?u=amara", category: "AI Researcher", isActive: false },
-                                { name: "Leo Messi", username: "leomessi", pic: "https://i.pravatar.cc/150?u=messi", category: "Athlete", isActive: true },
-                                { name: "Zoe Chen", username: "zoe_chef", pic: "https://i.pravatar.cc/150?u=zoe", category: "Pastry Artist", isActive: true },
-                                { name: "Arjun Mehta", username: "arjun_travels", pic: "https://i.pravatar.cc/150?u=arjun", category: "Travel Content", isActive: false },
-                                { name: "Elena Rossi", username: "elena_fashion", pic: "https://i.pravatar.cc/150?u=elena", category: "Style Guru", isActive: true },
-                                { name: "David Kim", username: "david_dev", pic: "https://i.pravatar.cc/150?u=david", category: "Software Engineer", isActive: false },
-                                { name: "Nia Jones", username: "nia_vocals", pic: "https://i.pravatar.cc/150?u=nia", category: "Indie Singer", isActive: false },
-                                { name: "Liam O'Connor", username: "liam_fit", pic: "https://i.pravatar.cc/150?u=liam", category: "Fitness Coach", isActive: true },
-                                { name: "Sana Khan", username: "sana_style", pic: "https://i.pravatar.cc/150?u=sanax", category: "Lifestyle Blogger", isActive: false },
-                                { name: "Oliver Smith", username: "oliver_art", pic: "https://i.pravatar.cc/150?u=oliver", category: "Modern Artist", isActive: false },
-                                { name: "Maria Silva", username: "maria_eco", pic: "https://i.pravatar.cc/150?u=maria", category: "Environmentalist", isActive: true }
-                            ].map((u, i) => (
-                                <div key={i} className="profile-follow">
-                                    <div className="profile-follow-left" onClick={() => openProfile({ ...u, pic: u.pic, name: u.name, bio: u.category })}>
-                                        <div className="profile-follow-image" style={{ position: 'relative' }}>
-                                            <img src={u.pic} alt="" />
-                                            {u.isActive && <div style={{ position: 'absolute', bottom: 0, right: 0, width: 8, height: 8, background: '#22c55e', borderRadius: '50%', border: '1px solid var(--card-bg)' }} />}
-                                        </div>
-                                        <div className="profile-follow-content">
-                                            <p className="profile-id">{u.username}</p>
-                                            <p className="profile-name" style={{ color: u.isActive ? '#22c55e' : 'var(--text-secondary)' }}>{u.isActive ? 'Active now' : u.category}</p>
-                                        </div>
+                    {/* Stories Rail */}
+                    {!isSearchActive && activeTab === 'Home' && (
+                        <div className="stories-row">
+                            <div className="story-circle" onClick={() => setCreateModalOpen(true)}>
+                                <div className="img-wrap" style={{ borderStyle: 'dashed', borderColor: '#cbd5e1' }}>
+                                    <User color="#64748b" />
+                                    <div className="plus-badge"><Plus size={12} /></div>
+                                </div>
+                                <div style={{ fontSize: '11px', color: 'var(--text-main)' }}>Your Story</div>
+                            </div>
+                            {stories.map((s, i) => (
+                                <div key={i} className="story-circle" onClick={() => openStory(i)}>
+                                    <div className="img-wrap">
+                                        <img src={s.user.pic} alt={s.user.username} />
                                     </div>
-                                    <a href="#" className="follow" onClick={(e) => { e.preventDefault(); window.dispatchEvent(new CustomEvent('OPEN_CHAT_PANEL')); }}>Chat</a>
+                                    <div style={{ fontSize: '11px', color: 'var(--text-main)' }}>{s.user.username}</div>
                                 </div>
                             ))}
                         </div>
                     )}
-                </div>
-            </div>
 
-            {/* Mobile Bottom Navigation */}
-            <FeedBottomNav
-                activeView={activeView}
-                setActiveView={setActiveView}
-                onOpenProfile={openProfile}
-                setIsCreationModalOpen={setIsCreationModalOpen}
-                onGoHome={() => navigate('/')}
-            />
+                    {renderContent()}
+                </main>
+
+                {/* SIDEBAR RIGHT */}
+                <aside className="sidebar-right">
+                    <div className="sidebar-box">
+                        <h3 className="sidebar-title" style={{ color: 'var(--text-main)' }}>Trends for you</h3>
+                        <div className="flex flex-col gap-4">
+                            {['#HappyyTalk', 'F1 2026', '#CodeLife', 'ReactJS', '#SummerVibes', 'AI Revolution'].map((tag, i) => (
+                                <div key={i} className="cursor-pointer" onClick={() => { setSearchQuery(tag); handleNavClick('Trends'); }}>
+                                    <div className="text-xs text-[var(--text-muted)]">Trending</div>
+                                    <div className="font-bold text-[var(--text-main)]">{tag}</div>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="side-divider" style={{ height: '1px', background: 'var(--border-color)', margin: '20px 0' }}></div>
+
+                        <h3 className="sidebar-title" style={{ color: 'var(--text-main)' }}>Suggested for you</h3>
+                        <div className="flex flex-col gap-3">
+                            {['Alex', 'Emma', 'Sarah', 'Justin'].map((name, i) => (
+                                <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                        <img src={`https://i.pravatar.cc/150?u=${name}`} style={{ width: '36px', height: '36px', borderRadius: '50%' }} alt={name} />
+                                        <div>
+                                            <div style={{ fontWeight: 'bold', fontSize: '14px', color: 'var(--text-main)' }}>{name}</div>
+                                            <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>@suggested</div>
+                                        </div>
+                                    </div>
+                                    <button style={{ background: 'var(--text-main)', color: 'var(--bg-color)', border: 'none', borderRadius: '20px', padding: '4px 12px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer' }}>Follow</button>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </aside>
+
+                {/* Create Post Modal */}
+                {createModalOpen && (
+                    <div className="fixed inset-0 z-[2000] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in" onClick={(e) => { if (e.target === e.currentTarget) setCreateModalOpen(false) }}>
+                        <div className="w-full max-w-md bg-[var(--card-bg)] border border-[var(--border-color)] rounded-3xl p-6 shadow-2xl slide-in-from-bottom-5 relative">
+                            <button
+                                onClick={() => setCreateModalOpen(false)}
+                                style={{ position: 'absolute', top: '20px', right: '20px', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-main)' }}
+                            >
+                                <X size={24} />
+                            </button>
+                            <h3 style={{ color: 'var(--text-main)', marginBottom: '20px', fontSize: '18px', fontWeight: 'bold' }}>Create</h3>
+                            <div className="grid grid-cols-3 gap-4">
+                                {[
+                                    { icon: Image, label: 'Image', color: '#3b82f6' },
+                                    { icon: Video, label: 'Video', color: '#ef4444' },
+                                    { icon: Music, label: 'Audio', color: '#a855f7' },
+                                    { icon: Type, label: 'Text', color: '#f59e0b' },
+                                    { icon: BarChart2, label: 'Poll', color: '#10b981' },
+                                    { icon: Users, label: 'Room', color: '#6366f1' },
+                                    { icon: Radio, label: 'Go Live', color: '#ec4899' },
+                                ].map((opt, i) => (
+                                    <button key={i} className="flex flex-col items-center justify-center p-4 rounded-2xl hover:bg-[var(--bg-hover)] transition-colors border border-[var(--border-color)] bg-[var(--container-bg)]" onClick={() => { }}>
+                                        <div style={{ color: opt.color, marginBottom: '8px' }}><opt.icon size={28} /></div>
+                                        <span style={{ color: 'var(--text-main)', fontSize: '13px', fontWeight: '600' }}>{opt.label}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Story Modal */}
+                <StoryModal
+                    isOpen={isStoryOpen}
+                    stories={stories}
+                    activeIndex={activeStoryIndex}
+                    onClose={() => setIsStoryOpen(false)}
+                    onNext={() => setActiveStoryIndex(prev => (prev + 1) % stories.length)}
+                    onPrev={() => setActiveStoryIndex(prev => (prev - 1 + stories.length) % stories.length)}
+                />
+
+                {/* Mobile Bottom Nav */}
+                <nav className="mobile-bottom-nav">
+                    <button className={`mobile-nav-item ${activeTab === 'Home' ? 'active' : ''}`} onClick={() => handleNavClick('Home')}>
+                        <Home size={24} />
+                        <span>Home</span>
+                    </button>
+                    <button className={`mobile-nav-item ${activeTab === 'Trends' ? 'active' : ''}`} onClick={() => { setIsSearchActive(true); handleNavClick('Trends'); }}>
+                        <Search size={24} />
+                        <span>Search</span>
+                    </button>
+                    <button className="mobile-nav-item create-nav-btn" onClick={() => setCreateModalOpen(true)}>
+                        <div style={{ background: 'var(--primary-blue)', borderRadius: '50%', padding: '12px', marginTop: '-25px', border: '4px solid var(--container-bg)' }}>
+                            <Plus size={24} color="white" />
+                        </div>
+                        <span style={{ marginTop: '4px' }}>Post</span>
+                    </button>
+                    <button className={`mobile-nav-item ${activeTab === 'Shots' ? 'active' : ''}`} onClick={() => handleNavClick('Shots')}>
+                        <PlaySquare size={24} />
+                        <span>Shots</span>
+                    </button>
+                    <button className="mobile-nav-item" onClick={() => navigate(-1)}>
+                        <ArrowLeft size={24} />
+                        <span>Back</span>
+                    </button>
+                </nav>
+            </div>
         </div>
     );
 };

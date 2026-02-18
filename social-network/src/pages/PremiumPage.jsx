@@ -587,9 +587,7 @@ const PremiumPage = () => {
               {/* getBilledText removed */}
               <p style={{ color: 'var(--muted)', marginBottom: '20px', fontSize: '0.95rem' }}>{plan.desc}</p>
               <button className={`btn ${plan.buttonClass}`} onClick={() => {
-                if (plan.name === 'Free') {
-                  console.log('Continuing with Free plan');
-                } else if (plan.name === 'Donation') {
+                if (plan.name === 'Donation') {
                   const section = document.querySelector('.bmc-section');
                   if (section) section.scrollIntoView({ behavior: 'smooth' });
                 } else {

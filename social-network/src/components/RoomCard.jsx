@@ -37,10 +37,9 @@ const RoomCard = ({ room, currentUser, onTopicUpdated, onRoomDeleted }) => {
 
         // Room name from data or fallback to ID
         const roomName = (mirotalk_room_name || `room-${id}`).trim();
-        const baseUrl = 'http://localhost:3000';
 
-        // Open meet.happytalk directly
-        const finalUrl = `${baseUrl}/join/${encodeURIComponent(roomName)}?name=${encodeURIComponent(userName)}`;
+        // Open local /meet route (React app wrapper)
+        const finalUrl = `${window.location.origin}/meet?room=${encodeURIComponent(roomName)}&name=${encodeURIComponent(userName)}`;
         window.open(finalUrl, '_blank');
     };
 

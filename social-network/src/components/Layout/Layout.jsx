@@ -40,6 +40,7 @@ const Layout = () => {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [activeCategory, setActiveCategory] = useState('all');
+  const [activeHomeView, setActiveHomeView] = useState('rooms');
   const [categoryVisible, setCategoryVisible] = useState(false);
 
   const [banners, setBanners] = useState([]);
@@ -84,8 +85,6 @@ const Layout = () => {
           }
         }));
         setChatPanelOpen(true);
-      } else {
-        // Removed setRightSidebarOpen(true);
       }
     }
   };
@@ -181,6 +180,8 @@ const Layout = () => {
     sidebarOpen,
     refreshTrigger, // Export state
     triggerRoomRefresh, // Export function
+    activeHomeView,
+    setActiveHomeView,
     unreadCount,
     setUnreadCount,
     openProfile: (user, context = {}) => {
@@ -194,7 +195,7 @@ const Layout = () => {
   const isImmersivePage = ['/premium', '/1to1'].includes(pathname);
 
   // Immersive full-screen pages that should not have main layout padding or main sidebar
-  const fullScreenApps = ['/feed', '/youtube', '/live', '/learning', '/ai-chat', '/news', '/apps', '/1to1', '/premium'];
+  const fullScreenApps = ['/feed', '/youtube', '/live', '/learning', '/ai-chat', '/news', '/apps', '/1to1', '/premium', '/meet'];
   const isFullScreenApp = fullScreenApps.some(route => pathname.startsWith(route));
 
   // Routes that should be wrapped in a tablet frame
@@ -209,7 +210,7 @@ const Layout = () => {
   return (
     <LayoutContext.Provider value={layoutContextValue}>
       <div className="background-glows">
-        {/* Glow divs remain same */}
+
         <div className="glow1"></div>
         <div className="glow2"></div>
         <div className="glow3"></div>
@@ -226,7 +227,7 @@ const Layout = () => {
         className="layout-root-wrapper min-h-screen flex flex-col"
         data-animation-stopped={animationStopped ? 'true' : 'false'}
       >
-        {(pathname !== '/feed' && pathname !== '/youtube') && (
+        {(pathname !== '/feed' && pathname !== '/youtube' && pathname !== '/ai-chat' && !pathname.startsWith('/meet')) && (
           <Sidebar
             isOpen={sidebarOpen}
             onClose={toggleSidebar}
@@ -249,13 +250,14 @@ const Layout = () => {
           onClose={() => setChatPanelOpen(false)}
         />
 
-        <div className={`page-content-container flex flex-col flex-grow ${(sidebarOpen && windowWidth > 768) ? 'shifted' : ''}`}>
+        <div className={`page-content-container flex flex-col flex-grow ${(sidebarOpen && windowWidth > 768 && !pathname.startsWith('/meet') && pathname !== '/feed' && pathname !== '/youtube' && pathname !== '/ai-chat') ? 'shifted' : ''}`}>
           <div className="layout-header-sticky">
-            {(pathname !== '/feed' && pathname !== '/youtube') ? (
+            {((pathname !== '/feed' && pathname !== '/youtube' && pathname !== '/ai-chat' && !pathname.startsWith('/meet') && activeHomeView !== 'shorts')) ? (
               <>
                 <Header
                   onMenuClick={toggleSidebar}
                   user={currentUser}
+                  onTitleClick={() => setActiveHomeView('rooms')}
                 />
 
                 <div className="layout-persistent-nav">
@@ -311,10 +313,12 @@ const Layout = () => {
                   </div>
                 </div>
               </>
-            ) : null}
+            ) : (activeHomeView === 'shorts' && isHomePage && (
+              <Header onMenuClick={toggleSidebar} user={currentUser} onTitleClick={() => setActiveHomeView('rooms')} />
+            ))}
           </div>
 
-          <main className={`main-content-area flex-grow overflow-x-hidden ${(!isFullScreenApp) ? 'p-4' : ''}`}>
+          <main className={`main-content-area flex-grow overflow-x-hidden ${(!isFullScreenApp && activeHomeView !== 'shorts') ? 'p-4' : ''}`}>
             {isAppPage ? (
               <TabletWrapper title={pathname.substring(1).toUpperCase()}>
                 <Outlet />
@@ -323,10 +327,10 @@ const Layout = () => {
               <Outlet />
             )}
           </main>
-          {(pathname !== '/feed' && pathname !== '/youtube') && <Footer />}
+          {(pathname !== '/feed' && pathname !== '/youtube' && pathname !== '/ai-chat' && !pathname.startsWith('/meet')) && <Footer />}
         </div>
 
-        {(pathname !== '/feed' && pathname !== '/youtube') && (
+        {(pathname !== '/feed' && pathname !== '/youtube' && pathname !== '/ai-chat' && !pathname.startsWith('/meet')) && (
           <BottomNavbar
             activeButton={pathname}
             onCreateClick={handleCreateRoomClick}

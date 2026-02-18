@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 
 const BasicLearning = () => {
@@ -365,7 +365,7 @@ const BasicLearning = () => {
     }
   };
 
-  const handleAnswer = (option) => {
+  const handleAnswer = useCallback((option) => {
     if (option === quizQuestion.correct) {
       setQuizScore(s => s + 1);
       setQuizFeedback('Correct! 🌟');
@@ -374,7 +374,7 @@ const BasicLearning = () => {
       setQuizFeedback(`Oops! The correct answer was ${quizQuestion.correct}`);
       setTimeout(generateQuestion, 2000);
     }
-  };
+  }, [quizQuestion]);
 
   useEffect(() => {
     if (data) {
@@ -527,7 +527,7 @@ const BasicLearning = () => {
       delete window.handleQuizAnswer;
       delete window.exitQuiz;
     };
-  }, [muted, quizQuestion]);
+  }, [muted, quizQuestion, handleAnswer]);
 
   const bgColor_unused = isDarkMode ? '#0f1419' : '#f8fafc';
 

@@ -4054,3 +4054,9 @@ body {
   border-radius: 50%;
   background: #1e293b;
 }
+
+@media (max-width: 768px) {
+  .desktop-only {
+    display: none !important;
+  }
+}

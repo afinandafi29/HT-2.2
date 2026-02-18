@@ -2,64 +2,81 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom';
 import AIChatBox from './AIChatBox';
 
-const QuizPage = ({
-  language,
-  languageCode,
-  pageTitle,
-  subtitle,
-  rawData,
-  speechLocale,
-  primaryColor,
-  primaryHover,
-  secondaryColor,
-  isRtl = false,
-  resultTitle,
-  resultMessage,
-  retryLabel,
-  levelLabels,
-}) => {
+const QuizPage = ({ language, languageCode, pageTitle, subtitle, rawData, speechLocale, primaryColor, primaryHover, resultTitle, resultMessage, retryLabel, levelLabels }) => {
   const navigate = useNavigate();
   const [isMuted, setIsMuted] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isAIChatOpen, setIsAIChatOpen] = useState(false);
+  const [levelFilter, setLevelFilter] = useState('Basic');
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
   const [selected, setSelected] = useState(null);
-  const [showResults, setShowResults] = useState(false);
   const [options, setOptions] = useState([]);
+  const [showResults, setShowResults] = useState(false);
   const answeredRef = useRef(false);
 
+  // Default values for optional props
+  const pColor = primaryColor || '#3b82f6';
+  const pHover = primaryHover || '#2563eb';
+
   const questions = useMemo(() => {
-    const parsed = rawData
-      .split('\n')
-      .map((line) => line.trim())
-      .filter(Boolean)
-      .map((line) => {
-        const parts = line.split('|');
-        const [l, q, a, ...rest] = parts;
-        const wRaw = rest.join('|');
-        const w = wRaw.split('||').filter(Boolean);
-        return { l, q, a, w };
-      });
-    return parsed.sort(() => Math.random() - 0.5);
-  }, [rawData]);
+    if (!rawData) return [];
+
+    // Check if rawData is already an object/array (if we move to JSON later) or string
+    let parsed = [];
+    if (typeof rawData === 'string') {
+      parsed = rawData
+        .split('\n')
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .map((line) => {
+          const parts = line.split('|');
+          const [l, q, a, ...rest] = parts;
+          const wRaw = rest.join('|');
+          const w = wRaw.split('||').filter(Boolean);
+          return { l, q, a, w };
+        });
+    }
+
+    // Filter by level (Basic = Beginner + Intermediate, Advanced = Advanced + Expert)
+    const filtered = parsed.filter((q) => {
+      // Simple mapping strategy: check against known keys in labels or direct string
+      const level = q.l;
+      const isBasic = level === 'Beginner' || level === 'Intermediate' ||
+        level === 'Principiante' || level === 'Intermedio' ||
+        level === 'Débutant' || level === 'Intermédiaire' ||
+        level === 'Anfänger' || level === 'Fortgeschritten' ||
+        level === 'Basic';
+
+      if (levelFilter === 'Basic') {
+        return isBasic;
+      } else {
+        return !isBasic;
+      }
+    });
+
+    return filtered.sort(() => Math.random() - 0.5);
+  }, [rawData, levelFilter]);
 
   const speak = useCallback(
     (text) => {
       if (isMuted) return;
       if (typeof window === 'undefined') return;
       if (!('speechSynthesis' in window)) return;
+
       const cleanText = String(text).replace(
         /[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu,
         '',
       );
+
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(cleanText);
       utterance.rate = 0.9;
-      utterance.lang = speechLocale;
+      utterance.pitch = 1.1;
+      utterance.lang = speechLocale || 'en-US';
       window.speechSynthesis.speak(utterance);
     },
-    [isMuted],
+    [isMuted, speechLocale],
   );
 
   const shuffle = useCallback((arr) => {
@@ -83,13 +100,15 @@ const QuizPage = ({
   );
 
   useEffect(() => {
-    loadQuestion(0);
+    if (questions.length > 0) {
+      loadQuestion(0);
+    }
     return () => {
       if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
         window.speechSynthesis.cancel();
       }
     };
-  }, [loadQuestion]);
+  }, [questions, loadQuestion]);
 
   const handleSelect = (choice) => {
     if (answeredRef.current) return;
@@ -117,442 +136,173 @@ const QuizPage = ({
     loadQuestion(0);
   };
 
+  const handleLevelChange = (level) => {
+    setLevelFilter(level);
+    setCurrentQuestion(0);
+    setScore(0);
+    setShowResults(false);
+    answeredRef.current = false;
+    setSelected(null);
+  };
+
   const q = questions[currentQuestion];
-  const levelClass = String(q?.l || '').toLowerCase();
   const correct = q?.a;
   const canGoNext = answeredRef.current;
 
-  const themeColors = {
-    light: {
-      bg: '#ffffff',
-      text: '#2c3e50',
-      muted: '#4b5563',
-      cardBorder: '#e5e5e5',
-      cardBorderHover: '#cecece',
-      cardHoverBg: '#f7f7f7',
-      flagBg: '#ffffff',
-      flagBorder: '#f0f0f0',
-      shadow: 'rgba(0, 0, 0, 0.05)',
-    },
-    dark: {
-      bg: '#0f172a',
-      text: '#e5e7eb',
-      muted: '#cbd5e1',
-      cardBorder: '#334155',
-      cardBorderHover: '#475569',
-      cardHoverBg: 'rgba(148, 163, 184, 0.12)',
-      flagBg: 'rgba(255, 255, 255, 0.08)',
-      flagBorder: 'rgba(255, 255, 255, 0.12)',
-      shadow: 'rgba(0, 0, 0, 0.35)',
-    },
-  };
-
-  const theme = isDarkMode ? themeColors.dark : themeColors.light;
-
-  const voiceCss = `
-    .quiz-container {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: ${theme.bg};
-      margin: 0;
-      padding: 20px;
-      color: ${theme.text};
+  // Use inline styles for simplicity since we want one file if possible, or we could keep using CSS modules?
+  // Re-using the style injection approach from the original files to minimize friction
+  const styles = `
+    .quiz-page {
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
       min-height: 100vh;
-    }
-
-    .quiz-header {
-      text-align: center;
-      color: ${primaryColor};
-      margin-bottom: 5px;
-      font-weight: 800;
-    }
-
-    .quiz-subtitle {
-      text-align: center;
-      color: #7f8c8d;
-      margin-bottom: 25px;
-      font-size: 1rem;
-    }
-
-    .external-controls {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-      width: 100%;
-      max-width: 1050px;
-      gap: 15px;
-    }
-
-    .control-group {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .control-group.right {
-      margin-left: auto;
-    }
-
-    .back-button {
-      background: ${primaryColor};
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 25px;
-      cursor: pointer;
-      font-weight: bold;
-      font-size: 14px;
       transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      gap: 5px;
+      padding: 20px;
     }
+    
+    .quiz-page.light-mode { background-color: #fafafa; color: #333; }
+    .quiz-page.dark-mode { background-color: #1a1a1a; color: #fff; }
 
-    .back-button:hover {
-      background: ${primaryHover};
-      transform: translateY(-2px);
-    }
-
-    .theme-buttons {
-      display: flex;
-      gap: 10px;
-    }
-
-    .theme-btn {
-      background: transparent;
-      color: ${theme.text};
-      border: 2px solid ${theme.cardBorder};
-      border-bottom: 4px solid ${theme.cardBorder};
-      padding: 10px 14px;
-      border-radius: 25px;
-      cursor: pointer;
-      font-weight: bold;
-      font-size: 14px;
-      transition: all 0.1s;
-      user-select: none;
-    }
-
-    .theme-btn:hover {
-      background-color: ${primaryColor}20;
-      border-color: ${primaryHover};
-    }
-
-    .theme-btn.active {
-      background: ${primaryColor};
-      color: white;
-      border-color: ${primaryColor};
-    }
-
-    .mute-toolbar-btn {
-      background: transparent;
-      color: ${theme.text};
-      border: 2px solid ${theme.cardBorder};
-      border-bottom: 4px solid ${theme.cardBorder};
-      padding: 10px 14px;
-      border-radius: 25px;
-      cursor: pointer;
-      font-weight: bold;
-      font-size: 14px;
-      transition: all 0.1s;
-      user-select: none;
-    }
-
-    .mute-toolbar-btn:hover {
-      background-color: ${primaryColor}20;
-      border-color: ${primaryHover};
-    }
-
-    .mute-toolbar-btn.active {
-      background: ${primaryColor};
-      color: white;
-      border-color: ${primaryColor};
-    }
-
-    .container {
-      max-width: 650px;
+    .quiz-container {
+      max-width: 800px;
       margin: 0 auto;
-      background: ${theme.bg};
-      border-radius: 20px;
-      padding: 30px;
-      box-shadow: 0 15px 35px rgba(0, 106, 167, 0.1);
+      border-radius: 24px;
+      padding: 40px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
       position: relative;
-      border-top: 10px solid ${secondaryColor || primaryColor};
-      direction: ${isRtl ? 'rtl' : 'ltr'};
-      text-align: ${isRtl ? 'right' : 'left'};
     }
+   
+    .quiz-page.light-mode .quiz-container { background: #ffffff; border: 2px solid ${pColor}; }
+    .quiz-page.dark-mode .quiz-container { background: #0d0d0d; border: 2px solid ${pColor}; }
 
-    .mute-btn {
-      position: absolute;
-      top: 25px;
-      ${isRtl ? 'left: 25px;' : 'right: 25px;'}
-      cursor: pointer;
-      background: ${theme.bg};
-      border: 2px solid ${primaryColor};
-      border-radius: 50%;
-      width: 48px;
-      height: 48px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.3rem;
-      z-index: 10;
-      transition: all 0.2s ease;
+    h1 { color: ${pColor}; text-align: center; margin-bottom: 20px; }
+
+    .option-item {
+        padding: 15px; margin: 10px 0; border-radius: 12px;
+        border: 2px solid ${pColor}; cursor: pointer; transition: all 0.2s;
     }
+    .option-item:hover { transform: translateY(-2px); }
+    .quiz-page.light-mode .option-item:hover { background: #f0f9ff; }
+    .quiz-page.dark-mode .option-item:hover { background: #333; }
 
-    .mute-btn:hover {
-      transform: scale(1.1);
-      background: ${theme.cardHoverBg};
+    .option-item.correct { background-color: ${pColor} !important; color: white !important; }
+    .option-item.wrong { background-color: #ffebee !important; border-color: #ef5350 !important; color: #c62828 !important; }
+
+    .quiz-btn {
+        background: ${pColor}; color: white; border: none; padding: 12px 24px;
+        border-radius: 25px; cursor: pointer; font-weight: bold; transition: background 0.2s;
     }
-
-    .question-box {
-      background: ${theme.cardHoverBg};
-      border-radius: 15px;
-      padding: 25px;
-      margin-bottom: 20px;
-      border: 1px solid ${theme.cardBorder};
-      text-align: ${isRtl ? 'right' : 'left'};
-    }
-
-    .level-badge {
-      display: inline-block;
-      padding: 5px 15px;
-      border-radius: 6px;
-      font-size: 0.75rem;
-      font-weight: bold;
-      text-transform: uppercase;
-      margin-bottom: 12px;
-      background: #e0e0e0;
-      color: #333;
-    }
-
-    /* Arabic levels - Updated to user requested theme */
-    .مبتدئ { background: #E8F5E9; color: #2E7D32; }
-    .متوسط { background: #FFF3E0; color: #E65100; }
-    .خبير { background: #E1F5FE; color: #01579B; }
-
-    /* Russian levels */
-    .новичок { background: #ffeaa7; color: #d35400; }
-    .любитель { background: #fab1a0; color: #c0392b; }
-    .эксперт { background: #2d3436; color: #fff; }
-
-    /* Portuguese levels */
-    .iniciante { background: #ffeaa7; color: #d35400; }
-    .intermediário { background: #fab1a0; color: #c0392b; }
-    .mestre { background: #2d3436; color: #fff; }
-
-    /* Turkish levels */
-    .başlangıç { background: #ffeaa7; color: #d35400; }
-    .orta { background: #fab1a0; color: #c0392b; }
-    .uzman { background: #2d3436; color: #fff; }
-
-    /* Indonesian levels */
-    .pemula { background: #ffeaa7; color: #d35400; }
-    .menengah { background: #fab1a0; color: #c0392b; }
-    .ahli { background: #2d3436; color: #fff; }
-
-    /* English levels */
-    .beginner { background: #ffeaa7; color: #d35400; }
-    .intermediate { background: #fab1a0; color: #c0392b; }
-    .advanced { background: #2d3436; color: #fff; }
-    .expert { background: #2d3436; color: #fff; }
-
-
-    .qnum {
-      color: ${primaryColor};
-      font-weight: bold;
-      font-size: 0.9rem;
-      display: block;
-      margin-bottom: 8px;
-    }
-
-    .options {
-      display: grid;
-      gap: 12px;
-    }
-
-    .option {
-      background: ${theme.bg};
-      border: 2px solid ${theme.cardBorder};
-      border-radius: 12px;
-      padding: 18px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      font-size: 1.1rem;
-      text-align: ${isRtl ? 'right' : 'left'};
-    }
-
-    .option.correct {
-      background: ${primaryColor} !important;
-      color: white !important;
-      border-color: ${primaryHover} !important;
-    }
-
-    .option.wrong {
-      background: #e74c3c !important;
-      color: white !important;
-      border-color: #c0392b !important;
-    }
-
-    .next-btn {
-      background: ${primaryColor};
-      color: white;
-      border: none;
-      padding: 18px;
-      font-size: 1.1rem;
-      font-weight: bold;
-      border-radius: 12px;
-      cursor: pointer;
-      width: 100%;
-      margin-top: 10px;
-    }
-
-    .next-btn:disabled {
-      background: #cbd5e1;
-      cursor: not-allowed;
-    }
-
-    .result-screen {
-      text-align: center;
-      padding: 40px 10px;
-    }
-
-    .result-title {
-      font-size: 2rem;
-      font-weight: 800;
-      margin-bottom: 20px;
-      color: ${primaryColor};
-    }
-
-    .score-display {
-      font-size: 4rem;
-      font-weight: 900;
-      color: ${primaryColor};
-      margin: 20px 0;
-    }
-
-    .result-message {
-      font-size: 1.2rem;
-      margin-bottom: 30px;
-    }
-
-    .try-again {
-      background: ${primaryColor};
-      color: white;
-      border: none;
-      padding: 15px 40px;
-      border-radius: 10px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    @media (max-width: 500px) {
-      .container {
-        padding: 20px;
-      }
-      .options {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
-      }
-      .option {
-        padding: 16px;
-        font-size: 1rem;
-      }
-    }
+    .quiz-btn:hover:not(:disabled) { background: ${pHover}; }
+    .quiz-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    
+    .top-bar { display: flex; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
   `;
 
-  const renderContent = () => {
-    if (showResults) {
-      return (
-        <div className="result-screen">
-          <h2 className="result-title">{resultTitle}</h2>
-          <div className="score-display">{score}/{questions.length}</div>
-          <p className="result-message">{resultMessage}</p>
-          <button type="button" onClick={restart} className="try-again">
-            {retryLabel}
+  if (showResults) {
+    return (
+      <div className={`quiz-page ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
+        <style>{styles}</style>
+        <div className="quiz-container" style={{ textAlign: 'center' }}>
+          <h1>{resultTitle || "Quiz Complete!"}</h1>
+          <p>{resultMessage || "Great job!"}</p>
+          <div style={{ fontSize: '3rem', fontWeight: 'bold', color: pColor, margin: '20px 0' }}>
+            {score}/{questions.length}
+          </div>
+
+          <button className="quiz-btn" onClick={restart}>
+            {retryLabel || "Try Again"}
+          </button>
+          <button className="quiz-btn" onClick={() => navigate('/learning-languages')} style={{ marginLeft: '10px', background: '#666' }}>
+            Back
           </button>
         </div>
-      );
-    }
-
-    return (
-      <>
-        <div className="quiz-header">
-          {pageTitle}
-        </div>
-        <div className="quiz-subtitle">{subtitle}</div>
-        <div className="question-box">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span className={`level-badge ${levelClass}`}>{q?.l}</span>
-            <span className="qnum">{isRtl ? 'سؤال' : 'Question'} {currentQuestion + 1} / {questions.length}</span>
-          </div>
-          <h2 style={{ fontSize: '1.3rem', marginTop: '10px' }}>{q?.q}</h2>
-          <div className="options" style={{ marginTop: '20px' }}>
-            {options.map((opt) => {
-              const isCorrect = answeredRef.current && opt === correct;
-              const isWrong = answeredRef.current && selected === opt && opt !== correct;
-              const cls = `option${isCorrect ? ' correct' : ''}${isWrong ? ' wrong' : ''}`;
-              return (
-                <div key={opt} className={cls} onClick={() => handleSelect(opt)}>
-                  {opt}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-        <button className="next-btn" type="button" disabled={!canGoNext} onClick={next}>
-          {isRtl ? 'السؤال التالي ←' : 'Next →'}
-        </button>
-      </>
+      </div>
     );
-  };
+  }
 
   return (
-    <div className="quiz-container">
-      <style>{voiceCss}</style>
-      <div className="external-controls">
-        <button className="back-button" onClick={() => navigate('/learning-languages')}>
-          ← Back
+    <div className={`quiz-page ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
+      <style>{styles}</style>
+
+      <div className="top-bar">
+        <button className="quiz-btn" onClick={() => navigate('/learning-languages')} style={{ padding: '8px 16px', fontSize: '0.9rem' }}>← Back</button>
+
+        <div>
+          <button
+            className="quiz-btn"
+            style={{ borderRadius: '20px 0 0 20px', background: levelFilter === 'Basic' ? pHover : pColor, opacity: levelFilter === 'Basic' ? 1 : 0.7 }}
+            onClick={() => handleLevelChange('Basic')}
+          >
+            Basic
+          </button>
+          <button
+            className="quiz-btn"
+            style={{ borderRadius: '0 20px 20px 0', background: levelFilter === 'Advanced' ? pHover : pColor, opacity: levelFilter === 'Advanced' ? 1 : 0.7 }}
+            onClick={() => handleLevelChange('Advanced')}
+          >
+            Advanced
+          </button>
+        </div>
+
+        <button className="quiz-btn" onClick={() => setIsDarkMode(!isDarkMode)}>
+          {isDarkMode ? '☀️' : '🌙'}
         </button>
-        <div className="control-group right">
-          <div className="theme-buttons">
-            <button className={`theme-btn ${!isDarkMode ? 'active' : ''}`} onClick={() => setIsDarkMode(false)}>
-              ☀️ Light
-            </button>
-            <button className={`theme-btn ${isDarkMode ? 'active' : ''}`} onClick={() => setIsDarkMode(true)}>
-              🌙 Dark
+      </div>
+
+      <div className="quiz-container">
+        <h1>{pageTitle}</h1>
+        <p style={{ textAlign: 'center', opacity: 0.7, marginBottom: '30px' }}>{subtitle}</p>
+
+        {questions.length > 0 ? (
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+              <span style={{ fontWeight: 'bold', color: pColor }}>{q?.l}</span>
+              <span style={{ fontWeight: 'bold' }}>{currentQuestion + 1}/{questions.length}</span>
+            </div>
+
+            <h2 style={{ fontSize: '1.5rem', marginBottom: '20px' }}>{q?.q}</h2>
+
+            <div>
+              {options.map((opt, idx) => {
+                const isCorrect = answeredRef.current && opt === correct;
+                const isWrong = answeredRef.current && selected === opt && opt !== correct;
+                const cls = `option-item${isCorrect ? ' correct' : ''}${isWrong ? ' wrong' : ''}`;
+                return (
+                  <div key={idx} className={cls} onClick={() => handleSelect(opt)}>
+                    {opt}
+                  </div>
+                );
+              })}
+            </div>
+
+            <button
+              className="quiz-btn"
+              id="nextBtn"
+              disabled={!canGoNext}
+              onClick={next}
+              style={{ width: '100%', marginTop: '30px' }}
+            >
+              Next Question →
             </button>
           </div>
-        </div>
+        ) : (
+          <div style={{ textAlign: 'center', padding: '50px' }}>
+            <p>Loading questions...</p>
+          </div>
+        )}
       </div>
-      <div className="container">
-        <button className="mute-btn" onClick={() => setIsMuted(!isMuted)}>
-          {isMuted ? '🔇' : '🔊'}
-        </button>
-        {renderContent()}
-      </div>
+
       <button
         type="button"
         onClick={() => setIsAIChatOpen(true)}
         style={{
-          position: 'fixed',
-          bottom: '20px',
-          right: '20px',
-          width: '60px',
-          height: '60px',
-          borderRadius: '50%',
-          background: `linear-gradient(135deg, ${primaryColor} 0%, ${primaryHover} 100%)`,
-          color: 'white',
-          border: 'none',
-          cursor: 'pointer',
-          fontSize: '24px',
-          boxShadow: '0 4px 20px rgba(59, 130, 246, 0.4)',
-          zIndex: 1000,
+          position: 'fixed', bottom: '20px', right: '20px', width: '60px', height: '60px', borderRadius: '50%',
+          background: `linear-gradient(135deg, ${pColor} 0%, ${pHover} 100%)`, color: 'white', border: 'none',
+          cursor: 'pointer', fontSize: '24px', boxShadow: `0 4px 20px rgba(0,0,0,0.3)`, zIndex: 1000,
         }}
-        aria-label="Open AI Chat"
       >
         🤖
       </button>
-      <AIChatBox isOpen={isAIChatOpen} onClose={() => setIsAIChatOpen(false)} language={languageCode} />
+      <AIChatBox isOpen={isAIChatOpen} onClose={() => setIsAIChatOpen(false)} language={language || "en"} />
     </div>
   );
 };

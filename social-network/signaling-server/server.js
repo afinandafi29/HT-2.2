@@ -135,7 +135,45 @@ io.on('connection', (socket) => {
     }
 });
 
+// API Routes (Mock for now)
+app.use(express.json());
+
+app.get('/api/posts', (req, res) => {
+    const posts = [
+        {
+            id: 1,
+            user: { full_name: "System Admin", avatar_url: "https://github.com/github.png" },
+            username: "admin",
+            image_url: "https://images.unsplash.com/photo-1498050108023-c5249f4df085",
+            content: "Welcome to HappyyTalk! This is a post from the backend.",
+            likes_count: 42,
+            comments_count: 5
+        },
+        {
+            id: 2,
+            user: { full_name: "Demo User", avatar_url: "https://ui-avatars.com/api/?name=Demo+User" },
+            username: "demo_user",
+            image_url: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5",
+            content: "Testing the API integration. It works!",
+            likes_count: 10,
+            comments_count: 2
+        }
+    ];
+    res.json(posts);
+});
+
+app.post('/api/posts', (req, res) => {
+    const newPost = req.body;
+    // In a real app, save to DB
+    res.json({ message: "Post created", post: newPost });
+});
+
+app.get('/api/posts/:id', (req, res) => {
+    res.json({ message: "Post details" });
+});
+
+// Start Server
 const PORT = 5001;
-httpServer.listen(PORT, () => {
+httpServer.listen(PORT, '0.0.0.0', () => {
     console.log(`Signaling server running on port ${PORT}`);
 });

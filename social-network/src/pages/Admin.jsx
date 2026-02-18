@@ -199,8 +199,10 @@ const Admin = () => {
         );
     }
 
-    const NavItem = ({ id, icon: Icon, label }) => (
+
+    const renderNavItem = (id, Icon, label) => (
         <button
+            key={id}
             onClick={() => setActiveTab(id)}
             className={`w-full flex items-center gap-4 p-4 rounded-2xl transition-all font-bold text-lg mb-2 ${activeTab === id ? 'bg-blue-600 text-white shadow-xl shadow-blue-500/20' : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}
         >
@@ -221,14 +223,14 @@ const Admin = () => {
                 </div>
 
                 <nav className="flex-1 space-y-2">
-                    <NavItem id="dashboard" icon={ShieldCheck} label="Dashboard" />
-                    <NavItem id="banners" icon={Eye} label="Banners" />
-                    <NavItem id="rooms" icon={Settings} label="Rooms" />
-                    <NavItem id="posts" icon={Plus} label="Posts" />
-                    <NavItem id="users" icon={LogOut} label="Users" />
-                    <NavItem id="apps" icon={Plus} label="Apps" />
-                    <NavItem id="settings" icon={Settings} label="API Master" />
-                    <NavItem id="reports" icon={AlertCircle} label="Reports" />
+                    {renderNavItem('dashboard', ShieldCheck, 'Dashboard')}
+                    {renderNavItem('banners', Eye, 'Banners')}
+                    {renderNavItem('rooms', Settings, 'Rooms')}
+                    {renderNavItem('posts', Plus, 'Posts')}
+                    {renderNavItem('users', LogOut, 'Users')}
+                    {renderNavItem('apps', Plus, 'Apps')}
+                    {renderNavItem('settings', Settings, 'API Master')}
+                    {renderNavItem('reports', AlertCircle, 'Reports')}
                 </nav>
 
                 <div className="mt-auto">
@@ -438,7 +440,7 @@ const Admin = () => {
                         </div>
                     )}
 
-                    {/* Posts placeholder - can integrate news/feed moderation here */}
+
                     {activeTab === 'posts' && (
                         <div className="h-full flex items-center justify-center animate-in fade-in duration-500">
                             <div className="text-center max-w-lg">
@@ -527,7 +529,7 @@ const Admin = () => {
                         </div>
                     )}
 
-                    {/* Placeholder for other tabs ... */}
+
                     {['users', 'reports'].includes(activeTab) && (
                         <div className="h-full flex items-center justify-center animate-in fade-in duration-500">
                             <div className="text-center max-w-lg">

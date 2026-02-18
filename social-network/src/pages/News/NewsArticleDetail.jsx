@@ -83,7 +83,7 @@ const NewsArticleDetail = () => {
         // Scroll to top
         window.scrollTo(0, 0);
 
-    }, [uuid]);
+    }, [uuid, article]);
 
     const handleShare = (platform) => {
         const shareUrl = encodeURIComponent(`${window.location.origin}/news/article/${uuid}`);

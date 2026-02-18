@@ -1,5 +1,5 @@
 import axios from 'axios';
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5001/api';
 import { supabase } from '../supabase/config';
 
 const api = axios.create({
@@ -10,15 +10,15 @@ const api = axios.create({
 });
 
 api.interceptors.request.use(async (config) => {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session?.access_token) {
-            config.headers.Authorization = `Bearer ${session.access_token}`;
-        } else {
-            delete config.headers.Authorization;
-        }
-        return config;
-    }, (error) => {
-        return Promise.reject(error);
-    });
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.access_token) {
+        config.headers.Authorization = `Bearer ${session.access_token}`;
+    } else {
+        delete config.headers.Authorization;
+    }
+    return config;
+}, (error) => {
+    return Promise.reject(error);
+});
 
-export {api}
+export { api }

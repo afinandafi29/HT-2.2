@@ -113,11 +113,7 @@ const Sidebar = ({
                             </button>
                         </li>
 
-                        <li>
-                            <button onClick={() => { navigate('/live'); if (onClose) onClose(); }} className={currentPath === '/live' ? 'active' : ''}>
-                                <i className="fas fa-tv"></i> <span>Live TV</span>
-                            </button>
-                        </li>
+
                         <li>
                             <button onClick={() => {
                                 if (onClose) onClose();

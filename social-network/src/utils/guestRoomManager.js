@@ -43,8 +43,8 @@ export const createGuestRoom = (roomData) => {
         topic: roomData.topic || roomData.language,
         language: roomData.language || 'English',
         max_capacity: roomData.max_capacity || 0,
-        mirotalk_room_name: `guest-room-${Date.now()}`,
-        meeting_url: null, // Will use local MiroTalk
+        happytalk_room_name: `guest-room-${Date.now()}`,
+        meeting_url: null, // Will use local HAPPYY TALK
         created_at: new Date().toISOString(),
         last_activity: new Date().toISOString(),
         participants: 0,
@@ -105,13 +105,13 @@ export const cleanupInactiveRooms = () => {
             return true; // Keep rooms that are still within the timeout period
         }
 
-        console.log(`Deleting inactive guest room: ${room.title} (inactive for ${Math.floor(timeSinceActivity / 60000)} minutes)`);
+
         return false; // Delete inactive rooms
     });
 
     if (activeRooms.length !== rooms.length) {
         saveGuestRooms(activeRooms);
-        console.log(`Cleaned up ${rooms.length - activeRooms.length} inactive guest rooms`);
+
     }
 
     return activeRooms;

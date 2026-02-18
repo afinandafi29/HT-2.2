@@ -4,7 +4,7 @@ const HappyTalkScreen = () => {
   return (
     <div className="h-full bg-white flex flex-col overflow-hidden">
       <iframe
-        src="http://localhost:3000"
+        src={import.meta.env.VITE_ROCKET_CHAT_URL || "http://localhost:3000"}
         title="HAPPYY TALK Chat"
         className="w-full h-full border-none"
         allow="camera;microphone;fullscreen;display-capture"

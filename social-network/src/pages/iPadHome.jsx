@@ -39,7 +39,7 @@ const IPadHome = () => {
   ];
 
   const handleAppClick = (appId) => {
-    console.log(`Opening ${appId} app...`);
+
     // You can add navigation logic here
   };
 

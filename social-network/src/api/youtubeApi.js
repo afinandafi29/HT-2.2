@@ -11,6 +11,6 @@ export function getYouTubeApiKey() {
       const keys = JSON.parse(saved);
       if (keys?.youtube) return keys.youtube;
     }
-  } catch (_) {}
+  } catch (_) { /* ignore */ }
   return import.meta.env.VITE_YT_API_KEY || FALLBACK_YT_KEY;
 }

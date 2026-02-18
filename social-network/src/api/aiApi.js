@@ -4,7 +4,7 @@
  */
 
 const OPENAI_KEY = import.meta.env.VITE_OPENAI_API_KEY || '';
-const GITHUB_AI_TOKEN = import.meta.env.VITE_GITHUB_AI_TOKEN || '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';
+const GITHUB_AI_TOKEN = import.meta.env.VITE_GITHUB_AI_TOKEN || '';
 
 const OPENAI_URL = 'https://api.openai.com/v1/chat/completions';
 const GITHUB_AI_URL = 'https://models.inference.ai.azure.com/chat/completions';

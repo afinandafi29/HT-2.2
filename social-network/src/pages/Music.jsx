@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Play, Pause, SkipForward, SkipBack, Volume2, VolumeX, Repeat, Shuffle, Upload } from 'lucide-react';
 
 const MusicPlayer = () => {
@@ -18,6 +18,19 @@ const MusicPlayer = () => {
 
     const audioRef = useRef(null);
     const fileInputRef = useRef(null);
+
+    const handleNext = useCallback(() => {
+        if (playlist.length === 0) return;
+
+        let nextIndex;
+        if (isShuffle) {
+            nextIndex = Math.floor(Math.random() * playlist.length);
+        } else {
+            nextIndex = (currentTrackIndex + 1) % playlist.length;
+        }
+        setCurrentTrackIndex(nextIndex);
+        setIsPlaying(true);
+    }, [playlist, isShuffle, currentTrackIndex]);
 
     useEffect(() => {
         localStorage.setItem('musicPlaylist', JSON.stringify(playlist));
@@ -47,7 +60,7 @@ const MusicPlayer = () => {
             audio.removeEventListener('loadedmetadata', updateDuration);
             audio.removeEventListener('ended', handleEnded);
         };
-    }, [isRepeat, currentTrackIndex]);
+    }, [isRepeat, currentTrackIndex, handleNext]);
 
     const handleFileUpload = (event) => {
         const files = Array.from(event.target.files);
@@ -73,18 +86,7 @@ const MusicPlayer = () => {
         setIsPlaying(!isPlaying);
     };
 
-    const handleNext = () => {
-        if (playlist.length === 0) return;
 
-        let nextIndex;
-        if (isShuffle) {
-            nextIndex = Math.floor(Math.random() * playlist.length);
-        } else {
-            nextIndex = (currentTrackIndex + 1) % playlist.length;
-        }
-        setCurrentTrackIndex(nextIndex);
-        setIsPlaying(true);
-    };
 
     const handlePrevious = () => {
         if (playlist.length === 0) return;
@@ -141,12 +143,15 @@ const MusicPlayer = () => {
 
     useEffect(() => {
         if (currentTrack && audioRef.current) {
-            audioRef.current.src = currentTrack.url;
-            if (isPlaying) {
-                audioRef.current.play();
+            // Only update src if changed to prevent reloading on every render/play toggle
+            if (audioRef.current.src !== currentTrack.url) {
+                audioRef.current.src = currentTrack.url;
+                if (isPlaying) {
+                    audioRef.current.play();
+                }
             }
         }
-    }, [currentTrackIndex]);
+    }, [currentTrack, isPlaying]);
 
     return (
         <div className="min-h-[calc(100vh-200px)] bg-transparent p-6">

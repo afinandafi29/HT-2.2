@@ -1,0 +1,309 @@
+
+> social-network-react@0.0.0 lint
+> eslint .
+
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/App.jsx
+  34:8  warning  'iPadHome' is defined but never used. Allowed unused vars must match /^_|^[A-Z_]/u  no-unused-vars
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/ErrorBoundary.jsx
+  9:37  warning  'error' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/api/newsApi.js
+   11:14  warning  'e' is defined but never used. Allowed unused caught errors must match /^_/u                          no-unused-vars
+   11:17  error    Empty block statement                                                                                 no-empty
+   27:14  warning  'e' is defined but never used. Allowed unused caught errors must match /^_/u                          no-unused-vars
+  156:14  warning  'error' is defined but never used. Allowed unused caught errors must match /^_/u                      no-unused-vars
+  161:7   warning  'fetchWorldNews' is assigned a value but never used. Allowed unused vars must match /^_|^[A-Z_]/u     no-unused-vars
+  177:14  warning  'error' is defined but never used. Allowed unused caught errors must match /^_/u                      no-unused-vars
+  182:7   warning  'fetchNewsData' is assigned a value but never used. Allowed unused vars must match /^_|^[A-Z_]/u      no-unused-vars
+  202:7   warning  'fetchMediastack' is assigned a value but never used. Allowed unused vars must match /^_|^[A-Z_]/u    no-unused-vars
+  218:14  warning  'error' is defined but never used. Allowed unused caught errors must match /^_/u                      no-unused-vars
+  223:7   warning  'fetchTheNewsAPI' is assigned a value but never used. Allowed unused vars must match /^_|^[A-Z_]/u    no-unused-vars
+  239:14  warning  'error' is defined but never used. Allowed unused caught errors must match /^_/u                      no-unused-vars
+  291:14  warning  'error' is defined but never used. Allowed unused caught errors must match /^_/u                      no-unused-vars
+  300:11  warning  'images' is assigned a value but never used. Allowed unused vars must match /^_|^[A-Z_]/u             no-unused-vars
+  335:7   warning  'getAggregatedNews' is assigned a value but never used. Allowed unused vars must match /^_|^[A-Z_]/u  no-unused-vars
+  395:14  warning  'e' is defined but never used. Allowed unused caught errors must match /^_/u                          no-unused-vars
+  417:14  warning  'e' is defined but never used. Allowed unused caught errors must match /^_/u                          no-unused-vars
+  424:34  warning  'uuid' is defined but never used. Allowed unused args must match /^_/u                                no-unused-vars
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/api/roomApi.js
+  9:14  warning  'e' is defined but never used. Allowed unused caught errors must match /^_/u  no-unused-vars
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/api/youtubeApi.js
+  14:15  error  Empty block statement  no-empty
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/components/Chat/ChatBubble.jsx
+  2:10  warning  'motion' is defined but never used. Allowed unused vars must match /^_|^[A-Z_]/u  no-unused-vars
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/components/Chat/ChatInput.jsx
+  2:10  warning  'motion' is defined but never used. Allowed unused vars must match /^_|^[A-Z_]/u  no-unused-vars
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/components/Chat/ChatInterface.jsx
+  94:63  warning  'n' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/components/Chat/ChatList.jsx
+  5:35  warning  'currentUser' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/components/Chat/ChatWindow.jsx
+   3:10  warning  'blockUserApi' is defined but never used. Allowed unused vars must match /^_|^[A-Z_]/u            no-unused-vars
+   4:10  warning  'unfriendUserApi' is defined but never used. Allowed unused vars must match /^_|^[A-Z_]/u         no-unused-vars
+   4:27  warning  'acceptFriendRequestApi' is defined but never used. Allowed unused vars must match /^_|^[A-Z_]/u  no-unused-vars
+   4:51  warning  'rejectFriendRequestApi' is defined but never used. Allowed unused vars must match /^_|^[A-Z_]/u  no-unused-vars
+  41:12  warning  'relationship' is assigned a value but never used. Allowed unused vars must match /^_|^[A-Z_]/u   no-unused-vars
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/components/CreateRoomModal.jsx
+  10:12  warning  'topic' is assigned a value but never used. Allowed unused vars must match /^_|^[A-Z_]/u  no-unused-vars
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/components/ErrorBoundary.jsx
+  9:37  warning  'error' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/components/Feed/ExploreGrid.jsx
+  75:8  warning  React Hook useCallback has missing dependencies: 'PEXELS_KEY' and 'YT_KEY'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/components/Feed/FeedContent.jsx
+  10:35  warning  'onBackClick' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/components/Feed/MobileSidebarDrawer.jsx
+  5:116  warning  'navigate' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/components/Feed/SearchGrid.jsx
+  81:8  warning  React Hook useCallback has missing dependencies: 'PEXELS_KEY' and 'SOURCESPLASH_KEY'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/components/Layout/BottomNavbar.jsx
+   8:11  warning  'currentUser' is assigned a value but never used. Allowed unused vars must match /^_|^[A-Z_]/u  no-unused-vars
+  27:14  error    Empty block statement                                                                           no-empty
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/components/Layout/Footer.jsx
+  7:9  warning  'liveDate' is assigned a value but never used. Allowed unused vars must match /^_|^[A-Z_]/u  no-unused-vars
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/components/Layout/Header.jsx
+  10:10  warning  'isLoading' is assigned a value but never used. Allowed unused vars must match /^_|^[A-Z_]/u   no-unused-vars
+  43:9   warning  'isHomePage' is assigned a value but never used. Allowed unused vars must match /^_|^[A-Z_]/u  no-unused-vars
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/components/Layout/Layout.jsx
+   22:14  warning  Fast refresh only works when a file only exports components. Move your React context(s) to a separate file  react-refresh/only-export-components
+   29:10  warning  'customColor' is assigned a value but never used. Allowed unused vars must match /^_|^[A-Z_]/u              no-unused-vars
+   29:23  warning  'setCustomColor' is assigned a value but never used. Allowed unused vars must match /^_|^[A-Z_]/u           no-unused-vars
+   88:14  error    Empty block statement                                                                                       no-empty
+  128:9   warning  'toggleChatPanel' is assigned a value but never used. Allowed unused vars must match /^_|^[A-Z_]/u          no-unused-vars
+  196:9   warning  'isYouTubePage' is assigned a value but never used. Allowed unused vars must match /^_|^[A-Z_]/u            no-unused-vars
+  197:9   warning  'isImmersivePage' is assigned a value but never used. Allowed unused vars must match /^_|^[A-Z_]/u          no-unused-vars
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/components/Layout/MobileBottomNav.jsx
+  10:13  warning  'currentUser' is assigned a value but never used. Allowed unused vars must match /^_|^[A-Z_]/u  no-unused-vars
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/components/Layout/Sidebar.jsx
+   4:20  warning  'useEffect' is defined but never used. Allowed unused vars must match /^_|^[A-Z_]/u                         no-unused-vars
+  11:5   warning  'onToggleAnimation' is defined but never used. Allowed unused args must match /^_/u                         no-unused-vars
+  12:5   warning  'animationStopped' is defined but never used. Allowed unused args must match /^_/u                          no-unused-vars
+  61:11  warning  'handlePostClick' is assigned a value but never used. Allowed unused vars must match /^_|^[A-Z_]/u          no-unused-vars
+  76:11  warning  'handleComingSoonFeature' is assigned a value but never used. Allowed unused vars must match /^_|^[A-Z_]/u  no-unused-vars
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/components/Navigation.jsx
+  10:3   warning  'onThemeClick' is defined but never used. Allowed unused args must match /^_/u                            no-unused-vars
+  11:3   warning  'onChatClick' is defined but never used. Allowed unused args must match /^_/u                             no-unused-vars
+  16:10  warning  'isAppsDropdownOpen' is assigned a value but never used. Allowed unused vars must match /^_|^[A-Z_]/u     no-unused-vars
+  16:30  warning  'setIsAppsDropdownOpen' is assigned a value but never used. Allowed unused vars must match /^_|^[A-Z_]/u  no-unused-vars
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/components/NotificationBell.jsx
+  3:10  warning  'motion' is defined but never used. Allowed unused vars must match /^_|^[A-Z_]/u  no-unused-vars
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/components/Phone/AIChatScreen.jsx
+  84:34  warning  'e' is defined but never used. Allowed unused caught errors must match /^_/u      no-unused-vars
+  94:18  warning  'error' is defined but never used. Allowed unused caught errors must match /^_/u  no-unused-vars
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/components/Phone/AppIcon.jsx
+  3:20  warning  'id' is defined but never used. Allowed unused args must match /^_/u   no-unused-vars
+  3:48  warning  'url' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/components/Phone/AppStoreScreen.jsx
+  501:18  warning  'e' is defined but never used. Allowed unused caught errors must match /^_/u  no-unused-vars
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/components/Phone/DictionaryScreen.jsx
+  18:18  warning  'err' is defined but never used. Allowed unused caught errors must match /^_/u  no-unused-vars
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/components/Phone/GameScreen.jsx
+  115:14  warning  'e' is defined but never used. Allowed unused caught errors must match /^_/u  no-unused-vars
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/components/Phone/MovieScreen.jsx
+  14:6  warning  React Hook useEffect has a missing dependency: 'fetchMovies'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/components/Phone/Phone.jsx
+  131:9  warning  'handleExpandClick' is assigned a value but never used. Allowed unused vars must match /^_|^[A-Z_]/u  no-unused-vars
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/components/Phone/WatchPartyScreen.jsx
+  109:14  warning  'e' is defined but never used. Allowed unused caught errors must match /^_/u  no-unused-vars
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/components/Phone/WhiteboardScreen.jsx
+  28:6  warning  React Hook useEffect has missing dependencies: 'brushSize' and 'color'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/components/Phone/YouTubeContainer.jsx
+  10:12  warning  'e' is defined but never used. Allowed unused caught errors must match /^_/u                                    no-unused-vars
+  10:15  error    Empty block statement                                                                                           no-empty
+  20:10  warning  'error' is assigned a value but never used. Allowed unused vars must match /^_|^[A-Z_]/u                        no-unused-vars
+  20:17  warning  'setError' is assigned a value but never used. Allowed unused vars must match /^_|^[A-Z_]/u                     no-unused-vars
+  39:6   warning  React Hook useEffect has a missing dependency: 'fetchVideos'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  68:16  warning  'apiError' is defined but never used. Allowed unused caught errors must match /^_/u                             no-unused-vars
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/components/ProfileModal.jsx
+  18:8  warning  React Hook useEffect has a missing dependency: 'fetchRelationshipStatus'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/components/QuizPage.jsx
+  5:31   warning  'languageCode' is defined but never used. Allowed unused args must match /^_/u                 no-unused-vars
+  5:157  warning  'levelLabels' is defined but never used. Allowed unused args must match /^_/u                  no-unused-vars
+  7:19   warning  'setIsMuted' is assigned a value but never used. Allowed unused vars must match /^_|^[A-Z_]/u  no-unused-vars
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/components/RoomCard.jsx
+   1:10  warning  'useState' is defined but never used. Allowed unused vars must match /^_|^[A-Z_]/u              no-unused-vars
+  11:9   warning  'meeting_url' is assigned a value but never used. Allowed unused vars must match /^_|^[A-Z_]/u  no-unused-vars
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/components/RoomGrid.jsx
+  22:6  warning  React Hook useEffect has a missing dependency: 'rooms'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/components/UserProfileModal.jsx
+    2:10  warning  'useAuth' is defined but never used. Allowed unused vars must match /^_|^[A-Z_]/u                                no-unused-vars
+   14:5   warning  'rejectFriendRequestApi' is defined but never used. Allowed unused vars must match /^_|^[A-Z_]/u                 no-unused-vars
+   35:8   warning  React Hook useEffect has a missing dependency: 'fetchProfile'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  132:11  warning  'handleFollowToggle' is assigned a value but never used. Allowed unused vars must match /^_|^[A-Z_]/u            no-unused-vars
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/components/YouTubeUI.jsx
+  21:18  warning  'e' is defined but never used. Allowed unused caught errors must match /^_/u                                    no-unused-vars
+  21:21  error    Empty block statement                                                                                           no-empty
+  57:8   warning  React Hook useCallback has a missing dependency: 'loading'. Either include it or remove the dependency array    react-hooks/exhaustive-deps
+  61:8   warning  React Hook useEffect has a missing dependency: 'fetchVideos'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/components/themes/Bubble.jsx
+  2:10  warning  'motion' is defined but never used. Allowed unused vars must match /^_|^[A-Z_]/u  no-unused-vars
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/components/themes/Dither.jsx
+  38:15  warning  'clock' is assigned a value but never used. Allowed unused vars must match /^_|^[A-Z_]/u  no-unused-vars
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/components/themes/Gradient.jsx
+  2:10  warning  'motion' is defined but never used. Allowed unused vars must match /^_|^[A-Z_]/u  no-unused-vars
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/components/themes/GravityStars.jsx
+  1:17  warning  'useCallback' is defined but never used. Allowed unused vars must match /^_|^[A-Z_]/u  no-unused-vars
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/components/themes/Hexagon.jsx
+  2:10  warning  'motion' is defined but never used. Allowed unused vars must match /^_|^[A-Z_]/u  no-unused-vars
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/components/themes/Hole.jsx
+  2:10  warning  'motion' is defined but never used. Allowed unused vars must match /^_|^[A-Z_]/u  no-unused-vars
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/components/themes/LiquidEther.jsx
+  1000:26  warning  'e' is defined but never used. Allowed unused caught errors must match /^_/u  no-unused-vars
+  1080:26  warning  'e' is defined but never used. Allowed unused caught errors must match /^_/u  no-unused-vars
+  1087:26  warning  'e' is defined but never used. Allowed unused caught errors must match /^_/u  no-unused-vars
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/components/themes/Plasma.jsx
+  86:30  warning  The ref value 'containerRef.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'containerRef.current' to a variable inside the effect, and use that variable in the cleanup function  react-hooks/exhaustive-deps
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/contexts/AuthContext.jsx
+    6:17  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+  135:8   warning  React Hook useEffect has a missing dependency: 'loading'. Either include it or remove the dependency array                      react-hooks/exhaustive-deps
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/contexts/NotificationContext.jsx
+  7:14  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/contexts/SocketContext.jsx
+  7:14  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/contexts/ThemeContext.jsx
+   3:14  warning  Fast refresh only works when a file only exports components. Move your React context(s) to a separate file                      react-refresh/only-export-components
+  81:14  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/data.js
+  731:7  warning  'generateRandomPeople' is assigned a value but never used. Allowed unused vars must match /^_|^[A-Z_]/u  no-unused-vars
+  747:7  warning  'getRandomCreator' is assigned a value but never used. Allowed unused vars must match /^_|^[A-Z_]/u      no-unused-vars
+  789:9  warning  'globalImagePool' is assigned a value but never used. Allowed unused vars must match /^_|^[A-Z_]/u       no-unused-vars
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/pages/AIChat.jsx
+  152:36  warning  'btnId' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/pages/AIGitHubChat.jsx
+  107:18  warning  'error' is defined but never used. Allowed unused caught errors must match /^_/u  no-unused-vars
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/pages/Admin.jsx
+   34:12  warning  'isBannerLoading' is assigned a value but never used. Allowed unused vars must match /^_|^[A-Z_]/u           no-unused-vars
+   36:25  warning  'setShowSidebar' is assigned a value but never used. Allowed unused vars must match /^_|^[A-Z_]/u            no-unused-vars
+  132:11  warning  'handleDismissReport' is assigned a value but never used. Allowed unused vars must match /^_|^[A-Z_]/u       no-unused-vars
+  133:11  warning  'handleDeleteReportedRoom' is assigned a value but never used. Allowed unused vars must match /^_|^[A-Z_]/u  no-unused-vars
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/pages/Apps.jsx
+  18:22  warning  'setCustomApps' is assigned a value but never used. Allowed unused vars must match /^_|^[A-Z_]/u  no-unused-vars
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/pages/BasicLearning.jsx
+  530:6  warning  React Hook useEffect has a missing dependency: 'handleAnswer'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  532:9  warning  'bgColor_unused' is assigned a value but never used. Allowed unused vars must match /^_|^[A-Z_]/u                no-unused-vars
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/pages/Chat.jsx
+  13:23  warning  'response' is assigned a value but never used. Allowed unused vars must match /^_|^[A-Z_]/u  no-unused-vars
+  19:22  warning  'err' is defined but never used. Allowed unused caught errors must match /^_/u               no-unused-vars
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/pages/CompassApp.jsx
+  56:18  warning  'error' is defined but never used. Allowed unused caught errors must match /^_/u  no-unused-vars
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/pages/EnglishQuiz.jsx
+  7:19  warning  'setIsMuted' is assigned a value but never used. Allowed unused vars must match /^_|^[A-Z_]/u  no-unused-vars
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/pages/FeedPage.jsx
+   48:12  warning  'moreMenuOpen' is assigned a value but never used. Allowed unused vars must match /^_|^[A-Z_]/u                                                                                                                                                                   no-unused-vars
+   48:26  warning  'setMoreMenuOpen' is assigned a value but never used. Allowed unused vars must match /^_|^[A-Z_]/u                                                                                                                                                                no-unused-vars
+  147:8   warning  React Hook useEffect has an unnecessary dependency: 'window.location.search'. Either exclude it or remove the dependency array. Outer scope values like 'window.location.search' aren't valid dependencies because mutating them doesn't re-render the component  react-hooks/exhaustive-deps
+  155:8   warning  React Hook useEffect has a missing dependency: 'fetchNewsFeed'. Either include it or remove the dependency array                                                                                                                                                  react-hooks/exhaustive-deps
+  303:8   warning  React Hook useEffect has an unnecessary dependency: 'window.location.search'. Either exclude it or remove the dependency array. Outer scope values like 'window.location.search' aren't valid dependencies because mutating them doesn't re-render the component  react-hooks/exhaustive-deps
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/pages/GermanQuiz.jsx
+  7:19  warning  'setIsMuted' is assigned a value but never used. Allowed unused vars must match /^_|^[A-Z_]/u  no-unused-vars
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/pages/ItalianQuiz.jsx
+  7:19  warning  'setIsMuted' is assigned a value but never used. Allowed unused vars must match /^_|^[A-Z_]/u  no-unused-vars
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/pages/JapaneseQuiz.jsx
+  7:19  warning  'setIsMuted' is assigned a value but never used. Allowed unused vars must match /^_|^[A-Z_]/u  no-unused-vars
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/pages/KoreanQuiz.jsx
+  7:19  warning  'setIsMuted' is assigned a value but never used. Allowed unused vars must match /^_|^[A-Z_]/u  no-unused-vars
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/pages/LearningLanguages.jsx
+  9:10  warning  'muted' is assigned a value but never used. Allowed unused vars must match /^_|^[A-Z_]/u     no-unused-vars
+  9:17  warning  'setMuted' is assigned a value but never used. Allowed unused vars must match /^_|^[A-Z_]/u  no-unused-vars
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/pages/LiveTV.jsx
+  23:12  warning  'pipMode' is assigned a value but never used. Allowed unused vars must match /^_|^[A-Z_]/u                        no-unused-vars
+  42:8   warning  React Hook useEffect has a missing dependency: 'fetchPlaylist'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/pages/Music.jsx
+   50:8  warning  React Hook useEffect has a missing dependency: 'handleNext'. Either include it or remove the dependency array                      react-hooks/exhaustive-deps
+  149:8  warning  React Hook useEffect has missing dependencies: 'currentTrack' and 'isPlaying'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/pages/News/NewsArticleDetail.jsx
+  20:18  warning  'e' is defined but never used. Allowed unused caught errors must match /^_/u                                no-unused-vars
+  86:8   warning  React Hook useEffect has a missing dependency: 'article'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/pages/News/NewsHome.jsx
+   1:38  warning  'useCallback' is defined but never used. Allowed unused vars must match /^_|^[A-Z_]/u                                no-unused-vars
+   3:10  warning  'newsApi' is defined but never used. Allowed unused vars must match /^_|^[A-Z_]/u                                    no-unused-vars
+  78:8   warning  React Hook useEffect has a missing dependency: 'fetchInitialNews'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  99:8   warning  React Hook useEffect has a missing dependency: 'handleLoadMore'. Either include it or remove the dependency array    react-hooks/exhaustive-deps
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/pages/News/NewsSearch.jsx
+  1:38  warning  'useMemo' is defined but never used. Allowed unused vars must match /^_|^[A-Z_]/u  no-unused-vars
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/pages/OneToOne.jsx
+   1:46  warning  'useCallback' is defined but never used. Allowed unused vars must match /^_|^[A-Z_]/u                        no-unused-vars
+  73:8   warning  React Hook useEffect has a missing dependency: 'stopChat'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/pages/PremiumPage.jsx
+  1:27  warning  'useEffect' is defined but never used. Allowed unused vars must match /^_|^[A-Z_]/u  no-unused-vars
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/pages/Profile.jsx
+  391:53  warning  'Icon' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+/Users/afi/Downloads/Happyytalk@1/social-network/src/pages/SinglePost.jsx
+  48:32  warning  'id' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+✖ 150 problems (6 errors, 144 warnings)
+

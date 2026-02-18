@@ -16,10 +16,10 @@ const YouTubeUI = ({ onBack }) => {
             const saved = localStorage.getItem('adminApiKeys');
             if (saved) {
                 const keys = JSON.parse(saved);
-                return keys.youtube || import.meta.env.VITE_YT_API_KEY || 'AIzaSyAsQ7E02xCW3qAdxwHK2PLj-pppMfm9fBw';
+                return keys.youtube || import.meta.env.VITE_YT_API_KEY;
             }
-        } catch (e) { }
-        return import.meta.env.VITE_YT_API_KEY || 'AIzaSyAsQ7E02xCW3qAdxwHK2PLj-pppMfm9fBw';
+        } catch (e) { /* ignore */ }
+        return import.meta.env.VITE_YT_API_KEY;
     };
 
     const API_KEY = getYTKey();

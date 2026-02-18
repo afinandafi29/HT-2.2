@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Search, Loader2, Download, ExternalLink, Image as ImageIcon } from 'lucide-react';
 
-const UNSPLASH_ACCESS_KEY = 'rjGx-WPtWIzElhWFmQ5hDgAOiACTbsr1UeslVUGNluk';
+const UNSPLASH_ACCESS_KEY = import.meta.env.VITE_UNSPLASH_ACCESS_KEY;
 
 const UnsplashScreen = () => {
     const [query, setQuery] = useState('');

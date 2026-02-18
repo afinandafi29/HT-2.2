@@ -31,18 +31,28 @@ const FeedContent = ({ className, onBackClick }) => {
             let newsPosts = [];
             try {
                 const newsRes = await newsApi.getTopStories({ limit: 20 });
-                newsPosts = (newsRes.data || []).map(ns => ({
-                    id: `news-${ns.uuid || Math.random().toString(36).substr(2, 9)}`,
-                    username: ns.source || 'News Hub',
-                    profile_pic_url: `https://ui-avatars.com/api/?name=${encodeURIComponent(ns.source || 'N')}&background=random&color=fff`,
-                    content: ns.title + (ns.description ? "\n\n" + ns.description : ""),
-                    image_url: ns.image_url || 'https://images.unsplash.com/photo-1504711434969?auto=format&fit=crop&q=80&w=800',
-                    likes_count: Math.floor(Math.random() * 500),
-                    comments_count: Math.floor(Math.random() * 50),
-                    created_at: ns.published_at || new Date().toISOString(),
-                    is_news: true,
-                    url: ns.url
-                }));
+                newsPosts = (newsRes.data || []).map(ns => {
+                    const fallbackImgs = [
+                        "https://images.unsplash.com/photo-1504711434969?auto=format&fit=crop&q=80&w=800",
+                        "https://images.unsplash.com/photo-1495020689067-958852a7765e?auto=format&fit=crop&q=80&w=800",
+                        "https://images.unsplash.com/photo-1476242906366-d8eb64c2f661?auto=format&fit=crop&q=80&w=800",
+                        "https://images.unsplash.com/photo-1585829365234-781fcdb4c40b?auto=format&fit=crop&q=80&w=800",
+                        "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=800",
+                        "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&q=80&w=800"
+                    ];
+                    return {
+                        id: `news-${ns.uuid || Math.random().toString(36).substr(2, 9)}`,
+                        username: ns.source || 'News Hub',
+                        profile_pic_url: `https://ui-avatars.com/api/?name=${encodeURIComponent(ns.source || 'N')}&background=random&color=fff`,
+                        content: ns.title + (ns.description ? "\n\n" + ns.description : ""),
+                        image_url: ns.image_url || fallbackImgs[Math.floor(Math.random() * fallbackImgs.length)],
+                        likes_count: Math.floor(Math.random() * 500),
+                        comments_count: Math.floor(Math.random() * 50),
+                        created_at: ns.published_at || new Date().toISOString(),
+                        is_news: true,
+                        url: ns.url
+                    };
+                });
             } catch (err) {
                 console.error("Failed to fetch news:", err);
             }

@@ -32,7 +32,7 @@ const NewsHome = () => {
         }
     };
 
-    const fetchInitialNews = async () => {
+    const fetchInitialNews = useCallback(async () => {
         setLoading(true);
         setError(null);
         try {
@@ -71,20 +71,20 @@ const NewsHome = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
 
     useEffect(() => {
         fetchInitialNews();
-    }, []);
+    }, [fetchInitialNews]);
 
-    const handleLoadMore = async () => {
+    const handleLoadMore = useCallback(async () => {
         if (loadingMore || !hasMore) return;
         setLoadingMore(true);
         const nextPage = page + 1;
         await loadMoreGeneralNews(nextPage);
         setPage(nextPage);
         setLoadingMore(false);
-    };
+    }, [loadingMore, hasMore, page]);
 
     // Infinite scroll listener
     useEffect(() => {
@@ -96,7 +96,7 @@ const NewsHome = () => {
 
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
-    }, [page, loadingMore, hasMore]); // Dependencies for scroll handler
+    }, [page, loadingMore, hasMore, handleLoadMore]); // Dependencies for scroll handler
 
 
     const [searchTerm, setSearchTerm] = useState('');

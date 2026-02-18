@@ -13,8 +13,7 @@ import AuthCallback from './pages/AuthCallback';
 import Layout from './components/Layout/Layout';
 import FeedPage from './pages/FeedPage';
 import FAQ from './pages/FAQ';
-import OmegleLanding from './pages/OmegleLanding';
-import OmegleSession from './pages/OmegleSession';
+
 import PremiumPage from './pages/PremiumPage';
 import NewsHome from './pages/News/NewsHome';
 import NewsSearch from './pages/News/NewsSearch';
@@ -58,6 +57,7 @@ import ClockApp from './pages/ClockApp';
 import NotesApp from './pages/NotesApp';
 import RemindersApp from './pages/RemindersApp';
 import CompassApp from './pages/CompassApp';
+import MeetPage from './pages/MeetPage';
 import './styles/main.css';
 import './styles/mobile.css';
 
@@ -74,7 +74,7 @@ function PublicRoute({ children }) {
 }
 
 function App() {
-  console.log('App component rendering');
+
 
   return (
     <Router>
@@ -93,6 +93,9 @@ function App() {
         <Route path="/terms" element={<TermsAndConditions />} />
         <Route path="/faq" element={<FAQ />} />
         <Route path="/admin" element={<Admin />} />
+
+        {/* Standalone 1-to-1 Chat */}
+        <Route path="/1to1" element={<OneToOne />} />
 
         {/* Routes with Layout */}
         <Route element={<Layout />}>
@@ -117,8 +120,6 @@ function App() {
             </PrivateRoute>
           } />
 
-          {/* 1-to-1 Chat Routes */}
-          <Route path="/1to1" element={<OneToOne />} />
           <Route path="/premium" element={<PremiumPage />} />
 
 
@@ -177,6 +178,9 @@ function App() {
           <Route path="/swedish-quiz" element={<SwedishQuiz />} />
           <Route path="/latin-quiz" element={<LatinQuiz />} />
           <Route path="/indonesian-quiz" element={<IndonesianQuiz />} />
+
+          {/* Meeting Route */}
+          <Route path="/meet" element={<MeetPage />} />
 
           {/* Utility Apps Routes */}
           <Route path="/calculator" element={<Calculator />} />

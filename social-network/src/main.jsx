@@ -7,10 +7,7 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import ErrorBoundary from './ErrorBoundary';
 import './index.css';
 
-console.log('Main.jsx loaded');
-
 const rootElement = document.getElementById('root');
-console.log('Root element:', rootElement);
 
 if (rootElement) {
   ReactDOM.createRoot(rootElement).render(
