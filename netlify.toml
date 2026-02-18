@@ -1,0 +1,9 @@
+[build]
+  base = "social-network"
+  command = "npm install && npm run build"
+  publish = "social-network/dist"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
