@@ -2841,6 +2841,7 @@ hr {
 }
 
 /*
+/*
 z-index
 6 theme custom picker
 7 video avatar img
@@ -2858,3 +2859,122 @@ z-index
 17 send File Div
 18 room Emoji reaction
 */
+
+/*--------------------------------------------------------------
+# Mobile Bottom Buttons Improvement
+--------------------------------------------------------------*/
+@media (max-width: 768px) {
+    #bottomButtons {
+        bottom: 24px !important;
+        background: rgba(18, 18, 18, 0.85);
+        /* Darker glass */
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        border-radius: 20px;
+        padding: 8px 12px;
+        gap: 8px;
+        width: auto;
+        max-width: 92%;
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        transition: bottom 0.3s ease;
+
+        /* Hide scrollbar */
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    #bottomButtons::-webkit-scrollbar {
+        display: none;
+    }
+
+    #bottomButtons button {
+        width: 48px;
+        height: 48px;
+        padding: 0;
+        font-size: 1.2rem;
+        background: rgba(255, 255, 255, 0.08);
+        /* Subtle pill */
+        border-radius: 12px !important;
+        color: #f0f0f0;
+        box-shadow: none;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    }
+
+    /* Selected/Active states */
+    #bottomButtons button:active {
+        background: rgba(255, 255, 255, 0.2);
+        transform: scale(0.95);
+    }
+
+    /* Split button specific */
+    #bottomButtons .split-btn {
+        background: transparent;
+        display: flex;
+        align-items: stretch;
+        gap: 0;
+        margin-right: 4px;
+    }
+
+    /* Main part of split button */
+    #bottomButtons .split-btn>button:first-child {
+        border-top-right-radius: 0 !important;
+        border-bottom-right-radius: 0 !important;
+        border-right: none !important;
+        width: 48px;
+        margin-right: 0;
+    }
+
+    /* Arrow part */
+    #bottomButtons .device-dropdown-toggle {
+        width: 24px;
+        height: 48px;
+        border-top-left-radius: 0 !important;
+        border-bottom-left-radius: 0 !important;
+        border-radius: 0 12px 12px 0 !important;
+        background: rgba(255, 255, 255, 0.08);
+        border-left: 1px solid rgba(255, 255, 255, 0.1) !important;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    #bottomButtons .device-dropdown-toggle i {
+        font-size: 0.8rem;
+        /* Smaller arrow */
+        opacity: 0.7;
+    }
+
+    /* Leave Button - Featured */
+    #leaveRoomBtn {
+        background: rgba(220, 38, 38, 0.9) !important;
+        /* Red */
+        color: white;
+        margin-left: 4px;
+        border: none !important;
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4) !important;
+    }
+
+    /* Ensure menus appear above the floating bar correctly on mobile */
+    #bottomButtons .dropup .dropdown-menu {
+        bottom: 60px;
+        position: fixed !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        width: 90vw !important;
+        max-width: 350px !important;
+        border-radius: 16px;
+        background: rgba(30, 30, 30, 0.95);
+        backdrop-filter: blur(10px);
+    }
+}
