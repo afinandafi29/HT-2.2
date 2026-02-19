@@ -38,8 +38,8 @@ const RoomCard = ({ room, currentUser, onTopicUpdated, onRoomDeleted }) => {
         // Room name from data or fallback to ID
         const roomName = (mirotalk_room_name || `room-${id}`).trim();
 
-        // Open local /meet route (React app wrapper)
-        const finalUrl = `${window.location.origin}/meet?room=${encodeURIComponent(roomName)}&name=${encodeURIComponent(userName)}`;
+        // Open external MiroTalk P2P route
+        const finalUrl = `https://p2p.mirotalk.com/join/${encodeURIComponent(roomName)}`;
         window.open(finalUrl, '_blank');
     };
 
