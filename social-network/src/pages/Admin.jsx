@@ -44,10 +44,10 @@ const Admin = () => {
     const [apiKeys, setApiKeys] = useState(() => {
         const saved = localStorage.getItem('adminApiKeys');
         return saved ? JSON.parse(saved) : {
-            youtube: 'AIzaSyDtLX6171RySOtqd-U2Pgcjy_9o2rWDNrc',
-            news: '0fc88aab4cf5487dab215fb4563ab635',
-            newsData: 'pub_default_key',
-            imageApi: 'default_key'
+            youtube: '',
+            news: '',
+            newsData: '',
+            imageApi: ''
         };
     });
     const [showAppModal, setShowAppModal] = useState(false);

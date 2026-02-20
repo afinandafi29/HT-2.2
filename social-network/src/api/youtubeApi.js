@@ -1,9 +1,7 @@
 /**
  * Shared YouTube API key for all YouTube features.
- * Uses: 1) Admin keys from localStorage, 2) VITE_YT_API_KEY env, 3) fallback key.
+ * Uses: 1) Admin keys from localStorage, 2) VITE_YT_API_KEY env.
  */
-const FALLBACK_YT_KEY = 'AIzaSyAsQ7E02xCW3qAdxwHK2PLj-pppMfm9fBw';
-
 export function getYouTubeApiKey() {
   try {
     const saved = localStorage.getItem('adminApiKeys');
@@ -12,5 +10,5 @@ export function getYouTubeApiKey() {
       if (keys?.youtube) return keys.youtube;
     }
   } catch (_) { /* ignore */ }
-  return import.meta.env.VITE_YT_API_KEY || FALLBACK_YT_KEY;
+  return import.meta.env.VITE_YT_API_KEY || '';
 }
